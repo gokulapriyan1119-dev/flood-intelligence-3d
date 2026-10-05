@@ -1,0 +1,37 @@
+[
+  {
+    "id": "usr-hyd-8821",
+    "name": "Dr. Elena Rostova",
+    "email": "elena.rostova@flood-intelligence.org",
+    "role": "Chief Remote Sensing Hydrologist",
+    "organization": "Copernicus Emergency & Global Disaster Alert System (GDACS)",
+    "avatar": "",
+    "bio": "Lead satellite SAR hydrologist specializing in synthetic aperture radar flood extent segmentation and hydrodynamic continuous depth modeling.",
+    "satelliteTier": "Level-1 GRD / SLC Sentinel-1 SAR Dual-Pol Constellation Access",
+    "createdAt": "2024-03-15"
+  },
+  {
+    "id": "usr-muv1il6v-deh8",
+    "name": "Dr. Test User",
+    "email": "hydrologist.test@flood-intel.org",
+    "passwordHash": "a109e36947ad56de1dca1cc49f0ef8ac9ad9a7b1aa0df41fb3c4cb73c1ff01ea",
+    "role": "Earth Observation & Flood Risk Analyst",
+    "organization": "Global Hydrological Assessment Network",
+    "avatar": "",
+    "bio": "Operational satellite SAR flood mapping and hydrodynamic emergency assessment specialist.",
+    "satelliteTier": "Level-1 Copernicus Sentinel-1 SAR Dual-Pol Access",
+    "createdAt": "2026-10-05"
+  },
+  {
+    "id": "usr-muv1w9ko-q273",
+    "name": "hem ananad",
+    "email": "hemanand5107@gmail.com",
+    "passwordHash": "22512d50ce37fd48db6150d01b7dfaef640ebec4dc232f224590abd6b0bdfe83",
+    "role": "Earth Observation & Flood Risk Analyst",
+    "organization": "Global Hydrological Assessment Network",
+    "avatar": "",
+    "bio": "Operational satellite SAR flood mapping and hydrodynamic emergency assessment specialist.",
+    "satelliteTier": "Level-1 Copernicus Sentinel-1 SAR Dual-Pol Access",
+    "createdAt": "2026-10-05"
+  }
+]
