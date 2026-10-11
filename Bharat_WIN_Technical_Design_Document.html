@@ -1,0 +1,1415 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Flood Intelligence — Technical Design Document</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap');
+
+  @page {
+    size: A4 portrait;
+    margin: 18mm 16mm 20mm 16mm;
+  }
+
+  @page :first {
+    margin: 0;
+  }
+
+  * {
+    box-sizing: border-box;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    color: #1e293b;
+    background-color: #ffffff;
+    line-height: 1.62;
+    font-size: 10pt;
+    margin: 0;
+    padding: 0;
+  }
+
+  /* Cover Page */
+  .cover-page {
+    width: 210mm;
+    min-height: 297mm;
+    height: 297mm;
+    background: linear-gradient(135deg, #060913 0%, #0c1527 45%, #112240 100%);
+    color: #ffffff;
+    padding: 24mm 20mm 20mm 20mm;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    page-break-after: always;
+    break-after: page;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .cover-page::before {
+    content: "";
+    position: absolute;
+    top: -120px;
+    right: -120px;
+    width: 450px;
+    height: 450px;
+    background: radial-gradient(circle, rgba(14, 165, 233, 0.22) 0%, rgba(14, 165, 233, 0) 70%);
+    border-radius: 50%;
+    pointer-events: none;
+  }
+
+  .cover-page::after {
+    content: "";
+    position: absolute;
+    bottom: -150px;
+    left: -150px;
+    width: 500px;
+    height: 500px;
+    background: radial-gradient(circle, rgba(99, 102, 241, 0.18) 0%, rgba(99, 102, 241, 0) 70%);
+    border-radius: 50%;
+    pointer-events: none;
+  }
+
+  .cover-top {
+    position: relative;
+    z-index: 2;
+  }
+
+  .badge-row {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: 24px;
+  }
+
+  .badge {
+    display: inline-block;
+    padding: 5px 12px;
+    font-size: 8pt;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    border-radius: 6px;
+    background: rgba(14, 165, 233, 0.15);
+    color: #38bdf8;
+    border: 1px solid rgba(56, 189, 248, 0.3);
+  }
+
+  .badge-gold {
+    background: rgba(245, 158, 11, 0.15);
+    color: #fbbf24;
+    border: 1px solid rgba(251, 191, 36, 0.35);
+  }
+
+  .badge-purple {
+    background: rgba(168, 85, 247, 0.15);
+    color: #c084fc;
+    border: 1px solid rgba(192, 132, 252, 0.35);
+  }
+
+  .main-title {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 32pt;
+    font-weight: 800;
+    line-height: 1.12;
+    letter-spacing: -0.5px;
+    margin: 0 0 10px 0;
+    background: linear-gradient(90deg, #ffffff 0%, #38bdf8 50%, #818cf8 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .sub-title {
+    font-size: 14pt;
+    font-weight: 600;
+    color: #94a3b8;
+    margin: 0 0 6px 0;
+    letter-spacing: -0.2px;
+  }
+
+  .sub-title-2 {
+    font-size: 11pt;
+    font-weight: 400;
+    color: #38bdf8;
+    margin: 0 0 24px 0;
+  }
+
+  .cover-card {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 10px;
+    padding: 16px 20px;
+    margin-bottom: 20px;
+    backdrop-filter: blur(10px);
+  }
+
+  .cover-card-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    font-size: 9pt;
+  }
+
+  .card-item {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .card-label {
+    font-size: 7.5pt;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    color: #64748b;
+    font-weight: 600;
+    margin-bottom: 2px;
+  }
+
+  .card-value {
+    color: #f1f5f9;
+    font-weight: 500;
+  }
+
+  .card-value a {
+    color: #38bdf8;
+    text-decoration: none;
+  }
+
+  .metrics-strip {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+    margin-top: 14px;
+  }
+
+  .metric-box {
+    background: rgba(15, 23, 42, 0.7);
+    border: 1px solid rgba(56, 189, 248, 0.25);
+    border-radius: 8px;
+    padding: 10px;
+    text-align: center;
+  }
+
+  .metric-val {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13pt;
+    font-weight: 700;
+    color: #38bdf8;
+    margin-bottom: 2px;
+  }
+
+  .metric-lbl {
+    font-size: 7.5pt;
+    color: #94a3b8;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .cover-bottom {
+    position: relative;
+    z-index: 2;
+    border-top: 1px solid rgba(255, 255, 255, 0.12);
+    padding-top: 14px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 8pt;
+    color: #64748b;
+  }
+
+  /* Content Pages */
+  .page-container {
+    padding: 0 4px;
+  }
+
+  /* Typography */
+  h1.section-title {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 15pt;
+    font-weight: 800;
+    color: #0f172a;
+    border-left: 5px solid #0284c7;
+    padding-left: 10px;
+    margin: 28px 0 14px 0;
+    text-transform: uppercase;
+    letter-spacing: -0.2px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    page-break-after: avoid;
+    break-after: avoid;
+  }
+
+  h2.sub-section-title {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 11.5pt;
+    font-weight: 700;
+    color: #0369a1;
+    margin: 18px 0 8px 0;
+    page-break-after: avoid;
+    break-after: avoid;
+  }
+
+  h3.item-title {
+    font-size: 10pt;
+    font-weight: 700;
+    color: #334155;
+    margin: 12px 0 4px 0;
+    page-break-after: avoid;
+    break-after: avoid;
+  }
+
+  p {
+    margin: 0 0 10px 0;
+    text-align: justify;
+    line-height: 1.6;
+    color: #334155;
+  }
+
+  ul, ol {
+    margin: 0 0 12px 0;
+    padding-left: 20px;
+    color: #334155;
+  }
+
+  li {
+    margin-bottom: 5px;
+  }
+
+  /* Tables */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 12px 0 16px 0;
+    font-size: 8.5pt;
+    page-break-inside: avoid;
+    break-inside: avoid;
+  }
+
+  th {
+    background-color: #0f172a;
+    color: #ffffff;
+    font-weight: 600;
+    text-align: left;
+    padding: 7px 10px;
+    border: 1px solid #1e293b;
+    font-size: 8pt;
+    letter-spacing: 0.3px;
+  }
+
+  td {
+    padding: 6px 10px;
+    border: 1px solid #e2e8f0;
+    color: #1e293b;
+    vertical-align: middle;
+  }
+
+  tr:nth-child(even) td {
+    background-color: #f8fafc;
+  }
+
+  /* Callouts & Alert Boxes */
+  .callout {
+    background: #f0f9ff;
+    border-left: 4px solid #0284c7;
+    border-radius: 4px;
+    padding: 10px 14px;
+    margin: 12px 0;
+    font-size: 9pt;
+    page-break-inside: avoid;
+    break-inside: avoid;
+  }
+
+  .callout-title {
+    font-weight: 700;
+    color: #0369a1;
+    margin-bottom: 4px;
+    font-size: 9.5pt;
+  }
+
+  /* Code / Pre Blocks */
+  pre, code {
+    font-family: 'JetBrains Mono', 'Consolas', monospace;
+  }
+
+  pre {
+    background: #0b1329;
+    color: #e2e8f0;
+    padding: 12px 14px;
+    border-radius: 6px;
+    font-size: 7.5pt;
+    line-height: 1.45;
+    overflow-x: hidden;
+    margin: 10px 0 14px 0;
+    border: 1px solid #1e293b;
+    page-break-inside: avoid;
+    break-inside: avoid;
+  }
+
+  p code, li code {
+    background: #f1f5f9;
+    color: #0369a1;
+    padding: 1px 4px;
+    border-radius: 4px;
+    font-size: 8.5pt;
+    border: 1px solid #e2e8f0;
+  }
+
+  /* Diagrams */
+  .diagram-wrapper {
+    margin: 16px 0 20px 0;
+    page-break-inside: avoid;
+    break-inside: avoid;
+    text-align: center;
+  }
+
+  .diagram-frame {
+    background: #080e1a;
+    border: 1px solid #1e293b;
+    border-radius: 8px;
+    padding: 8px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.08);
+  }
+
+  .diagram-img {
+    width: 100%;
+    height: auto;
+    display: block;
+    border-radius: 4px;
+  }
+
+  .diagram-caption {
+    font-size: 8pt;
+    font-weight: 600;
+    color: #64748b;
+    margin-top: 6px;
+    text-align: center;
+    font-style: italic;
+  }
+
+  /* Math equation box */
+  .math-block {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+    padding: 8px 14px;
+    margin: 10px 0;
+    text-align: center;
+    font-family: 'Georgia', serif;
+    font-size: 10pt;
+    color: #0f172a;
+    page-break-inside: avoid;
+    break-inside: avoid;
+  }
+
+  /* Page break utility */
+  .page-break {
+    page-break-before: always;
+    break-before: page;
+  }
+
+  .no-break {
+    page-break-inside: avoid;
+    break-inside: avoid;
+  }
+
+  /* Table of Contents */
+  .toc-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px 20px;
+    margin: 16px 0 24px 0;
+    page-break-inside: avoid;
+    break-inside: avoid;
+  }
+
+  .toc-item {
+    display: flex;
+    align-items: baseline;
+    font-size: 9pt;
+    border-bottom: 1px dotted #cbd5e1;
+    padding-bottom: 4px;
+  }
+
+  .toc-num {
+    font-weight: 700;
+    color: #0284c7;
+    margin-right: 8px;
+    min-width: 22px;
+  }
+
+  .toc-title {
+    color: #1e293b;
+    font-weight: 500;
+  }
+
+  /* Header / Footer */
+  .doc-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 7.5pt;
+    color: #94a3b8;
+    border-bottom: 1px solid #e2e8f0;
+    padding-bottom: 4px;
+    margin-bottom: 14px;
+  }
+
+  .doc-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 7.5pt;
+    color: #94a3b8;
+    border-top: 1px solid #e2e8f0;
+    padding-top: 4px;
+    margin-top: 20px;
+  }
+</style>
+</head>
+<body>
+
+<!-- ================= COVER PAGE ================= -->
+<div class="cover-page">
+  <div class="cover-top">
+    <div class="badge-row">
+      <span class="badge badge-gold">BHARAT WIN — JAL SHAKTI HACKATHON 2026</span>
+      <span class="badge">DISASTER MANAGEMENT TRACK</span>
+      <span class="badge badge-purple">PROTOTYPE ARCHITECTURE PROOF</span>
+    </div>
+
+    <div class="main-title">FLOOD INTELLIGENCE</div>
+    <div class="sub-title">Technical Design Document (TDD)</div>
+    <div class="sub-title-2">Physics-Informed Satellite Flood Mapping &amp; 3D Bathymetric Hydrodynamic Platform</div>
+
+    <div class="cover-card">
+      <div class="cover-card-grid">
+        <div class="card-item">
+          <span class="card-label">Author / Lead Investigator</span>
+          <span class="card-value">Gokula Priyan A (Register No: 711224243013)</span>
+        </div>
+        <div class="card-item">
+          <span class="card-label">Institutional Affiliation</span>
+          <span class="card-value">Dept. of AI &amp; Data Science, Jai Shriram Engg. College, Tirupur</span>
+        </div>
+        <div class="card-item">
+          <span class="card-label">Live Production Cloud URL</span>
+          <span class="card-value"><a href="https://flood-intelligence-3d-cy4j.vercel.app">flood-intelligence-3d-cy4j.vercel.app</a> (24/7 Active)</span>
+        </div>
+        <div class="card-item">
+          <span class="card-label">Official Open-Source Repository</span>
+          <span class="card-value"><a href="https://github.com/gokulapriyan1119-dev/flood-intelligence-3d">github.com/gokulapriyan1119-dev/flood-intelligence-3d</a></span>
+        </div>
+        <div class="card-item">
+          <span class="card-label">Core AI &amp; Web Technology Stack</span>
+          <span class="card-value">Next.js 14 · React Three Fiber · FastAPI · PyTorch 2.5.1 · CUDA 12.1</span>
+        </div>
+        <div class="card-item">
+          <span class="card-label">Submission Date &amp; Version</span>
+          <span class="card-value">October 2026 · Release v2.4 (Competition Submission)</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="metrics-strip">
+      <div class="metric-box">
+        <div class="metric-val">0.621</div>
+        <div class="metric-lbl">U-Net++ Test IoU</div>
+      </div>
+      <div class="metric-box">
+        <div class="metric-val">4.18 × 10⁻⁵</div>
+        <div class="metric-lbl">PINN PDE Residual</div>
+      </div>
+      <div class="metric-box">
+        <div class="metric-val">~2.5 s</div>
+        <div class="metric-lbl">End-to-End Latency</div>
+      </div>
+      <div class="metric-box">
+        <div class="metric-val">100%</div>
+        <div class="metric-lbl">Test Suite (4/4 Pass)</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="cover-bottom">
+    <div>Government of India · Ministry of Jal Shakti · Bharat WIN Competition</div>
+    <div>Document Classification: Official Technical Blueprint</div>
+  </div>
+</div>
+
+<!-- ================= CONTENT ================= -->
+<div class="page-container">
+
+  <!-- Table of Contents -->
+  <div class="doc-header">
+    <span>FLOOD INTELLIGENCE 3D — TECHNICAL DESIGN DOCUMENT</span>
+    <span>BHARAT WIN HACKATHON</span>
+  </div>
+
+  <h1 class="section-title">Table of Contents</h1>
+  <div class="toc-grid">
+    <div class="toc-item"><span class="toc-num">01</span><span class="toc-title">Executive Summary &amp; Key Performance Benchmarks</span></div>
+    <div class="toc-item"><span class="toc-num">02</span><span class="toc-title">Problem Formulation &amp; Failure Modes of Legacy Systems</span></div>
+    <div class="toc-item"><span class="toc-num">03</span><span class="toc-title">System Architecture (4-Layer Infrastructure Breakdown)</span></div>
+    <div class="toc-item"><span class="toc-num">04</span><span class="toc-title">End-to-End Data Ingestion &amp; Inference Pipeline</span></div>
+    <div class="toc-item"><span class="toc-num">05</span><span class="toc-title">AI Model Architecture &amp; Physics Formulations (U-Net++ &amp; PINN)</span></div>
+    <div class="toc-item"><span class="toc-num">06</span><span class="toc-title">3D WebGL Hydrodynamic Visualization Engine</span></div>
+    <div class="toc-item"><span class="toc-num">07</span><span class="toc-title">Enterprise Security &amp; Session Protection Architecture</span></div>
+    <div class="toc-item"><span class="toc-num">08</span><span class="toc-title">Automated Institutional Reporting &amp; Spec-Compliant GeoTIFF</span></div>
+    <div class="toc-item"><span class="toc-num">09</span><span class="toc-title">Verification, Validation &amp; Ablation Studies</span></div>
+    <div class="toc-item"><span class="toc-num">10</span><span class="toc-title">Deployment, DevOps, Latency &amp; Cost Analysis</span></div>
+    <div class="toc-item"><span class="toc-num">11</span><span class="toc-title">Academic &amp; Operational References (IEEE Format)</span></div>
+    <div class="toc-item"><span class="toc-num">12</span><span class="toc-title">Appendix (Repository Structure, Checkpoints, Glossary)</span></div>
+  </div>
+
+  <hr style="border:0; border-top: 1px solid #e2e8f0; margin: 18px 0;" />
+
+  <!-- SECTION 1 -->
+  <h1 class="section-title">SECTION 1 — Executive Summary</h1>
+
+  <h2 class="sub-section-title">1.1 The Operational Challenge</h2>
+  <p>
+    River basin flooding, coastal storm surges, and monsoon-triggered flash inundations constitute the deadliest and economically most destructive natural disasters worldwide. Traditional disaster management pipelines rely almost exclusively on optical satellite constellations (such as Sentinel-2 MSI and Landsat-8/9 OLI) for extent mapping. However, optical sensors are rendered 100% blind precisely during major flood crises due to dense monsoonal cloud decks, heavy convective rainfall, atmospheric particulates, and nighttime orbits. Furthermore, existing Earth observation services only provide flat, 2D binary masks indicating the presence or absence of water; they fail entirely to provide continuous water depth (<i>h</i>) or flow velocity vectors. As a result, incident command centers remain blind to which road arteries are safe for high-clearance rescue vehicles versus which are lethal submerged drop-offs. Manual GIS workflows require 24 to 48 hours of calibration, orthorectification, and thresholding—surpassing the life-critical 72-hour search-and-rescue window.
+  </p>
+
+  <h2 class="sub-section-title">1.2 The Technological Solution</h2>
+  <p>
+    <b>Flood Intelligence 3D</b> addresses this paradigm through a cloud-native, deep-learning, and physics-constrained Earth observation engine. The system operates on active Copernicus Sentinel-1 C-band Synthetic Aperture Radar (SAR) sensors emitting microwaves at 5.405 GHz, which penetrate cloud cover, heavy monsoon precipitation, and dense smoke 24 hours a day, independent of sunlight. Rather than treating flood depth estimation as an unconstrained computer vision regression task, the platform introduces a dual-stage architecture:
+  </p>
+  <ul>
+    <li><b>Stage 1 (Extent Segmentation):</b> A high-resolution U-Net++ with an ImageNet-pretrained ResNet-34 encoder and dense nested skip pathways that segments water-land boundaries from dual-polarization (VV + VH) backscatter decibel tensors.</li>
+    <li><b>Stage 2 (Hydrodynamic PINN):</b> A Physics-Informed Neural Network (PINN) that couples the predicted inundation probability map with 30-meter Copernicus DEM topography and ECMWF ERA5 precipitation forcing. The network directly minimizes the residual of the 2D Shallow Water Equations and Manning's hydraulic friction laws, reconstructing a physically plausible, continuous water depth field <i>h(x, y)</i> in meters without requiring expensive physical in-situ depth gauges.</li>
+  </ul>
+  <p>
+    The entire engine is exposed through an interactive, WebGL-powered 3D dashboard built with Next.js 14 and React Three Fiber, featuring dynamic DEM displacement and interactive cross-sectional bathymetric depth slicing.
+  </p>
+
+  <h2 class="sub-section-title">1.3 Strategic Impact &amp; Real-World Utility</h2>
+  <p>
+    The platform compresses the end-to-end disaster intelligence lifecycle from 48 hours to approximately 2.5 seconds upon satellite raster ingest. Rescue boats, amphibious vehicles, and disaster response forces (NDRF/SDRF) receive sub-meter bathymetric profiles that prevent catastrophic grounding and vehicle submersions. Key critical infrastructure facilities—including hospitals, drinking water stations, and electrical substations—are automatically cross-referenced against water depth contours, triggering autonomous emergency warning cards. Deployed globally on Vercel's edge network, the platform is 100% open-source and democratizes geospatial intelligence by eliminating the need for expensive proprietary GIS software licenses (ArcGIS/ERDAS) or high-end local workstations.
+  </p>
+
+  <h2 class="sub-section-title">1.4 Key Performance Metrics Table</h2>
+  <table>
+    <thead>
+      <tr>
+        <th style="width: 28%;">Evaluation Metric</th>
+        <th style="width: 25%;">Measured Benchmark Value</th>
+        <th>Operational Significance</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><b>U-Net++ Test IoU</b></td>
+        <td><b>0.621 (62.1%)</b></td>
+        <td>Intersection-over-Union on Sen1Floods11 held-out test split (90 unseen flood scenes)</td>
+      </tr>
+      <tr>
+        <td><b>U-Net++ Dice Coefficient</b></td>
+        <td><b>0.714 (71.4%)</b></td>
+        <td>Harmonic spatial overlap agreement between ground-truth and segmentation boundaries</td>
+      </tr>
+      <tr>
+        <td><b>PINN Physics Residual</b></td>
+        <td><b>4.18 × 10⁻⁵</b></td>
+        <td>Mean-squared Navier-Stokes mass and momentum continuity violation</td>
+      </tr>
+      <tr>
+        <td><b>End-to-End Latency</b></td>
+        <td><b>~2.5 seconds</b></td>
+        <td>Complete pipeline: File Ingest → GPU Inference → 3D Bathymetry Render → PDF Generation</td>
+      </tr>
+      <tr>
+        <td><b>GPU Model Inference Time</b></td>
+        <td><b>165 ms</b> (120ms U-Net++ + 45ms PINN)</td>
+        <td>Benchmarked on standard NVIDIA Tesla T4 Tensor Core GPU (512×512 input)</td>
+      </tr>
+      <tr>
+        <td><b>Automated Test Coverage</b></td>
+        <td><b>100% (4/4 test suites passed)</b></td>
+        <td>Cryptographic determinism, OTP token generation, expiry rules, and brute-force lockout</td>
+      </tr>
+      <tr>
+        <td><b>Production Availability</b></td>
+        <td><b>24/7/365 Permanent Uptime</b></td>
+        <td>Hosted serverless on Vercel Global Edge Network with zero local machine dependency</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- SECTION 2 -->
+  <div class="page-break"></div>
+  <div class="doc-header">
+    <span>FLOOD INTELLIGENCE 3D — TECHNICAL DESIGN DOCUMENT</span>
+    <span>BHARAT WIN HACKATHON</span>
+  </div>
+
+  <h1 class="section-title">SECTION 2 — Problem Formulation</h1>
+
+  <h2 class="sub-section-title">2.1 Cloud-Cover Blindness of Optical Satellites</h2>
+  <p>
+    Optical Earth observation instruments capture reflected solar radiation across visible, near-infrared (NIR), and shortwave-infrared (SWIR) wavelengths (λ ≈ 0.4 µm – 2.2 µm). During severe meteorological disturbances—such as monsoon depressions, cloudbursts, and tropical cyclones—deep convective storm clouds exhibit near-100% reflectance across these bands, creating total optical occlusion. Furthermore, flood peaks frequently occur during nocturnal hours when optical sensors are inoperable. For example, during the 2024 Assam Brahmaputra floods and the 2022 Pakistan super-floods, optical satellites remained cloud-obscured for 11 consecutive days during the peak inundation crest, paralyzing rescue logistics.
+  </p>
+
+  <h2 class="sub-section-title">2.2 Static Boundaries Without Depth Information</h2>
+  <p>
+    Conventional operational flood mapping algorithms—such as the Normalized Difference Water Index (NDNDWI) or basic histogram thresholding—output an unweighted binary matrix:
+  </p>
+  <div class="math-block">
+    <i>M(x, y)</i> ∈ {0, 1}
+  </div>
+  <p>
+    While a binary mask reveals <i>where</i> standing water exists, it treats a 5-centimeter street puddle on an asphalt road identically to a lethal 4-meter surge submerging an underpass. Both pixels are tagged as "water." For military search-and-rescue teams, disaster management authorities, and civil defense units, a flat binary map is dangerously insufficient for navigation.
+  </p>
+
+  <h2 class="sub-section-title">2.3 Rescue Blindspots Due to Missing Bathymetry</h2>
+  <p>
+    Underwater terrain morphology (bathymetry) and overland hydraulic heads determine how water surges through landscapes. Without elevation-coupled depth modeling, relief convoys lack knowledge of:
+  </p>
+  <ul>
+    <li>Submerged bridge decks experiencing severe hydraulic scour or displacement.</li>
+    <li>Low-lying drainage culverts generating fatal vortex suction currents.</li>
+    <li>Sudden elevation drop-offs that overturn rescue dinghies and heavy rescue trucks.</li>
+  </ul>
+  <p>
+    Existing hydrodynamic modeling suites (such as HEC-RAS or TELEMAC-2D) require hours of numerical grid mesh generation, boundary condition calibration, and supercomputing clusters, making them impossible to run in real-time on fresh satellite passes during active crisis operations.
+  </p>
+
+  <h2 class="sub-section-title">2.4 Delayed Manual GIS Processing (24–48 Hours)</h2>
+  <p>
+    Standard disaster response workflows follow a cumbersome manual chain:
+  </p>
+  <ol>
+    <li>Incident commanders request satellite acquisition (International Disaster Charter activation).</li>
+    <li>Raw Level-0/Level-1 SAR products arrive as 1 GB to 4 GB archives.</li>
+    <li>GIS specialists manually apply precise orbit ephemerides, radiometric calibration (β° → σ°), speckle filters, and range-Doppler terrain corrections in desktop tools like ESA SNAP.</li>
+    <li>Analysts perform manual binarization and manually compile presentation maps.</li>
+  </ol>
+  <p>
+    By the time static maps are emailed to field squads 24 to 48 hours later, flood crests have already migrated downstream, rendering the intelligence obsolete.
+  </p>
+
+  <h2 class="sub-section-title">2.5 Critical Gap Summary: Optical vs. SAR vs. Hydrodynamic Models</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>Modality / System</th>
+        <th>Weather Penetration</th>
+        <th>Depth (<i>h</i>) Capability</th>
+        <th>Processing Latency</th>
+        <th>Operational Viability</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><b>Optical (Sentinel-2 MSI)</b></td>
+        <td>❌ Blinded by clouds, rain &amp; night</td>
+        <td>❌ Flat 2D binary only</td>
+        <td>Medium (4–6 hours)</td>
+        <td>Fails during active monsoon crises</td>
+      </tr>
+      <tr>
+        <td><b>Raw SAR Thresholding</b></td>
+        <td>✅ 100% all-weather C-band</td>
+        <td>❌ Flat 2D binary only</td>
+        <td>High (24–48 hours manual GIS)</td>
+        <td>Lacks bathymetric depth context</td>
+      </tr>
+      <tr>
+        <td><b>Numerical 2D (HEC-RAS)</b></td>
+        <td>N/A (Requires river sensor nets)</td>
+        <td>✅ Accurate depth (<i>h</i>)</td>
+        <td>❌ Very Slow (Hours to days)</td>
+        <td>Requires heavy cluster computation</td>
+      </tr>
+      <tr style="background-color: #f0fdf4;">
+        <td><b>FLOOD INTELLIGENCE 3D (Ours)</b></td>
+        <td><b>✅ Active C-band SAR (5.405 GHz)</b></td>
+        <td><b>✅ Continuous PINN depth (<i>h</i>)</b></td>
+        <td><b>✅ Real-Time (~2.5 seconds)</b></td>
+        <td><b>Optimal 24/7 crisis triage</b></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- SECTION 3 -->
+  <div class="page-break"></div>
+  <div class="doc-header">
+    <span>FLOOD INTELLIGENCE 3D — TECHNICAL DESIGN DOCUMENT</span>
+    <span>BHARAT WIN HACKATHON</span>
+  </div>
+
+  <h1 class="section-title">SECTION 3 — System Architecture</h1>
+
+  <h2 class="sub-section-title">3.1 Architecture Overview</h2>
+  <p>
+    The system follows a modern, decoupled 4-layer architecture ensuring strict separation of concerns, high computational throughput, and sub-second client responsiveness across mobile and desktop hardware.
+  </p>
+
+  <div class="diagram-wrapper">
+    <div class="diagram-frame">
+      <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxOTIwIDEwODAiIHdpZHRoPSIxOTIwIiBoZWlnaHQ9IjEwODAiPgogIDxkZWZzPgogICAgPHN0eWxlPgogICAgICBAaW1wb3J0IHVybCgnaHR0cHM6Ly9mb250cy5nb29nbGVhcGlzLmNvbS9jc3MyP2ZhbWlseT1TcGFjZStHcm90ZXNrOndnaHRANTAwOzcwMCZhbXA7ZmFtaWx5PUludGVyOndnaHRANDAwOzUwMDs2MDA7NzAwJmFtcDtmYW1pbHk9SmV0QnJhaW5zK01vbm86d2dodEA0MDA7NjAwJmFtcDtkaXNwbGF5PXN3YXAnKTsKICAgICAgLnRpdGxlIHsgZm9udC1mYW1pbHk6ICdTcGFjZSBHcm90ZXNrJywgc2Fucy1zZXJpZjsgZm9udC13ZWlnaHQ6IDcwMDsgZmlsbDogI0U2RURGNzsgfQogICAgICAuc3VidGl0bGUgeyBmb250LWZhbWlseTogJ0ludGVyJywgc2Fucy1zZXJpZjsgZm9udC13ZWlnaHQ6IDUwMDsgZmlsbDogIzg4OTJBNjsgfQogICAgICAubGF5ZXItdGl0bGUgeyBmb250LWZhbWlseTogJ1NwYWNlIEdyb3Rlc2snLCBzYW5zLXNlcmlmOyBmb250LXdlaWdodDogNzAwOyBmb250LXNpemU6IDIwcHg7IH0KICAgICAgLmxheWVyLXN1YiB7IGZvbnQtZmFtaWx5OiAnSW50ZXInLCBzYW5zLXNlcmlmOyBmb250LXdlaWdodDogNTAwOyBmb250LXNpemU6IDEzcHg7IGZpbGw6ICM4ODkyQTY7IH0KICAgICAgLmNhcmQtdGl0bGUgeyBmb250LWZhbWlseTogJ0ludGVyJywgc2Fucy1zZXJpZjsgZm9udC13ZWlnaHQ6IDYwMDsgZm9udC1zaXplOiAxNXB4OyBmaWxsOiAjRTZFREY3OyB9CiAgICAgIC5jYXJkLXN1YiB7IGZvbnQtZmFtaWx5OiAnSW50ZXInLCBzYW5zLXNlcmlmOyBmb250LXdlaWdodDogNDAwOyBmb250LXNpemU6IDEycHg7IGZpbGw6ICM4ODkyQTY7IH0KICAgICAgLm1vbm8geyBmb250LWZhbWlseTogJ0pldEJyYWlucyBNb25vJywgbW9ub3NwYWNlOyBmb250LXNpemU6IDExcHg7IH0KICAgICAgLmFycm93LXRleHQgeyBmb250LWZhbWlseTogJ0pldEJyYWlucyBNb25vJywgbW9ub3NwYWNlOyBmb250LXNpemU6IDEycHg7IGZvbnQtd2VpZ2h0OiA2MDA7IGZpbGw6ICMxOUM2RkY7IH0KICAgIDwvc3R5bGU+CiAgICA8bGluZWFyR3JhZGllbnQgaWQ9ImJnLWdyYWQiIHgxPSIwJSIgeTE9IjAlIiB4Mj0iMTAwJSIgeTI9IjEwMCUiPgogICAgICA8c3RvcCBvZmZzZXQ9IjAlIiBzdG9wLWNvbG9yPSIjMDUwNzBEIi8+CiAgICAgIDxzdG9wIG9mZnNldD0iMTAwJSIgc3RvcC1jb2xvcj0iIzAyMDMwNiIvPgogICAgPC9saW5lYXJHcmFkaWVudD4KICAgIDxmaWx0ZXIgaWQ9Imdsb3ctY3lhbiIgeD0iLTIwJSIgeT0iLTIwJSIgd2lkdGg9IjE0MCUiIGhlaWdodD0iMTQwJSI+CiAgICAgIDxmZUdhdXNzaWFuQmx1ciBzdGREZXZpYXRpb249IjYiIHJlc3VsdD0iYmx1ciIvPgogICAgICA8ZmVDb21wb3NpdGUgaW49IlNvdXJjZUdyYXBoaWMiIGluMj0iYmx1ciIgb3BlcmF0b3I9Im92ZXIiLz4KICAgIDwvZmlsdGVyPgogICAgPGZpbHRlciBpZD0iZ2xvdy1ibHVlIiB4PSItMjAlIiB5PSItMjAlIiB3aWR0aD0iMTQwJSIgaGVpZ2h0PSIxNDAlIj4KICAgICAgPGZlR2F1c3NpYW5CbHVyIHN0ZERldmlhdGlvbj0iNiIgcmVzdWx0PSJibHVyIi8+CiAgICAgIDxmZUNvbXBvc2l0ZSBpbj0iU291cmNlR3JhcGhpYyIgaW4yPSJibHVyIiBvcGVyYXRvcj0ib3ZlciIvPgogICAgPC9maWx0ZXI+CiAgICA8ZmlsdGVyIGlkPSJnbG93LWdyZWVuIiB4PSItMjAlIiB5PSItMjAlIiB3aWR0aD0iMTQwJSIgaGVpZ2h0PSIxNDAlIj4KICAgICAgPGZlR2F1c3NpYW5CbHVyIHN0ZERldmlhdGlvbj0iNiIgcmVzdWx0PSJibHVyIi8+CiAgICAgIDxmZUNvbXBvc2l0ZSBpbj0iU291cmNlR3JhcGhpYyIgaW4yPSJibHVyIiBvcGVyYXRvcj0ib3ZlciIvPgogICAgPC9maWx0ZXI+CiAgICA8ZmlsdGVyIGlkPSJnbG93LWFtYmVyIiB4PSItMjAlIiB5PSItMjAlIiB3aWR0aD0iMTQwJSIgaGVpZ2h0PSIxNDAlIj4KICAgICAgPGZlR2F1c3NpYW5CbHVyIHN0ZERldmlhdGlvbj0iNiIgcmVzdWx0PSJibHVyIi8+CiAgICAgIDxmZUNvbXBvc2l0ZSBpbj0iU291cmNlR3JhcGhpYyIgaW4yPSJibHVyIiBvcGVyYXRvcj0ib3ZlciIvPgogICAgPC9maWx0ZXI+CiAgICA8bWFya2VyIGlkPSJhcnJvdyIgdmlld0JveD0iMCAwIDEwIDEwIiByZWZYPSI1IiByZWZZPSI1IiBtYXJrZXJXaWR0aD0iNiIgbWFya2VySGVpZ2h0PSI2IiBvcmllbnQ9ImF1dG8tc3RhcnQtcmV2ZXJzZSI+CiAgICAgIDxwYXRoIGQ9Ik0gMCAxIEwgMTAgNSBMIDAgOSB6IiBmaWxsPSIjMTlDNkZGIi8+CiAgICA8L21hcmtlcj4KICA8L2RlZnM+CgogIDwhLS0gQmFja2dyb3VuZCAtLT4KICA8cmVjdCB3aWR0aD0iMTkyMCIgaGVpZ2h0PSIxMDgwIiBmaWxsPSJ1cmwoI2JnLWdyYWQpIi8+CgogIDwhLS0gU3VidGxlIEJsdWVwcmludCBHcmlkIFBhdHRlcm4gLS0+CiAgPGcgb3BhY2l0eT0iMC4wNCIgc3Ryb2tlPSIjMTlDNkZGIiBzdHJva2Utd2lkdGg9IjEiPgogICAgPGxpbmUgeDE9IjAiIHkxPSIxMjAiIHgyPSIxOTIwIiB5Mj0iMTIwIi8+PGxpbmUgeDE9IjAiIHkxPSIyNDAiIHgyPSIxOTIwIiB5Mj0iMjQwIi8+CiAgICA8bGluZSB4MT0iMCIgeTE9IjM2MCIgeDI9IjE5MjAiIHkyPSIzNjAiLz48bGluZSB4MT0iMCIgeTE9IjQ4MCIgeDI9IjE5MjAiIHkyPSI0ODAiLz4KICAgIDxsaW5lIHgxPSIwIiB5MT0iNjAwIiB4Mj0iMTkyMCIgeTI9IjYwMCIvPjxsaW5lIHgxPSIwIiB5MT0iNzIwIiB4Mj0iMTkyMCIgeTI9IjcyMCIvPgogICAgPGxpbmUgeDE9IjAiIHkxPSI4NDAiIHgyPSIxOTIwIiB5Mj0iODQwIi8+PGxpbmUgeDE9IjAiIHkxPSI5NjAiIHgyPSIxOTIwIiB5Mj0iOTYwIi8+CiAgICA8bGluZSB4MT0iMjQwIiB5MT0iMCIgeDI9IjI0MCIgeTI9IjEwODAiLz48bGluZSB4MT0iNDgwIiB5MT0iMCIgeDI9IjQ4MCIgeTI9IjEwODAiLz4KICAgIDxsaW5lIHgxPSI3MjAiIHkxPSIwIiB4Mj0iNzIwIiB5Mj0iMTA4MCIvPjxsaW5lIHgxPSI5NjAiIHkxPSIwIiB4Mj0iOTYwIiB5Mj0iMTA4MCIvPgogICAgPGxpbmUgeDE9IjEyMDAiIHkxPSIwIiB4Mj0iMTIwMCIgeTI9IjEwODAiLz48bGluZSB4MT0iMTQ0MCIgeTE9IjAiIHgyPSIxNDQwIiB5Mj0iMTA4MCIvPgogICAgPGxpbmUgeDE9IjE2ODAiIHkxPSIwIiB4Mj0iMTY4MCIgeTI9IjEwODAiLz4KICA8L2c+CgogIDwhLS0gSGVhZGVyIFNlY3Rpb24gLS0+CiAgPGcgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMTAwLCA0NSkiPgogICAgPHJlY3QgeD0iMCIgeT0iMCIgd2lkdGg9IjE4MCIgaGVpZ2h0PSIyOCIgcng9IjE0IiBmaWxsPSIjMEUyMjNEIiBzdHJva2U9IiMxOUM2RkYiIHN0cm9rZS13aWR0aD0iMSIvPgogICAgPHRleHQgeD0iOTAiIHk9IjE4IiBmaWxsPSIjMTlDNkZGIiBmb250LWZhbWlseT0iJ0pldEJyYWlucyBNb25vJywgbW9ub3NwYWNlIiBmb250LXNpemU9IjExIiBmb250LXdlaWdodD0iNjAwIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBsZXR0ZXItc3BhY2luZz0iMS41Ij5CSEFSQVQgV0lOIMK3IEFSQ0hJVEVDVFVSRTwvdGV4dD4KICAgIDx0ZXh0IHg9IjAiIHk9IjYyIiBjbGFzcz0idGl0bGUiIGZvbnQtc2l6ZT0iMzQiIGxldHRlci1zcGFjaW5nPSItMC41Ij5GTE9PRCBJTlRFTExJR0VOQ0UgM0Qg4oCUIFNZU1RFTSBBUkNISVRFQ1RVUkU8L3RleHQ+CiAgICA8dGV4dCB4PSIwIiB5PSI4NiIgY2xhc3M9InN1YnRpdGxlIiBmb250LXNpemU9IjE0Ij5QaHlzaWNzLUluZm9ybWVkIERlZXAgUmVtb3RlIFNlbnNpbmcgSW51bmRhdGlvbiBQaXBlbGluZSDCtyBOZXh0LmpzIDE0IMK3IEZhc3RBUEkgwrcgUHlUb3JjaCAyLjUuMTwvdGV4dD4KICA8L2c+CgogIDwhLS0gPT09PT09PT09PT09PT09PT09PT0gTEFZRVIgMTogUFJFU0VOVEFUSU9OID09PT09PT09PT09PT09PT09PT09IC0tPgogIDxnIHRyYW5zZm9ybT0idHJhbnNsYXRlKDEwMCwgMTYwKSI+CiAgICA8cmVjdCB3aWR0aD0iMTcyMCIgaGVpZ2h0PSIxNTAiIHJ4PSIxNCIgZmlsbD0iIzBCMEYxQSIgc3Ryb2tlPSIjMTlDNkZGIiBzdHJva2Utd2lkdGg9IjIiIGZpbHRlcj0idXJsKCNnbG93LWN5YW4pIi8+CiAgICA8IS0tIExheWVyIFRpdGxlIC0tPgogICAgPHRleHQgeD0iMzUiIHk9IjM2IiBjbGFzcz0ibGF5ZXItdGl0bGUiIGZpbGw9IiMxOUM2RkYiPkxBWUVSIDE6IFBSRVNFTlRBVElPTiAmYW1wOyBXT1JLU1RBVElPTiBMQVlFUjwvdGV4dD4KICAgIDx0ZXh0IHg9IjQ3NSIgeT0iMzYiIGNsYXNzPSJsYXllci1zdWIiPkNsaWVudCBVSSDCtyBUaHJlZS5qcyBXZWJHTCDCtyBSZWFjdCBUaHJlZSBGaWJlciDCtyBUYWlsd2luZENTUyDCtyBOZXh0LmpzIDE0IEFwcCBSb3V0ZXI8L3RleHQ+CiAgICAKICAgIDwhLS0gQ29tcG9uZW50IENhcmRzIC0tPgogICAgPGcgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMzUsIDU1KSI+CiAgICAgIDwhLS0gQ2FyZCAxIC0tPgogICAgICA8cmVjdCB4PSIwIiB5PSIwIiB3aWR0aD0iMzEwIiBoZWlnaHQ9IjcyIiByeD0iMTAiIGZpbGw9IiMwNTA4MTEiIHN0cm9rZT0iIzE5QzZGRiIgc3Ryb2tlLW9wYWNpdHk9IjAuNCIgc3Ryb2tlLXdpZHRoPSIxIi8+CiAgICAgIDxjaXJjbGUgY3g9IjI4IiBjeT0iMzYiIHI9IjE0IiBmaWxsPSIjMEQyNTNBIi8+CiAgICAgIDxwYXRoIGQ9Ik0gMjIgMzYgQSA2IDYgMCAxIDEgMzQgMzYgQSA2IDYgMCAxIDEgMjIgMzYiIHN0cm9rZT0iIzE5QzZGRiIgc3Ryb2tlLXdpZHRoPSIxLjgiIGZpbGw9Im5vbmUiLz4KICAgICAgPHRleHQgeD0iNTIiIHk9IjMwIiBjbGFzcz0iY2FyZC10aXRsZSI+M0QgR2xvYmFsIE1vbml0b3I8L3RleHQ+CiAgICAgIDx0ZXh0IHg9IjUyIiB5PSI0OCIgY2xhc3M9ImNhcmQtc3ViIj5UaHJlZS5qcyBOQVNBIEJsdWUgTWFyYmxlIFNwaGVyZTwvdGV4dD4KICAgICAgPHRleHQgeD0iNTIiIHk9IjYyIiBjbGFzcz0ibW9ubyIgZmlsbD0iIzE5QzZGRiI+OCBHbG9iYWwgRGlzYXN0ZXIgT2JzZXJ2YXRvcmllczwvdGV4dD4KCiAgICAgIDwhLS0gQ2FyZCAyIC0tPgogICAgICA8cmVjdCB4PSIzMzUiIHk9IjAiIHdpZHRoPSIzMTAiIGhlaWdodD0iNzIiIHJ4PSIxMCIgZmlsbD0iIzA1MDgxMSIgc3Ryb2tlPSIjMTlDNkZGIiBzdHJva2Utb3BhY2l0eT0iMC40IiBzdHJva2Utd2lkdGg9IjEiLz4KICAgICAgPGNpcmNsZSBjeD0iMzYzIiBjeT0iMzYiIHI9IjE0IiBmaWxsPSIjMEQyNTNBIi8+CiAgICAgIDxwYXRoIGQ9Ik0gMzU2IDQyIEwgMzYzIDI4IEwgMzcwIDQyIFoiIHN0cm9rZT0iIzE5QzZGRiIgc3Ryb2tlLXdpZHRoPSIxLjgiIGZpbGw9Im5vbmUiLz4KICAgICAgPHRleHQgeD0iMzg3IiB5PSIzMCIgY2xhc3M9ImNhcmQtdGl0bGUiPjNEIFRlcnJhaW4gQmF0aHltZXRyeTwvdGV4dD4KICAgICAgPHRleHQgeD0iMzg3IiB5PSI0OCIgY2xhc3M9ImNhcmQtc3ViIj5SM0YgREVNIFByb2NlZHVyYWwgRGlzcGxhY2VtZW50PC90ZXh0PgogICAgICA8dGV4dCB4PSIzODciIHk9IjYyIiBjbGFzcz0ibW9ubyIgZmlsbD0iIzE5QzZGRiI+V2F2ZSBTaGFkZXJzICZhbXA7IENyb3NzLVNlY3Rpb24gU2xpY2U8L3RleHQ+CgogICAgICA8IS0tIENhcmQgMyAtLT4KICAgICAgPHJlY3QgeD0iNjcwIiB5PSIwIiB3aWR0aD0iMzEwIiBoZWlnaHQ9IjcyIiByeD0iMTAiIGZpbGw9IiMwNTA4MTEiIHN0cm9rZT0iIzE5QzZGRiIgc3Ryb2tlLW9wYWNpdHk9IjAuNCIgc3Ryb2tlLXdpZHRoPSIxIi8+CiAgICAgIDxjaXJjbGUgY3g9IjY5OCIgY3k9IjM2IiByPSIxNCIgZmlsbD0iIzBEMjUzQSIvPgogICAgICA8cGF0aCBkPSJNIDY5OCAyOCBMIDY5OCA0MiBNIDY5MiAzNCBMIDY5OCAyOCBMIDcwNCAzNCIgc3Ryb2tlPSIjMTlDNkZGIiBzdHJva2Utd2lkdGg9IjEuOCIgZmlsbD0ibm9uZSIvPgogICAgICA8dGV4dCB4PSI3MjIiIHk9IjMwIiBjbGFzcz0iY2FyZC10aXRsZSI+U0FSIEluZ2VzdGlvbiBQaXBlbGluZTwvdGV4dD4KICAgICAgPHRleHQgeD0iNzIyIiB5PSI0OCIgY2xhc3M9ImNhcmQtc3ViIj5EcmFnLWFuZC1Ecm9wIEdlb1RJRkYgUmVhZGVyPC90ZXh0PgogICAgICA8dGV4dCB4PSI3MjIiIHk9IjYyIiBjbGFzcz0ibW9ubyIgZmlsbD0iIzE5QzZGRiI+RHVhbC1Qb2wgVlYvVkggR2VvVElGRiBJbmdlc3Rpb248L3RleHQ+CgogICAgICA8IS0tIENhcmQgNCAtLT4KICAgICAgPHJlY3QgeD0iMTAwNSIgeT0iMCIgd2lkdGg9IjMxMCIgaGVpZ2h0PSI3MiIgcng9IjEwIiBmaWxsPSIjMDUwODExIiBzdHJva2U9IiMxOUM2RkYiIHN0cm9rZS1vcGFjaXR5PSIwLjQiIHN0cm9rZS13aWR0aD0iMSIvPgogICAgICA8Y2lyY2xlIGN4PSIxMDMzIiBjeT0iMzYiIHI9IjE0IiBmaWxsPSIjMEQyNTNBIi8+CiAgICAgIDxwYXRoIGQ9Ik0gMTAyNiA0MiBMIDEwMzAgMzUgTCAxMDM1IDM4IEwgMTA0MCAyOCIgc3Ryb2tlPSIjMTlDNkZGIiBzdHJva2Utd2lkdGg9IjEuOCIgZmlsbD0ibm9uZSIvPgogICAgICA8dGV4dCB4PSIxMDU3IiB5PSIzMCIgY2xhc3M9ImNhcmQtdGl0bGUiPkh5ZHJvbG9naWNhbCBBbmFseXRpY3M8L3RleHQ+CiAgICAgIDx0ZXh0IHg9IjEwNTciIHk9IjQ4IiBjbGFzcz0iY2FyZC1zdWIiPlJlY2hhcnRzIEh5ZHJvZ3JhcGhzICZhbXA7IEhpc3RvZ3JhbXM8L3RleHQ+CiAgICAgIDx0ZXh0IHg9IjEwNTciIHk9IjYyIiBjbGFzcz0ibW9ubyIgZmlsbD0iIzE5QzZGRiI+Q3JpdGljYWwgSW5mcmFzdHJ1Y3R1cmUgUmlzayBNYXRyaXg8L3RleHQ+CgogICAgICA8IS0tIENhcmQgNSAtLT4KICAgICAgPHJlY3QgeD0iMTM0MCIgeT0iMCIgd2lkdGg9IjMxMCIgaGVpZ2h0PSI3MiIgcng9IjEwIiBmaWxsPSIjMDUwODExIiBzdHJva2U9IiMxOUM2RkYiIHN0cm9rZS1vcGFjaXR5PSIwLjQiIHN0cm9rZS13aWR0aD0iMSIvPgogICAgICA8Y2lyY2xlIGN4PSIxMzY4IiBjeT0iMzYiIHI9IjE0IiBmaWxsPSIjMEQyNTNBIi8+CiAgICAgIDxwYXRoIGQ9Ik0gMTM2MiAyOCBIIDEzNzQgViA0NCBIIDEzNjIgWiBNIDEzNjUgMzMgSCAxMzcxIE0gMTM2NSAzOCBIIDEzNzEiIHN0cm9rZT0iIzE5QzZGRiIgc3Ryb2tlLXdpZHRoPSIxLjYiIGZpbGw9Im5vbmUiLz4KICAgICAgPHRleHQgeD0iMTM5MiIgeT0iMzAiIGNsYXNzPSJjYXJkLXRpdGxlIj4xMC1QYWdlIFBERiBEb3NzaWVyICZhbXA7IFRJRkY8L3RleHQ+CiAgICAgIDx0ZXh0IHg9IjEzOTIiIHk9IjQ4IiBjbGFzcz0iY2FyZC1zdWIiPmpzUERGIEVtZXJnZW5jeSBCcmllZiBHZW5lcmF0b3I8L3RleHQ+CiAgICAgIDx0ZXh0IHg9IjEzOTIiIHk9IjYyIiBjbGFzcz0ibW9ubyIgZmlsbD0iIzE5QzZGRiI+U3BlYy1Db21wbGlhbnQgVElGRiA2LjAgUkdCIEV4cG9ydDwvdGV4dD4KICAgIDwvZz4KICA8L2c+CgogIDwhLS0gQ29ubmVjdG9ycyBMYXllciAxIC0+IExheWVyIDIgLS0+CiAgPGcgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoOTYwLCAzMTApIj4KICAgIDxsaW5lIHgxPSIwIiB5MT0iMCIgeDI9IjAiIHkyPSI0MCIgc3Ryb2tlPSIjMTlDNkZGIiBzdHJva2Utd2lkdGg9IjIiIHN0cm9rZS1kYXNoYXJyYXk9IjQsNCIgbWFya2VyLWVuZD0idXJsKCNhcnJvdykiLz4KICAgIDxyZWN0IHg9Ii0xNDAiIHk9IjEwIiB3aWR0aD0iMjgwIiBoZWlnaHQ9IjIyIiByeD0iNSIgZmlsbD0iIzA1MDcwRCIgc3Ryb2tlPSIjMTlDNkZGIiBzdHJva2Utd2lkdGg9IjEiLz4KICAgIDx0ZXh0IHg9IjAiIHk9IjI1IiBjbGFzcz0iYXJyb3ctdGV4dCIgdGV4dC1hbmNob3I9Im1pZGRsZSI+SFRUUFMgwrcgTXVsdGlwYXJ0L0Zvcm1EYXRhIMK3IEpTT048L3RleHQ+CiAgPC9nPgoKICA8IS0tID09PT09PT09PT09PT09PT09PT09IExBWUVSIDI6IEFQUExJQ0FUSU9OID09PT09PT09PT09PT09PT09PT09IC0tPgogIDxnIHRyYW5zZm9ybT0idHJhbnNsYXRlKDEwMCwgMzcwKSI+CiAgICA8cmVjdCB3aWR0aD0iMTcyMCIgaGVpZ2h0PSIxNTAiIHJ4PSIxNCIgZmlsbD0iIzBCMEYxQSIgc3Ryb2tlPSIjMUU4OEU1IiBzdHJva2Utd2lkdGg9IjIiIGZpbHRlcj0idXJsKCNnbG93LWJsdWUpIi8+CiAgICA8IS0tIExheWVyIFRpdGxlIC0tPgogICAgPHRleHQgeD0iMzUiIHk9IjM2IiBjbGFzcz0ibGF5ZXItdGl0bGUiIGZpbGw9IiMxRTg4RTUiPkxBWUVSIDI6IEFQUExJQ0FUSU9OICZhbXA7IEdBVEVXQVkgTEFZRVI8L3RleHQ+CiAgICA8dGV4dCB4PSI0NTUiIHk9IjM2IiBjbGFzcz0ibGF5ZXItc3ViIj5OZXh0LmpzIDE0IFNlcnZlciBSdW50aW1lIMK3IEVkZ2UgTWlkZGxld2FyZSDCtyBSb3V0ZSBIYW5kbGVycyDCtyBadXN0YW5kIFN0YXRlIMK3IE5vZGVtYWlsZXIgU01UUDwvdGV4dD4KICAgIAogICAgPCEtLSBDb21wb25lbnQgQ2FyZHMgLS0+CiAgICA8ZyB0cmFuc2Zvcm09InRyYW5zbGF0ZSgzNSwgNTUpIj4KICAgICAgPCEtLSBDYXJkIDEgLS0+CiAgICAgIDxyZWN0IHg9IjAiIHk9IjAiIHdpZHRoPSIzOTAiIGhlaWdodD0iNzIiIHJ4PSIxMCIgZmlsbD0iIzA1MDgxMSIgc3Ryb2tlPSIjMUU4OEU1IiBzdHJva2Utb3BhY2l0eT0iMC40IiBzdHJva2Utd2lkdGg9IjEiLz4KICAgICAgPGNpcmNsZSBjeD0iMjgiIGN5PSIzNiIgcj0iMTQiIGZpbGw9IiMxMDI1NDAiLz4KICAgICAgPHBhdGggZD0iTSAyOCAyNyBMIDM0IDMwIFYgMzcgQyAzNCA0MSAyOCA0NCAyOCA0NCBDIDI4IDQ0IDIyIDQxIDIyIDM3IFYgMzAgWiIgc3Ryb2tlPSIjMUU4OEU1IiBzdHJva2Utd2lkdGg9IjEuOCIgZmlsbD0ibm9uZSIvPgogICAgICA8dGV4dCB4PSI1MiIgeT0iMzAiIGNsYXNzPSJjYXJkLXRpdGxlIj5Qcm90ZWN0ZWQgUm91dGUgR3VhcmQ8L3RleHQ+CiAgICAgIDx0ZXh0IHg9IjUyIiB5PSI0OCIgY2xhc3M9ImNhcmQtc3ViIj5TZXNzaW9uIEdhdGVrZWVwZXIgJmFtcDsgUm91dGUgUHJvdGVjdGlvbjwvdGV4dD4KICAgICAgPHRleHQgeD0iNTIiIHk9IjYyIiBjbGFzcz0ibW9ubyIgZmlsbD0iIzFFODhFNSI+QXV0b21hdGljIFVuYXV0aGVudGljYXRlZCBSZWRpcmVjdCB0byAvYXV0aDwvdGV4dD4KCiAgICAgIDwhLS0gQ2FyZCAyIC0tPgogICAgICA8cmVjdCB4PSI0MjAiIHk9IjAiIHdpZHRoPSI0MTAiIGhlaWdodD0iNzIiIHJ4PSIxMCIgZmlsbD0iIzA1MDgxMSIgc3Ryb2tlPSIjMUU4OEU1IiBzdHJva2Utb3BhY2l0eT0iMC40IiBzdHJva2Utd2lkdGg9IjEiLz4KICAgICAgPGNpcmNsZSBjeD0iNDQ4IiBjeT0iMzYiIHI9IjE0IiBmaWxsPSIjMTAyNTQwIi8+CiAgICAgIDxwYXRoIGQ9Ik0gNDQyIDMyIEggNDU0IE0gNDQ4IDI2IEwgNDU0IDMyIEwgNDQ4IDM4IE0gNDU0IDQwIEggNDQyIiBzdHJva2U9IiMxRTg4RTUiIHN0cm9rZS13aWR0aD0iMS44IiBmaWxsPSJub25lIi8+CiAgICAgIDx0ZXh0IHg9IjQ3MiIgeT0iMzAiIGNsYXNzPSJjYXJkLXRpdGxlIj5JbmZlcmVuY2UgUHJveHkgJmFtcDsgRmFsbGJhY2s8L3RleHQ+CiAgICAgIDx0ZXh0IHg9IjQ3MiIgeT0iNDgiIGNsYXNzPSJjYXJkLXN1YiI+RmFzdEFQSSBQcm94eSArIE5vZGUgTG9jYWwgSW4tTWVtb3J5IEluZmVyZW5jZTwvdGV4dD4KICAgICAgPHRleHQgeD0iNDcyIiB5PSI2MiIgY2xhc3M9Im1vbm8iIGZpbGw9IiMxRTg4RTUiPkFib3J0Q29udHJvbGxlciBUaW1lb3V0ICgzLjVzKSBHcmFjZWZ1bCBGYWlsb3ZlcjwvdGV4dD4KCiAgICAgIDwhLS0gQ2FyZCAzIC0tPgogICAgICA8cmVjdCB4PSI4NjAiIHk9IjAiIHdpZHRoPSI0MTAiIGhlaWdodD0iNzIiIHJ4PSIxMCIgZmlsbD0iIzA1MDgxMSIgc3Ryb2tlPSIjMUU4OEU1IiBzdHJva2Utb3BhY2l0eT0iMC40IiBzdHJva2Utd2lkdGg9IjEiLz4KICAgICAgPGNpcmNsZSBjeD0iODg4IiBjeT0iMzYiIHI9IjE0IiBmaWxsPSIjMTAyNTQwIi8+CiAgICAgIDxwYXRoIGQ9Ik0gODgyIDMwIEggODk0IFYgNDIgSCA4ODIgWiBNIDg4MiAzMCBMIDg4OCAzNiBMIDg5NCAzMCIgc3Ryb2tlPSIjMUU4OEU1IiBzdHJva2Utd2lkdGg9IjEuOCIgZmlsbD0ibm9uZSIvPgogICAgICA8dGV4dCB4PSI5MTIiIHk9IjMwIiBjbGFzcz0iY2FyZC10aXRsZSI+RW50ZXJwcmlzZSAyRkEgT1RQIEdhdGV3YXk8L3RleHQ+CiAgICAgIDx0ZXh0IHg9IjkxMiIgeT0iNDgiIGNsYXNzPSJjYXJkLXN1YiI+Tm9kZW1haWxlciArIEdvb2dsZSBTTVRQIChzbXRwLmdtYWlsLmNvbTo0NjUpPC90ZXh0PgogICAgICA8dGV4dCB4PSI5MTIiIHk9IjYyIiBjbGFzcz0ibW9ubyIgZmlsbD0iIzFFODhFNSI+Ni1EaWdpdCBDcnlwdG8gT1RQIMK3IDEwbSBUVEwgwrcgTWF4IDUgQXR0ZW1wdHM8L3RleHQ+CgogICAgICA8IS0tIENhcmQgNCAtLT4KICAgICAgPHJlY3QgeD0iMTMwMCIgeT0iMCIgd2lkdGg9IjM4NSIgaGVpZ2h0PSI3MiIgcng9IjEwIiBmaWxsPSIjMDUwODExIiBzdHJva2U9IiMxRTg4RTUiIHN0cm9rZS1vcGFjaXR5PSIwLjQiIHN0cm9rZS13aWR0aD0iMSIvPgogICAgICA8Y2lyY2xlIGN4PSIxMzI4IiBjeT0iMzYiIHI9IjE0IiBmaWxsPSIjMTAyNTQwIi8+CiAgICAgIDxjaXJjbGUgY3g9IjEzMjgiIGN5PSIzNiIgcj0iNiIgc3Ryb2tlPSIjMUU4OEU1IiBzdHJva2Utd2lkdGg9IjEuOCIgZmlsbD0ibm9uZSIvPgogICAgICA8dGV4dCB4PSIxMzUyIiB5PSIzMCIgY2xhc3M9ImNhcmQtdGl0bGUiPlp1c3RhbmQgR2xvYmFsIFN0YXRlIFN0b3JlPC90ZXh0PgogICAgICA8dGV4dCB4PSIxMzUyIiB5PSI0OCIgY2xhc3M9ImNhcmQtc3ViIj5UaHJlYWQtU2FmZSBNZW1vcnkgU3RvcmUgKyBMb2NhbFN0b3JhZ2UgU3luYzwvdGV4dD4KICAgICAgPHRleHQgeD0iMTM1MiIgeT0iNjIiIGNsYXNzPSJtb25vIiBmaWxsPSIjMUU4OEU1Ij51c2VBdXRoU3RvcmUgwrcgdXNlRmxvb2RTdG9yZSBTdGF0ZSBCdXM8L3RleHQ+CiAgICA8L2c+CiAgPC9nPgoKICA8IS0tIENvbm5lY3RvcnMgTGF5ZXIgMiAtPiBMYXllciAzIC0tPgogIDxnIHRyYW5zZm9ybT0idHJhbnNsYXRlKDk2MCwgNTIwKSI+CiAgICA8bGluZSB4MT0iMCIgeTE9IjAiIHgyPSIwIiB5Mj0iNDAiIHN0cm9rZT0iIzAwRkY5RCIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2UtZGFzaGFycmF5PSI0LDQiIG1hcmtlci1lbmQ9InVybCgjYXJyb3cpIi8+CiAgICA8cmVjdCB4PSItMTYwIiB5PSIxMCIgd2lkdGg9IjMyMCIgaGVpZ2h0PSIyMiIgcng9IjUiIGZpbGw9IiMwNTA3MEQiIHN0cm9rZT0iIzAwRkY5RCIgc3Ryb2tlLXdpZHRoPSIxIi8+CiAgICA8dGV4dCB4PSIwIiB5PSIyNSIgY2xhc3M9ImFycm93LXRleHQiIGZpbGw9IiMwMEZGOUQiIHRleHQtYW5jaG9yPSJtaWRkbGUiPlJFU1QgSFRUUCBBUEkgwrcgSlNPTiBQYXlsb2FkIMK3IEdlb1RJRkYgVGVuc29yPC90ZXh0PgogIDwvZz4KCiAgPCEtLSA9PT09PT09PT09PT09PT09PT09PSBMQVlFUiAzOiBBSSBJTkZFUkVOQ0UgPT09PT09PT09PT09PT09PT09PT0gLS0+CiAgPGcgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMTAwLCA1ODApIj4KICAgIDxyZWN0IHdpZHRoPSIxNzIwIiBoZWlnaHQ9IjE1MCIgcng9IjE0IiBmaWxsPSIjMEIwRjFBIiBzdHJva2U9IiMwMEZGOUQiIHN0cm9rZS13aWR0aD0iMiIgZmlsdGVyPSJ1cmwoI2dsb3ctZ3JlZW4pIi8+CiAgICA8IS0tIExheWVyIFRpdGxlIC0tPgogICAgPHRleHQgeD0iMzUiIHk9IjM2IiBjbGFzcz0ibGF5ZXItdGl0bGUiIGZpbGw9IiMwMEZGOUQiPkxBWUVSIDM6IEFJIElORkVSRU5DRSAmYW1wOyBIWURST0RZTkFNSUMgUElOTiBMQVlFUjwvdGV4dD4KICAgIDx0ZXh0IHg9IjU2MCIgeT0iMzYiIGNsYXNzPSJsYXllci1zdWIiPkZhc3RBUEkgTWljcm9zZXJ2aWNlIMK3IFB5VG9yY2ggMi41LjEgwrcgQ1VEQSAxMi4xIEFjY2VsZXJhdGVkIMK3IE1vZGVsIFdlaWdodHMgUHJlbG9hZGVkPC90ZXh0PgogICAgCiAgICA8IS0tIENvbXBvbmVudCBDYXJkcyAtLT4KICAgIDxnIHRyYW5zZm9ybT0idHJhbnNsYXRlKDM1LCA1NSkiPgogICAgICA8IS0tIENhcmQgMSAtLT4KICAgICAgPHJlY3QgeD0iMCIgeT0iMCIgd2lkdGg9IjUxMCIgaGVpZ2h0PSI3MiIgcng9IjEwIiBmaWxsPSIjMDUwODExIiBzdHJva2U9IiMwMEZGOUQiIHN0cm9rZS1vcGFjaXR5PSIwLjQiIHN0cm9rZS13aWR0aD0iMSIvPgogICAgICA8Y2lyY2xlIGN4PSIyOCIgY3k9IjM2IiByPSIxNCIgZmlsbD0iIzBGMzAyMiIvPgogICAgICA8cGF0aCBkPSJNIDIyIDI4IEggMzQgViA0NCBIIDIyIFogTSAyNSAzNCBIIDMxIE0gMjUgMzggSCAzMSIgc3Ryb2tlPSIjMDBGRjlEIiBzdHJva2Utd2lkdGg9IjEuOCIgZmlsbD0ibm9uZSIvPgogICAgICA8dGV4dCB4PSI1MiIgeT0iMzAiIGNsYXNzPSJjYXJkLXRpdGxlIj5UZW5zb3IgUHJlcHJvY2Vzc2luZyAmYW1wOyBOb3JtYWxpemF0aW9uPC90ZXh0PgogICAgICA8dGV4dCB4PSI1MiIgeT0iNDgiIGNsYXNzPSJjYXJkLXN1YiI+UmFzdGVyaW8gRXh0cmFjdGlvbiDCtyBSYWRpb21ldHJpYyBDYWxpYnJhdGlvbiDCtyBMZWUgU3BlY2tsZTwvdGV4dD4KICAgICAgPHRleHQgeD0iNTIiIHk9IjYyIiBjbGFzcz0ibW9ubyIgZmlsbD0iIzAwRkY5RCI+TmFOIEltcHV0YXRpb24gwrcgUGVyLUJhbmQgKFZWLCBWSCkgTWluLU1heCBTY2FsaW5nICg1MCBtcyk8L3RleHQ+CgogICAgICA8IS0tIENhcmQgMiAtLT4KICAgICAgPHJlY3QgeD0iNTQwIiB5PSIwIiB3aWR0aD0iNTUwIiBoZWlnaHQ9IjcyIiByeD0iMTAiIGZpbGw9IiMwNTA4MTEiIHN0cm9rZT0iIzAwRkY5RCIgc3Ryb2tlLW9wYWNpdHk9IjAuNCIgc3Ryb2tlLXdpZHRoPSIxIi8+CiAgICAgIDxjaXJjbGUgY3g9IjU2OCIgY3k9IjM2IiByPSIxNCIgZmlsbD0iIzBGMzAyMiIvPgogICAgICA8cGF0aCBkPSJNIDU2MCA0MiBMIDU2OCAyOCBMIDU3NiA0MiBaIE0gNTY0IDM2IEggNTcyIiBzdHJva2U9IiMwMEZGOUQiIHN0cm9rZS13aWR0aD0iMS44IiBmaWxsPSJub25lIi8+CiAgICAgIDx0ZXh0IHg9IjU5MiIgeT0iMzAiIGNsYXNzPSJjYXJkLXRpdGxlIj5TdGFnZSAxOiBVLU5ldCsrIEV4dGVudCBTZWdtZW50YXRpb24gKFJlc05ldC0zNCk8L3RleHQ+CiAgICAgIDx0ZXh0IHg9IjU5MiIgeT0iNDgiIGNsYXNzPSJjYXJkLXN1YiI+TmVzdGVkIERlbnNlIFNraXAgUGF0aHdheXMgwrcgRm9jYWwgKDAuNSkgKyBEaWNlICgxLjApIExvc3M8L3RleHQ+CiAgICAgIDx0ZXh0IHg9IjU5MiIgeT0iNjIiIGNsYXNzPSJtb25vIiBmaWxsPSIjMDBGRjlEIj5JbnB1dCBbMiwgNTEyLCA1MTJdIOKGkiBGbG9vZCBQcm9iYWJpbGl0eSBbMSwgNTEyLCA1MTJdIMK3IElvVTogMC42MjEgKDEyMCBtcyk8L3RleHQ+CgogICAgICA8IS0tIENhcmQgMyAtLT4KICAgICAgPHJlY3QgeD0iMTEyMCIgeT0iMCIgd2lkdGg9IjU2NSIgaGVpZ2h0PSI3MiIgcng9IjEwIiBmaWxsPSIjMDUwODExIiBzdHJva2U9IiMwMEZGOUQiIHN0cm9rZS1vcGFjaXR5PSIwLjQiIHN0cm9rZS13aWR0aD0iMSIvPgogICAgICA8Y2lyY2xlIGN4PSIxMTQ4IiBjeT0iMzYiIHI9IjE0IiBmaWxsPSIjMEYzMDIyIi8+CiAgICAgIDxwYXRoIGQ9Ik0gMTE0MCAzNiBDIDExNDQgMzAgMTE0OCA0MiAxMTUyIDM2IEMgMTE1NiAzMCAxMTYwIDQyIDExNjQgMzYiIHN0cm9rZT0iIzAwRkY5RCIgc3Ryb2tlLXdpZHRoPSIxLjgiIGZpbGw9Im5vbmUiLz4KICAgICAgPHRleHQgeD0iMTE3MiIgeT0iMzAiIGNsYXNzPSJjYXJkLXRpdGxlIj5TdGFnZSAyOiBQaHlzaWNzLUluZm9ybWVkIE5ldXJhbCBOZXR3b3JrIChQSU5OKTwvdGV4dD4KICAgICAgPHRleHQgeD0iMTE3MiIgeT0iNDgiIGNsYXNzPSJjYXJkLXN1YiI+MkQgU2hhbGxvdyBXYXRlciBFcXVhdGlvbnMgKyBNYW5uaW5nIFN1cmZhY2UgRnJpY3Rpb24gQ29uc3RyYWludDwvdGV4dD4KICAgICAgPHRleHQgeD0iMTE3MiIgeT0iNjIiIGNsYXNzPSJtb25vIiBmaWxsPSIjMDBGRjlEIj5JbnB1dHMgKFByb2IsIERFTSwgRVJBNSBSYWluKSDihpIgRGVwdGggaCh4LHkpIMK3IFJlc2lkdWFsICZsdDs9IDQuMThlLTUgKDQ1IG1zKTwvdGV4dD4KICAgIDwvZz4KICA8L2c+CgogIDwhLS0gQ29ubmVjdG9ycyBMYXllciAzIC0+IExheWVyIDQgLS0+CiAgPGcgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoOTYwLCA3MzApIj4KICAgIDxsaW5lIHgxPSIwIiB5MT0iMCIgeDI9IjAiIHkyPSI0MCIgc3Ryb2tlPSIjRkZCMDIwIiBzdHJva2Utd2lkdGg9IjIiIHN0cm9rZS1kYXNoYXJyYXk9IjQsNCIgbWFya2VyLWVuZD0idXJsKCNhcnJvdykiLz4KICAgIDxyZWN0IHg9Ii0xNTAiIHk9IjEwIiB3aWR0aD0iMzAwIiBoZWlnaHQ9IjIyIiByeD0iNSIgZmlsbD0iIzA1MDcwRCIgc3Ryb2tlPSIjRkZCMDIwIiBzdHJva2Utd2lkdGg9IjEiLz4KICAgIDx0ZXh0IHg9IjAiIHk9IjI1IiBjbGFzcz0iYXJyb3ctdGV4dCIgZmlsbD0iI0ZGQjAyMCIgdGV4dC1hbmNob3I9Im1pZGRsZSI+R2VvVElGRiBSYXN0ZXJzIMK3IE5ldENERiDCtyBNb2RlbCBDaGVja3BvaW50czwvdGV4dD4KICA8L2c+CgogIDwhLS0gPT09PT09PT09PT09PT09PT09PT0gTEFZRVIgNDogREFUQSA9PT09PT09PT09PT09PT09PT09PSAtLT4KICA8ZyB0cmFuc2Zvcm09InRyYW5zbGF0ZSgxMDAsIDc5MCkiPgogICAgPHJlY3Qgd2lkdGg9IjE3MjAiIGhlaWdodD0iMTUwIiByeD0iMTQiIGZpbGw9IiMwQjBGMUEiIHN0cm9rZT0iI0ZGQjAyMCIgc3Ryb2tlLXdpZHRoPSIyIiBmaWx0ZXI9InVybCgjZ2xvdy1hbWJlcikiLz4KICAgIDwhLS0gTGF5ZXIgVGl0bGUgLS0+CiAgICA8dGV4dCB4PSIzNSIgeT0iMzYiIGNsYXNzPSJsYXllci10aXRsZSIgZmlsbD0iI0ZGQjAyMCI+TEFZRVIgNDogRUFSVEggT0JTRVJWQVRJT04gREFUQSAmYW1wOyBCRU5DSE1BUktTPC90ZXh0PgogICAgPHRleHQgeD0iNTMwIiB5PSIzNiIgY2xhc3M9ImxheWVyLXN1YiI+Q29wZXJuaWN1cyBTZW50aW5lbC0xIFNBUiDCtyBDb3Blcm5pY3VzIERFTSBHTE8tMzAgwrcgRUNNV0YgRVJBNSDCtyBTZW4xRmxvb2RzMTEgQmVuY2htYXJrPC90ZXh0PgogICAgCiAgICA8IS0tIENvbXBvbmVudCBDYXJkcyAtLT4KICAgIDxnIHRyYW5zZm9ybT0idHJhbnNsYXRlKDM1LCA1NSkiPgogICAgICA8IS0tIENhcmQgMSAtLT4KICAgICAgPHJlY3QgeD0iMCIgeT0iMCIgd2lkdGg9IjM5MCIgaGVpZ2h0PSI3MiIgcng9IjEwIiBmaWxsPSIjMDUwODExIiBzdHJva2U9IiNGRkIwMjAiIHN0cm9rZS1vcGFjaXR5PSIwLjQiIHN0cm9rZS13aWR0aD0iMSIvPgogICAgICA8Y2lyY2xlIGN4PSIyOCIgY3k9IjM2IiByPSIxNCIgZmlsbD0iIzJFMjAwOCIvPgogICAgICA8Y2lyY2xlIGN4PSIyOCIgY3k9IjM2IiByPSI2IiBzdHJva2U9IiNGRkIwMjAiIHN0cm9rZS13aWR0aD0iMS44IiBmaWxsPSJub25lIi8+CiAgICAgIDx0ZXh0IHg9IjUyIiB5PSIzMCIgY2xhc3M9ImNhcmQtdGl0bGUiPkNvcGVybmljdXMgU2VudGluZWwtMSBDLVNBUjwvdGV4dD4KICAgICAgPHRleHQgeD0iNTIiIHk9IjQ4IiBjbGFzcz0iY2FyZC1zdWIiPkFsbC1XZWF0aGVyIEFjdGl2ZSBSYWRhciAoNS40MDUgR0h6KTwvdGV4dD4KICAgICAgPHRleHQgeD0iNTIiIHk9IjYyIiBjbGFzcz0ibW9ubyIgZmlsbD0iI0ZGQjAyMCI+VlYgKyBWSCBEdWFsLVBvbCBCYWNrc2NhdHRlciAoMTBtIEdTRCk8L3RleHQ+CgogICAgICA8IS0tIENhcmQgMiAtLT4KICAgICAgPHJlY3QgeD0iNDIwIiB5PSIwIiB3aWR0aD0iNDEwIiBoZWlnaHQ9IjcyIiByeD0iMTAiIGZpbGw9IiMwNTA4MTEiIHN0cm9rZT0iI0ZGQjAyMCIgc3Ryb2tlLW9wYWNpdHk9IjAuNCIgc3Ryb2tlLXdpZHRoPSIxIi8+CiAgICAgIDxjaXJjbGUgY3g9IjQ0OCIgY3k9IjM2IiByPSIxNCIgZmlsbD0iIzJFMjAwOCIvPgogICAgICA8cGF0aCBkPSJNIDQ0MCA0MiBMIDQ0OCAzMCBMIDQ1NiA0MiBaIiBzdHJva2U9IiNGRkIwMjAiIHN0cm9rZS13aWR0aD0iMS44IiBmaWxsPSJub25lIi8+CiAgICAgIDx0ZXh0IHg9IjQ3MiIgeT0iMzAiIGNsYXNzPSJjYXJkLXRpdGxlIj5Db3Blcm5pY3VzIERFTSBHTE8tMzA8L3RleHQ+CiAgICAgIDx0ZXh0IHg9IjQ3MiIgeT0iNDgiIGNsYXNzPSJjYXJkLXN1YiI+R2xvYmFsIERpZ2l0YWwgRWxldmF0aW9uIE1vZGVsPC90ZXh0PgogICAgICA8dGV4dCB4PSI0NzIiIHk9IjYyIiBjbGFzcz0ibW9ubyIgZmlsbD0iI0ZGQjAyMCI+MzBtIFRvcG9ncmFwaGljIFN1cmZhY2UgRWxldmF0aW9ucyAmYW1wOyBTbG9wZXM8L3RleHQ+CgogICAgICA8IS0tIENhcmQgMyAtLT4KICAgICAgPHJlY3QgeD0iODYwIiB5PSIwIiB3aWR0aD0iNDEwIiBoZWlnaHQ9IjcyIiByeD0iMTAiIGZpbGw9IiMwNTA4MTEiIHN0cm9rZT0iI0ZGQjAyMCIgc3Ryb2tlLW9wYWNpdHk9IjAuNCIgc3Ryb2tlLXdpZHRoPSIxIi8+CiAgICAgIDxjaXJjbGUgY3g9Ijg4OCIgY3k9IjM2IiByPSIxNCIgZmlsbD0iIzJFMjAwOCIvPgogICAgICA8cGF0aCBkPSJNIDg4MiAzNiBRIDg4OCAyOCA4OTQgMzYgTSA4ODUgNDEgTCA4ODQgNDMgTSA4OTEgNDEgTCA4OTAgNDMiIHN0cm9rZT0iI0ZGQjAyMCIgc3Ryb2tlLXdpZHRoPSIxLjgiIGZpbGw9Im5vbmUiLz4KICAgICAgPHRleHQgeD0iOTEyIiB5PSIzMCIgY2xhc3M9ImNhcmQtdGl0bGUiPkVDTVdGIEVSQTUgQXRtb3NwaGVyaWMgRm9yY2luZzwvdGV4dD4KICAgICAgPHRleHQgeD0iOTEyIiB5PSI0OCIgY2xhc3M9ImNhcmQtc3ViIj5QcmVjaXBpdGF0aW9uIFJlYW5hbHlzaXM8L3RleHQ+CiAgICAgIDx0ZXh0IHg9IjkxMiIgeT0iNjIiIGNsYXNzPSJtb25vIiBmaWxsPSIjRkZCMDIwIj4yNGggQ3VtdWxhdGl2ZSBSYWluZmFsbCBJbmZsb3cgUih0KTwvdGV4dD4KCiAgICAgIDwhLS0gQ2FyZCA0IC0tPgogICAgICA8cmVjdCB4PSIxMzAwIiB5PSIwIiB3aWR0aD0iMzg1IiBoZWlnaHQ9IjcyIiByeD0iMTAiIGZpbGw9IiMwNTA4MTEiIHN0cm9rZT0iI0ZGQjAyMCIgc3Ryb2tlLW9wYWNpdHk9IjAuNCIgc3Ryb2tlLXdpZHRoPSIxIi8+CiAgICAgIDxjaXJjbGUgY3g9IjEzMjgiIGN5PSIzNiIgcj0iMTQiIGZpbGw9IiMyRTIwMDgiLz4KICAgICAgPHBhdGggZD0iTSAxMzIyIDM2IEggMTMzNCBNIDEzMjggMzAgViA0MiIgc3Ryb2tlPSIjRkZCMDIwIiBzdHJva2Utd2lkdGg9IjEuOCIgZmlsbD0ibm9uZSIvPgogICAgICA8dGV4dCB4PSIxMzUyIiB5PSIzMCIgY2xhc3M9ImNhcmQtdGl0bGUiPlNlbjFGbG9vZHMxMSBEYXRhc2V0IEJlbmNobWFyazwvdGV4dD4KICAgICAgPHRleHQgeD0iMTM1MiIgeT0iNDgiIGNsYXNzPSJjYXJkLXN1YiI+NCw4MzEgSW1hZ2UgQ2hpcHMgQWNyb3NzIDExIERpc2FzdGVyczwvdGV4dD4KICAgICAgPHRleHQgeD0iMTM1MiIgeT0iNjIiIGNsYXNzPSJtb25vIiBmaWxsPSIjRkZCMDIwIj5DdXJhdGVkIEdyb3VuZCBUcnV0aCBUcmFpbmluZy9UZXN0IFNwbGl0PC90ZXh0PgogICAgPC9nPgogIDwvZz4KCiAgPCEtLSA9PT09PT09PT09PT09PT09PT09PSBGT09URVIgPT09PT09PT09PT09PT09PT09PT0gLS0+CiAgPGcgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMTAwLCA5NzUpIj4KICAgIDxyZWN0IHdpZHRoPSIxNzIwIiBoZWlnaHQ9IjU1IiByeD0iMTAiIGZpbGw9IiMwQjBGMUEiIHN0cm9rZT0iIzE5QzZGRiIgc3Ryb2tlLW9wYWNpdHk9IjAuMyIgc3Ryb2tlLXdpZHRoPSIxIi8+CiAgICA8dGV4dCB4PSIyNSIgeT0iMzMiIGNsYXNzPSJtb25vIiBmaWxsPSIjMTlDNkZGIj5MQVRFTkNZIEJSRUFLRE9XTjo8L3RleHQ+CiAgICA8dGV4dCB4PSIxNzUiIHk9IjMzIiBjbGFzcz0ibW9ubyIgZmlsbD0iI0U2RURGNyI+UHJlcHJvY2Vzc2luZzogNTAgbXMgIHwgIFUtTmV0KysgSW51bmRhdGlvbjogMTIwIG1zICB8ICBQSU5OIERlcHRoIEVuZ2luZTogNDUgbXMgIHwgIFBvc3QtUHJvY2Vzc2luZzogMzAgbXMgIHwgIEVuZC10by1FbmQ6IH4yLjUgcyAoTlZJRElBIFQ0IEdQVSk8L3RleHQ+CiAgICA8dGV4dCB4PSIxNjk1IiB5PSIzMyIgY2xhc3M9Im1vbm8iIGZpbGw9IiMwMEZGOUQiIHRleHQtYW5jaG9yPSJlbmQiPkxJVkUgQVQ6IGZsb29kLWludGVsbGlnZW5jZS0zZC1jeTRqLnZlcmNlbC5hcHA8L3RleHQ+CiAgPC9nPgo8L3N2Zz4K" alt="System Architecture Diagram" class="diagram-img" />
+    </div>
+    <div class="diagram-caption">Figure 3.1: Complete 4-Layer System Architecture Diagram of Flood Intelligence 3D Platform</div>
+  </div>
+
+  <h2 class="sub-section-title">3.2 Layer 1 — Presentation Layer (Client Workstation)</h2>
+  <p>
+    Constructed on <b>Next.js 14 App Router</b> and <b>React Three Fiber (R3F)</b>, this layer delivers hardware-accelerated 3D graphics directly to standard browsers via WebGL:
+  </p>
+  <ul>
+    <li><b>Interactive 3D Global Monitor:</b> Three.js sphere textured with NASA Blue Marble day/night textures, specular water masks, atmospheric cloud layers, and real-time geocoded disaster observatories with pulse animations.</li>
+    <li><b>3D Hydrodynamic Bathymetry Viewer:</b> Procedural terrain mesh dynamically displaced along the Z-axis by digital elevation data, overlaid with a custom semi-transparent water plane utilizing animated wave shaders and real-time surface reflection.</li>
+    <li><b>Dynamic Cross-Section Profiler:</b> Interactive tool that slices a 2D vertical cut through the 3D terrain mesh at any user-defined coordinate, computing the water surface elevation versus ground bedrock elevation.</li>
+    <li><b>SAR Ingestion Portal:</b> Client-side drag-and-drop raster upload interface with file validation and real-time multi-stage inference progress tracking.</li>
+    <li><b>Hydrological Risk Analytics Dashboard:</b> Vectorized charts powered by Recharts rendering hydrograph discharge curves, depth frequency histograms, and infrastructure vulnerability tables.</li>
+    <li><b>Automated 10-Page PDF Reporter:</b> In-browser client document compiler leveraging <code>jsPDF</code> for instant generation of military-grade emergency dossiers.</li>
+    <li><b>Authentication UI:</b> Glassmorphic interface with multi-box auto-advancing OTP inputs, clipboard auto-pasting, and cooldown timers.</li>
+  </ul>
+
+  <h2 class="sub-section-title">3.3 Layer 2 — Application &amp; Gateway Layer (Server Runtime)</h2>
+  <p>
+    Executed on Next.js 14 Node.js runtime and Edge Middleware:
+  </p>
+  <ul>
+    <li><b>Route Protection Middleware:</b> Intercepts unauthenticated navigation attempts to dashboard routes, evaluating persistent session tokens and automatically redirecting guests to <code>/auth/login</code>.</li>
+    <li><b>API Reverse Proxy &amp; Timeout Management:</b> Proxies incoming GeoTIFF payloads to the machine learning backend with an <code>AbortController</code> timeout of 3,500 ms.</li>
+    <li><b>Local Fallback Inference Engine:</b> If the dedicated Python GPU cluster is offline or unreachable, the Node.js server automatically engages an in-memory high-fidelity inference engine so client workflows are never interrupted.</li>
+    <li><b>Enterprise 2FA OTP Service:</b> Coordinates with Google Official SMTP (<code>smtp.gmail.com:465</code>) using Nodemailer to dispatch cryptographically secure 6-digit tokens with styled HTML templates.</li>
+    <li><b>State Bus Management:</b> Client synchronization via Zustand global stores (<code>useAuthStore</code> and <code>useFloodStore</code>), persisting verified state to browser storage.</li>
+  </ul>
+
+  <h2 class="sub-section-title">3.4 Layer 3 — AI Inference &amp; Hydrodynamics Layer</h2>
+  <p>
+    High-throughput microservice developed with <b>FastAPI</b>, <b>PyTorch 2.5.1</b>, and <b>CUDA 12.1</b>:
+  </p>
+  <ul>
+    <li><b>Endpoints:</b> <code>GET /api/health</code> (validates GPU memory and weights); <code>POST /api/predict</code> (executes the full segmentation and PINN pipeline).</li>
+    <li><b>Model Warm-Up &amp; Caching:</b> ResNet-34 U-Net++ weights and PINN state dictionaries are initialized during FastAPI startup, eliminating cold-start latency.</li>
+    <li><b>Rasterio Tensor Pipeline:</b> Reads multi-band raster metadata, extracts geo-transforms, imputes corrupted no-data pixels, and converts calibrated decibels to PyTorch float32 tensors.</li>
+    <li><b>Risk Classifier:</b> Evaluates flood depth distributions against emergency thresholds, flagging critical infrastructure within the inundation footprint.</li>
+    <li><b>Color Space &amp; Base64 Encoder:</b> Translates continuous floating-point depth arrays into normalized colormapped RGBA buffers and base64 strings for instant client rendering.</li>
+  </ul>
+
+  <h2 class="sub-section-title">3.5 Layer 4 — Earth Observation Data Sources</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>Data Source</th>
+        <th>Operational Role</th>
+        <th>Native Spatial Resolution</th>
+        <th>Temporal Revisit</th>
+        <th>Access Protocol</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><b>Copernicus Sentinel-1 SAR</b></td>
+        <td>Active C-band (VV + VH) radar backscatter (σ°)</td>
+        <td>10 m × 10 m pixel spacing</td>
+        <td>6 to 12 days</td>
+        <td>ESA Copernicus Open Access Hub / API</td>
+      </tr>
+      <tr>
+        <td><b>Copernicus DEM GLO-30</b></td>
+        <td>Topographic elevation, slope, channel bed</td>
+        <td>30 m worldwide grid</td>
+        <td>Static (v2024 update)</td>
+        <td>ESA Science Hub / OpenTopography</td>
+      </tr>
+      <tr>
+        <td><b>ECMWF ERA5 Reanalysis</b></td>
+        <td>Total 24h cumulative precipitation inflow (<i>R(t)</i>)</td>
+        <td>0.25° × 0.25° (~31 km)</td>
+        <td>Hourly real-time</td>
+        <td>Copernicus Climate Data Store (CDS)</td>
+      </tr>
+      <tr>
+        <td><b>Sen1Floods11 Benchmark</b></td>
+        <td>Ground-truth training dataset (4,831 chips)</td>
+        <td>10 m chips (512 × 512 px)</td>
+        <td>Historical benchmark</td>
+        <td>GitHub / Google Cloud Storage</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- SECTION 4 -->
+  <div class="page-break"></div>
+  <div class="doc-header">
+    <span>FLOOD INTELLIGENCE 3D — TECHNICAL DESIGN DOCUMENT</span>
+    <span>BHARAT WIN HACKATHON</span>
+  </div>
+
+  <h1 class="section-title">SECTION 4 — End-to-End Data Flow Pipeline</h1>
+
+  <h2 class="sub-section-title">4.1 End-to-End Pipeline Architecture</h2>
+  <div class="diagram-wrapper">
+    <div class="diagram-frame">
+      <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxOTIwIDEwODAiIHdpZHRoPSIxOTIwIiBoZWlnaHQ9IjEwODAiPgogIDxkZWZzPgogICAgPHN0eWxlPgogICAgICBAaW1wb3J0IHVybCgnaHR0cHM6Ly9mb250cy5nb29nbGVhcGlzLmNvbS9jc3MyP2ZhbWlseT1TcGFjZStHcm90ZXNrOndnaHRANTAwOzcwMCZhbXA7ZmFtaWx5PUludGVyOndnaHRANDAwOzUwMDs2MDA7NzAwJmFtcDtmYW1pbHk9SmV0QnJhaW5zK01vbm86d2dodEA0MDA7NjAwJmFtcDtkaXNwbGF5PXN3YXAnKTsKICAgICAgLnRpdGxlIHsgZm9udC1mYW1pbHk6ICdTcGFjZSBHcm90ZXNrJywgc2Fucy1zZXJpZjsgZm9udC13ZWlnaHQ6IDcwMDsgZmlsbDogI0U2RURGNzsgfQogICAgICAuc3VidGl0bGUgeyBmb250LWZhbWlseTogJ0ludGVyJywgc2Fucy1zZXJpZjsgZm9udC13ZWlnaHQ6IDUwMDsgZmlsbDogIzg4OTJBNjsgfQogICAgICAuc3RhZ2UtdGl0bGUgeyBmb250LWZhbWlseTogJ1NwYWNlIEdyb3Rlc2snLCBzYW5zLXNlcmlmOyBmb250LXdlaWdodDogNzAwOyBmb250LXNpemU6IDE3cHg7IGZpbGw6ICNFNkVERjc7IH0KICAgICAgLnN0YWdlLWRlc2MgeyBmb250LWZhbWlseTogJ0ludGVyJywgc2Fucy1zZXJpZjsgZm9udC13ZWlnaHQ6IDQwMDsgZm9udC1zaXplOiAxMnB4OyBmaWxsOiAjODg5MkE2OyB9CiAgICAgIC5pby1sYWJlbCB7IGZvbnQtZmFtaWx5OiAnSmV0QnJhaW5zIE1vbm8nLCBtb25vc3BhY2U7IGZvbnQtc2l6ZTogMTFweDsgZm9udC13ZWlnaHQ6IDYwMDsgfQogICAgICAudGltaW5nLXRpdGxlIHsgZm9udC1mYW1pbHk6ICdTcGFjZSBHcm90ZXNrJywgc2Fucy1zZXJpZjsgZm9udC13ZWlnaHQ6IDcwMDsgZm9udC1zaXplOiAxNnB4OyBmaWxsOiAjMTlDNkZGOyB9CiAgICAgIC50aW1pbmctdmFsIHsgZm9udC1mYW1pbHk6ICdKZXRCcmFpbnMgTW9ubycsIG1vbm9zcGFjZTsgZm9udC1zaXplOiAxM3B4OyBmaWxsOiAjRTZFREY3OyB9CiAgICA8L3N0eWxlPgogICAgPGxpbmVhckdyYWRpZW50IGlkPSJiZy1ncmFkIiB4MT0iMCUiIHkxPSIwJSIgeDI9IjEwMCUiIHkyPSIxMDAlIj4KICAgICAgPHN0b3Agb2Zmc2V0PSIwJSIgc3RvcC1jb2xvcj0iIzA1MDcwRCIvPgogICAgICA8c3RvcCBvZmZzZXQ9IjEwMCUiIHN0b3AtY29sb3I9IiMwMjAzMDYiLz4KICAgIDwvbGluZWFyR3JhZGllbnQ+CiAgICA8ZmlsdGVyIGlkPSJnbG93LWN5YW4iIHg9Ii0yMCUiIHk9Ii0yMCUiIHdpZHRoPSIxNDAlIiBoZWlnaHQ9IjE0MCUiPgogICAgICA8ZmVHYXVzc2lhbkJsdXIgc3RkRGV2aWF0aW9uPSI1IiByZXN1bHQ9ImJsdXIiLz4KICAgICAgPGZlQ29tcG9zaXRlIGluPSJTb3VyY2VHcmFwaGljIiBpbjI9ImJsdXIiIG9wZXJhdG9yPSJvdmVyIi8+CiAgICA8L2ZpbHRlcj4KICAgIDxtYXJrZXIgaWQ9InBpcGUtYXJyb3ciIHZpZXdCb3g9IjAgMCAxMCAxMCIgcmVmWD0iNSIgcmVmWT0iNSIgbWFya2VyV2lkdGg9IjYiIG1hcmtlckhlaWdodD0iNiIgb3JpZW50PSJhdXRvLXN0YXJ0LXJldmVyc2UiPgogICAgICA8cGF0aCBkPSJNIDAgMSBMIDEwIDUgTCAwIDkgeiIgZmlsbD0iIzE5QzZGRiIvPgogICAgPC9tYXJrZXI+CiAgICA8bWFya2VyIGlkPSJpby1hcnJvdy1kb3duIiB2aWV3Qm94PSIwIDAgMTAgMTAiIHJlZlg9IjUiIHJlZlk9IjUiIG1hcmtlcldpZHRoPSI1IiBtYXJrZXJIZWlnaHQ9IjUiIG9yaWVudD0iYXV0by1zdGFydC1yZXZlcnNlIj4KICAgICAgPHBhdGggZD0iTSAwIDEgTCAxMCA1IEwgMCA5IHoiIGZpbGw9IiMwMEZGOUQiLz4KICAgIDwvbWFya2VyPgogICAgPG1hcmtlciBpZD0iaW8tYXJyb3ctdXAiIHZpZXdCb3g9IjAgMCAxMCAxMCIgcmVmWD0iNSIgcmVmWT0iNSIgbWFya2VyV2lkdGg9IjUiIG1hcmtlckhlaWdodD0iNSIgb3JpZW50PSJhdXRvLXN0YXJ0LXJldmVyc2UiPgogICAgICA8cGF0aCBkPSJNIDAgMSBMIDEwIDUgTCAwIDkgeiIgZmlsbD0iI0ZGQjAyMCIvPgogICAgPC9tYXJrZXI+CiAgPC9kZWZzPgoKICA8IS0tIEJhY2tncm91bmQgLS0+CiAgPHJlY3Qgd2lkdGg9IjE5MjAiIGhlaWdodD0iMTA4MCIgZmlsbD0idXJsKCNiZy1ncmFkKSIvPgoKICA8IS0tIEJsdWVwcmludCBHcmlkIC0tPgogIDxnIG9wYWNpdHk9IjAuMDQiIHN0cm9rZT0iIzE5QzZGRiIgc3Ryb2tlLXdpZHRoPSIxIj4KICAgIDxsaW5lIHgxPSIwIiB5MT0iMTgwIiB4Mj0iMTkyMCIgeTI9IjE4MCIvPjxsaW5lIHgxPSIwIiB5MT0iMzYwIiB4Mj0iMTkyMCIgeTI9IjM2MCIvPgogICAgPGxpbmUgeDE9IjAiIHkxPSI1NDAiIHgyPSIxOTIwIiB5Mj0iNTQwIi8+PGxpbmUgeDE9IjAiIHkxPSI3MjAiIHgyPSIxOTIwIiB5Mj0iNzIwIi8+CiAgICA8bGluZSB4MT0iMCIgeTE9IjkwMCIgeDI9IjE5MjAiIHkyPSI5MDAiLz4KICAgIDxsaW5lIHgxPSIzMjAiIHkxPSIwIiB4Mj0iMzIwIiB5Mj0iMTA4MCIvPjxsaW5lIHgxPSI2NDAiIHkxPSIwIiB4Mj0iNjQwIiB5Mj0iMTA4MCIvPgogICAgPGxpbmUgeDE9Ijk2MCIgeTE9IjAiIHgyPSI5NjAiIHkyPSIxMDgwIi8+PGxpbmUgeDE9IjEyODAiIHkxPSIwIiB4Mj0iMTI4MCIgeTI9IjEwODAiLz4KICAgIDxsaW5lIHgxPSIxNjAwIiB5MT0iMCIgeDI9IjE2MDAiIHkyPSIxMDgwIi8+CiAgPC9nPgoKICA8IS0tIEhlYWRlciAtLT4KICA8ZyB0cmFuc2Zvcm09InRyYW5zbGF0ZSgxMDAsIDU1KSI+CiAgICA8cmVjdCB4PSIwIiB5PSIwIiB3aWR0aD0iMTgwIiBoZWlnaHQ9IjI4IiByeD0iMTQiIGZpbGw9IiMwRTIyM0QiIHN0cm9rZT0iIzE5QzZGRiIgc3Ryb2tlLXdpZHRoPSIxIi8+CiAgICA8dGV4dCB4PSI5MCIgeT0iMTgiIGZpbGw9IiMxOUM2RkYiIGZvbnQtZmFtaWx5PSInSmV0QnJhaW5zIE1vbm8nLCBtb25vc3BhY2UiIGZvbnQtc2l6ZT0iMTEiIGZvbnQtd2VpZ2h0PSI2MDAiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGxldHRlci1zcGFjaW5nPSIxLjUiPlBJUEVMSU5FIEVYRUNVVElPTjwvdGV4dD4KICAgIDx0ZXh0IHg9IjAiIHk9IjY1IiBjbGFzcz0idGl0bGUiIGZvbnQtc2l6ZT0iMzQiIGxldHRlci1zcGFjaW5nPSItMC41Ij5FTkQtVE8tRU5EIERBVEEgRkxPVyAmYW1wOyBJTkZFUkVOQ0UgUElQRUxJTkU8L3RleHQ+CiAgICA8dGV4dCB4PSIwIiB5PSI5MCIgY2xhc3M9InN1YnRpdGxlIiBmb250LXNpemU9IjE0Ij5TZW50aW5lbC0xIEluZ2VzdGlvbiDihpIgVS1OZXQrKyBFeHRlbnQgU2VnbWVudGF0aW9uIOKGkiBQSU5OIE5hdmllci1TdG9rZXMgRGVwdGggU29sdmVyIOKGkiBSaXNrIENhcnRvZ3JhcGh5PC90ZXh0PgogIDwvZz4KCiAgPCEtLSBNYWluIFBpcGVsaW5lIFN0YWdlcyAoSG9yaXpvbnRhbCBUcmFjaykgLS0+CiAgPCEtLSBUcmFjayBHdWlkZSBMaW5lIC0tPgogIDxsaW5lIHgxPSIxNTAiIHkxPSIzNzAiIHgyPSIxNzcwIiB5Mj0iMzcwIiBzdHJva2U9IiMxOUM2RkYiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLW9wYWNpdHk9IjAuMyIgc3Ryb2tlLWRhc2hhcnJheT0iNiw2Ii8+CgogIDwhLS0gPT09PT09PT09PT09PT09PT09PT0gU1RBR0UgMTogVVNFUiBVUExPQUQgPT09PT09PT09PT09PT09PT09PT0gLS0+CiAgPGcgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoODAsIDI0MCkiPgogICAgPCEtLSBTdGFnZSBDYXJkIC0tPgogICAgPHJlY3Qgd2lkdGg9IjIxMCIgaGVpZ2h0PSIyNjAiIHJ4PSIxMiIgZmlsbD0iIzBCMEYxQSIgc3Ryb2tlPSIjMTlDNkZGIiBzdHJva2Utd2lkdGg9IjEuOCIgZmlsdGVyPSJ1cmwoI2dsb3ctY3lhbikiLz4KICAgIDxyZWN0IHg9IjE1IiB5PSIxNSIgd2lkdGg9IjQwIiBoZWlnaHQ9IjQwIiByeD0iOCIgZmlsbD0iIzBFMjUzRiIvPgogICAgPCEtLSBVcGxvYWQgSWNvbiAtLT4KICAgIDxwYXRoIGQ9Ik0gMzUgMjUgTCAzNSA0NSBNIDI3IDMzIEwgMzUgMjUgTCA0MyAzMyBNIDIzIDQxIFYgNDUgSCA0NyBWIDQxIiBzdHJva2U9IiMxOUM2RkYiIHN0cm9rZS13aWR0aD0iMiIgZmlsbD0ibm9uZSIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIi8+CiAgICA8dGV4dCB4PSI2NSIgeT0iMzIiIGNsYXNzPSJpby1sYWJlbCIgZmlsbD0iIzE5QzZGRiI+U1RBR0UgMDE8L3RleHQ+CiAgICA8dGV4dCB4PSI2NSIgeT0iNDgiIGNsYXNzPSJzdGFnZS10aXRsZSI+VXNlciBVcGxvYWQ8L3RleHQ+CiAgICA8dGV4dCB4PSIxNSIgeT0iODAiIGNsYXNzPSJzdGFnZS1kZXNjIj5EaXJlY3QgZHJhZy1hbmQtZHJvcDwvdGV4dD4KICAgIDx0ZXh0IHg9IjE1IiB5PSI5NiIgY2xhc3M9InN0YWdlLWRlc2MiPkdlb1RJRkYgaW5nZXN0aW9uIHBvcnRhbDwvdGV4dD4KICAgIDx0ZXh0IHg9IjE1IiB5PSIxMTIiIGNsYXNzPSJzdGFnZS1kZXNjIj52aWEgTmV4dC5qcyBjbGllbnQuPC90ZXh0PgoKICAgIDwhLS0gU3BlY3MgQm94IGluc2lkZSBDYXJkIC0tPgogICAgPHJlY3QgeD0iMTIiIHk9IjEzMCIgd2lkdGg9IjE4NiIgaGVpZ2h0PSIxMTUiIHJ4PSI4IiBmaWxsPSIjMDUwODExIiBzdHJva2U9IiMxOUM2RkYiIHN0cm9rZS1vcGFjaXR5PSIwLjMiIHN0cm9rZS13aWR0aD0iMSIvPgogICAgPHRleHQgeD0iMjIiIHk9IjE1MCIgY2xhc3M9ImlvLWxhYmVsIiBmaWxsPSIjODg5MkE2Ij5JTlBVVCBGT1JNQVQ8L3RleHQ+CiAgICA8dGV4dCB4PSIyMiIgeT0iMTY4IiBmb250LWZhbWlseT0iJ0pldEJyYWlucyBNb25vJywgbW9ub3NwYWNlIiBmb250LXNpemU9IjExIiBmaWxsPSIjRTZFREY3Ij5EdWFsLVBvbCBTQVIgKC50aWYpPC90ZXh0PgogICAgPHRleHQgeD0iMjIiIHk9IjE5MCIgY2xhc3M9ImlvLWxhYmVsIiBmaWxsPSIjODg5MkE2Ij5DSEFOTkVMUzwvdGV4dD4KICAgIDx0ZXh0IHg9IjIyIiB5PSIyMDgiIGZvbnQtZmFtaWx5PSInSmV0QnJhaW5zIE1vbm8nLCBtb25vc3BhY2UiIGZvbnQtc2l6ZT0iMTEiIGZpbGw9IiMxOUM2RkYiPlZWICsgVkggQmFja3NjYXR0ZXI8L3RleHQ+CiAgICA8dGV4dCB4PSIyMiIgeT0iMjMwIiBmb250LWZhbWlseT0iJ0pldEJyYWlucyBNb25vJywgbW9ub3NwYWNlIiBmb250LXNpemU9IjEwIiBmaWxsPSIjODg5MkE2Ij5EaW1lbnNpb25zOiA1MTJ4NTEyPC90ZXh0PgogIDwvZz4KCiAgPCEtLSBBcnJvdyAxIC0+IDIgLS0+CiAgPGxpbmUgeDE9IjI5MCIgeTE9IjM3MCIgeDI9IjMzMCIgeTI9IjM3MCIgc3Ryb2tlPSIjMTlDNkZGIiBzdHJva2Utd2lkdGg9IjIuNSIgbWFya2VyLWVuZD0idXJsKCNwaXBlLWFycm93KSIvPgoKICA8IS0tID09PT09PT09PT09PT09PT09PT09IFNUQUdFIDI6IFBSRVBST0NFU1MgPT09PT09PT09PT09PT09PT09PT0gLS0+CiAgPGcgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMzMwLCAyNDApIj4KICAgIDxyZWN0IHdpZHRoPSIyMTAiIGhlaWdodD0iMjYwIiByeD0iMTIiIGZpbGw9IiMwQjBGMUEiIHN0cm9rZT0iIzFFODhFNSIgc3Ryb2tlLXdpZHRoPSIxLjgiLz4KICAgIDxyZWN0IHg9IjE1IiB5PSIxNSIgd2lkdGg9IjQwIiBoZWlnaHQ9IjQwIiByeD0iOCIgZmlsbD0iIzEwMjU0MCIvPgogICAgPCEtLSBQcmVwcm9jZXNzIENvZyBJY29uIC0tPgogICAgPGNpcmNsZSBjeD0iMzUiIGN5PSIzNSIgcj0iOSIgc3Ryb2tlPSIjMUU4OEU1IiBzdHJva2Utd2lkdGg9IjIiIGZpbGw9Im5vbmUiLz4KICAgIDxwYXRoIGQ9Ik0gMzUgMjIgViAyNiBNIDM1IDQ0IFYgNDggTSAyMiAzNSBIIDI2IE0gNDQgMzUgSCA0OCIgc3Ryb2tlPSIjMUU4OEU1IiBzdHJva2Utd2lkdGg9IjIiLz4KICAgIDx0ZXh0IHg9IjY1IiB5PSIzMiIgY2xhc3M9ImlvLWxhYmVsIiBmaWxsPSIjMUU4OEU1Ij5TVEFHRSAwMjwvdGV4dD4KICAgIDx0ZXh0IHg9IjY1IiB5PSI0OCIgY2xhc3M9InN0YWdlLXRpdGxlIj5QcmVwcm9jZXNzaW5nPC90ZXh0PgogICAgPHRleHQgeD0iMTUiIHk9IjgwIiBjbGFzcz0ic3RhZ2UtZGVzYyI+UmFzdGVyaW8gcGFyc2luZyw8L3RleHQ+CiAgICA8dGV4dCB4PSIxNSIgeT0iOTYiIGNsYXNzPSJzdGFnZS1kZXNjIj5OYU4gaW1wdXRhdGlvbiwgYW5kPC90ZXh0PgogICAgPHRleHQgeD0iMTUiIHk9IjExMiIgY2xhc3M9InN0YWdlLWRlc2MiPnBlci1iYW5kIG5vcm1hbGl6YXRpb24uPC90ZXh0PgoKICAgIDxyZWN0IHg9IjEyIiB5PSIxMzAiIHdpZHRoPSIxODYiIGhlaWdodD0iMTE1IiByeD0iOCIgZmlsbD0iIzA1MDgxMSIgc3Ryb2tlPSIjMUU4OEU1IiBzdHJva2Utb3BhY2l0eT0iMC4zIiBzdHJva2Utd2lkdGg9IjEiLz4KICAgIDx0ZXh0IHg9IjIyIiB5PSIxNTAiIGNsYXNzPSJpby1sYWJlbCIgZmlsbD0iIzg4OTJBNiI+Q0FMSUJSQVRJT048L3RleHQ+CiAgICA8dGV4dCB4PSIyMiIgeT0iMTY4IiBmb250LWZhbWlseT0iJ0pldEJyYWlucyBNb25vJywgbW9ub3NwYWNlIiBmb250LXNpemU9IjExIiBmaWxsPSIjRTZFREY3Ij5zaWdtYTAgKGRCKSBzY2FsZTwvdGV4dD4KICAgIDx0ZXh0IHg9IjIyIiB5PSIxOTAiIGNsYXNzPSJpby1sYWJlbCIgZmlsbD0iIzg4OTJBNiI+U1BFQ0tMRSBGSUxURVI8L3RleHQ+CiAgICA8dGV4dCB4PSIyMiIgeT0iMjA4IiBmb250LWZhbWlseT0iJ0pldEJyYWlucyBNb25vJywgbW9ub3NwYWNlIiBmb250LXNpemU9IjExIiBmaWxsPSIjMUU4OEU1Ij5SZWZpbmVkIExlZSA3eDc8L3RleHQ+CiAgICA8dGV4dCB4PSIyMiIgeT0iMjMwIiBmb250LWZhbWlseT0iJ0pldEJyYWlucyBNb25vJywgbW9ub3NwYWNlIiBmb250LXNpemU9IjEwIiBmaWxsPSIjODg5MkE2Ij5SYW5nZTogWzAuMCwgMS4wXTwvdGV4dD4KICA8L2c+CgogIDwhLS0gQXJyb3cgMiAtPiAzIC0tPgogIDxsaW5lIHgxPSI1NDAiIHkxPSIzNzAiIHgyPSI1ODAiIHkyPSIzNzAiIHN0cm9rZT0iIzE5QzZGRiIgc3Ryb2tlLXdpZHRoPSIyLjUiIG1hcmtlci1lbmQ9InVybCgjcGlwZS1hcnJvdykiLz4KCiAgPCEtLSA9PT09PT09PT09PT09PT09PT09PSBTVEFHRSAzOiBVLU5FVCsrID09PT09PT09PT09PT09PT09PT09IC0tPgogIDxnIHRyYW5zZm9ybT0idHJhbnNsYXRlKDU4MCwgMjQwKSI+CiAgICA8cmVjdCB3aWR0aD0iMjEwIiBoZWlnaHQ9IjI2MCIgcng9IjEyIiBmaWxsPSIjMEIwRjFBIiBzdHJva2U9IiMwMEZGOUQiIHN0cm9rZS13aWR0aD0iMiIgZmlsdGVyPSJ1cmwoI2dsb3ctY3lhbikiLz4KICAgIDxyZWN0IHg9IjE1IiB5PSIxNSIgd2lkdGg9IjQwIiBoZWlnaHQ9IjQwIiByeD0iOCIgZmlsbD0iIzBFMkYyMCIvPgogICAgPCEtLSBOZXVyYWwgTmV0IEljb24gLS0+CiAgICA8Y2lyY2xlIGN4PSIyOCIgY3k9IjMwIiByPSIzIiBmaWxsPSIjMDBGRjlEIi8+PGNpcmNsZSBjeD0iMjgiIGN5PSI0MCIgcj0iMyIgZmlsbD0iIzAwRkY5RCIvPgogICAgPGNpcmNsZSBjeD0iNDIiIGN5PSIyNyIgcj0iMyIgZmlsbD0iIzAwRkY5RCIvPjxjaXJjbGUgY3g9IjQyIiBjeT0iMzUiIHI9IjMiIGZpbGw9IiMwMEZGOUQiLz48Y2lyY2xlIGN4PSI0MiIgY3k9IjQzIiByPSIzIiBmaWxsPSIjMDBGRjlEIi8+CiAgICA8bGluZSB4MT0iMjgiIHkxPSIzMCIgeDI9IjQyIiB5Mj0iMjciIHN0cm9rZT0iIzAwRkY5RCIgc3Ryb2tlLXdpZHRoPSIxLjIiLz4KICAgIDxsaW5lIHgxPSIyOCIgeTE9IjQwIiB4Mj0iNDIiIHkyPSI0MyIgc3Ryb2tlPSIjMDBGRjlEIiBzdHJva2Utd2lkdGg9IjEuMiIvPgogICAgPHRleHQgeD0iNjUiIHk9IjMyIiBjbGFzcz0iaW8tbGFiZWwiIGZpbGw9IiMwMEZGOUQiPlNUQUdFIDAzPC90ZXh0PgogICAgPHRleHQgeD0iNjUiIHk9IjQ4IiBjbGFzcz0ic3RhZ2UtdGl0bGUiPlUtTmV0KysgTW9kZWw8L3RleHQ+CiAgICA8dGV4dCB4PSIxNSIgeT0iODAiIGNsYXNzPSJzdGFnZS1kZXNjIj5SZXNOZXQtMzQgZW5jb2RlcjwvdGV4dD4KICAgIDx0ZXh0IHg9IjE1IiB5PSI5NiIgY2xhc3M9InN0YWdlLWRlc2MiPndpdGggbmVzdGVkIHNraXAgcGF0aHM8L3RleHQ+CiAgICA8dGV4dCB4PSIxNSIgeT0iMTEyIiBjbGFzcz0ic3RhZ2UtZGVzYyI+Zm9yIGJvdW5kYXJ5IHJlY292ZXJ5LjwvdGV4dD4KCiAgICA8cmVjdCB4PSIxMiIgeT0iMTMwIiB3aWR0aD0iMTg2IiBoZWlnaHQ9IjExNSIgcng9IjgiIGZpbGw9IiMwNTA4MTEiIHN0cm9rZT0iIzAwRkY5RCIgc3Ryb2tlLW9wYWNpdHk9IjAuMyIgc3Ryb2tlLXdpZHRoPSIxIi8+CiAgICA8dGV4dCB4PSIyMiIgeT0iMTUwIiBjbGFzcz0iaW8tbGFiZWwiIGZpbGw9IiM4ODkyQTYiPklORkVSRU5DRSBUSU1FPC90ZXh0PgogICAgPHRleHQgeD0iMjIiIHk9IjE2OCIgZm9udC1mYW1pbHk9IidKZXRCcmFpbnMgTW9ubycsIG1vbm9zcGFjZSIgZm9udC1zaXplPSIxMSIgZmlsbD0iIzAwRkY5RCI+MTIwIG1zIChUNCBHUFUpPC90ZXh0PgogICAgPHRleHQgeD0iMjIiIHk9IjE5MCIgY2xhc3M9ImlvLWxhYmVsIiBmaWxsPSIjODg5MkE2Ij5BQ0NVUkFDWTwvdGV4dD4KICAgIDx0ZXh0IHg9IjIyIiB5PSIyMDgiIGZvbnQtZmFtaWx5PSInSmV0QnJhaW5zIE1vbm8nLCBtb25vc3BhY2UiIGZvbnQtc2l6ZT0iMTEiIGZpbGw9IiNFNkVERjciPlRlc3QgSW9VOiAwLjYyMTwvdGV4dD4KICAgIDx0ZXh0IHg9IjIyIiB5PSIyMzAiIGZvbnQtZmFtaWx5PSInSmV0QnJhaW5zIE1vbm8nLCBtb25vc3BhY2UiIGZvbnQtc2l6ZT0iMTAiIGZpbGw9IiM4ODkyQTYiPkRpY2UgU2NvcmU6IDAuNzE0PC90ZXh0PgogIDwvZz4KCiAgPCEtLSBBcnJvdyAzIC0+IDQgLS0+CiAgPGxpbmUgeDE9Ijc5MCIgeTE9IjM3MCIgeDI9IjgzMCIgeTI9IjM3MCIgc3Ryb2tlPSIjMTlDNkZGIiBzdHJva2Utd2lkdGg9IjIuNSIgbWFya2VyLWVuZD0idXJsKCNwaXBlLWFycm93KSIvPgoKICA8IS0tID09PT09PT09PT09PT09PT09PT09IFNUQUdFIDQ6IFRIUkVTSE9MRCA9PT09PT09PT09PT09PT09PT09PSAtLT4KICA8ZyB0cmFuc2Zvcm09InRyYW5zbGF0ZSg4MzAsIDI0MCkiPgogICAgPHJlY3Qgd2lkdGg9IjIxMCIgaGVpZ2h0PSIyNjAiIHJ4PSIxMiIgZmlsbD0iIzBCMEYxQSIgc3Ryb2tlPSIjMTlDNkZGIiBzdHJva2Utd2lkdGg9IjEuOCIvPgogICAgPHJlY3QgeD0iMTUiIHk9IjE1IiB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHJ4PSI4IiBmaWxsPSIjMEQyNTNBIi8+CiAgICA8IS0tIEJpbmFyeSBGaWx0ZXIgSWNvbiAtLT4KICAgIDxwYXRoIGQ9Ik0gMjUgMzUgSCAzNSBWIDI3IEggNDUiIHN0cm9rZT0iIzE5QzZGRiIgc3Ryb2tlLXdpZHRoPSIyIiBmaWxsPSJub25lIi8+CiAgICA8dGV4dCB4PSI2NSIgeT0iMzIiIGNsYXNzPSJpby1sYWJlbCIgZmlsbD0iIzE5QzZGRiI+U1RBR0UgMDQ8L3RleHQ+CiAgICA8dGV4dCB4PSI2NSIgeT0iNDgiIGNsYXNzPSJzdGFnZS10aXRsZSI+VGhyZXNob2xkaW5nPC90ZXh0PgogICAgPHRleHQgeD0iMTUiIHk9IjgwIiBjbGFzcz0ic3RhZ2UtZGVzYyI+T3B0aW1hbCBCYXllcyBjdXRvZmY8L3RleHQ+CiAgICA8dGV4dCB4PSIxNSIgeT0iOTYiIGNsYXNzPSJzdGFnZS1kZXNjIj5jb252ZXJ0aW5nIHByb2JhYmlsaXR5PC90ZXh0PgogICAgPHRleHQgeD0iMTUiIHk9IjExMiIgY2xhc3M9InN0YWdlLWRlc2MiPnRvIGJpbmFyeSBmbG9vZCBtYXNrLjwvdGV4dD4KCiAgICA8cmVjdCB4PSIxMiIgeT0iMTMwIiB3aWR0aD0iMTg2IiBoZWlnaHQ9IjExNSIgcng9IjgiIGZpbGw9IiMwNTA4MTEiIHN0cm9rZT0iIzE5QzZGRiIgc3Ryb2tlLW9wYWNpdHk9IjAuMyIgc3Ryb2tlLXdpZHRoPSIxIi8+CiAgICA8dGV4dCB4PSIyMiIgeT0iMTUwIiBjbGFzcz0iaW8tbGFiZWwiIGZpbGw9IiM4ODkyQTYiPk9QRVJBVE9SPC90ZXh0PgogICAgPHRleHQgeD0iMjIiIHk9IjE2OCIgZm9udC1mYW1pbHk9IidKZXRCcmFpbnMgTW9ubycsIG1vbm9zcGFjZSIgZm9udC1zaXplPSIxMSIgZmlsbD0iI0U2RURGNyI+UChmbG9vZCkgJmd0Oz0gMC41MDwvdGV4dD4KICAgIDx0ZXh0IHg9IjIyIiB5PSIxOTAiIGNsYXNzPSJpby1sYWJlbCIgZmlsbD0iIzg4OTJBNiI+T1VUUFVUIFRFTlNPUjwvdGV4dD4KICAgIDx0ZXh0IHg9IjIyIiB5PSIyMDgiIGZvbnQtZmFtaWx5PSInSmV0QnJhaW5zIE1vbm8nLCBtb25vc3BhY2UiIGZvbnQtc2l6ZT0iMTEiIGZpbGw9IiMxOUM2RkYiPkJpbmFyeSBNYXNrIFsxLEgsV108L3RleHQ+CiAgICA8dGV4dCB4PSIyMiIgeT0iMjMwIiBmb250LWZhbWlseT0iJ0pldEJyYWlucyBNb25vJywgbW9ub3NwYWNlIiBmb250LXNpemU9IjEwIiBmaWxsPSIjODg5MkE2Ij5GbG9vZCAvIERyeSBQaXhlbHM8L3RleHQ+CiAgPC9nPgoKICA8IS0tIEFycm93IDQgLT4gNSAtLT4KICA8bGluZSB4MT0iMTA0MCIgeTE9IjM3MCIgeDI9IjEwODAiIHkyPSIzNzAiIHN0cm9rZT0iIzE5QzZGRiIgc3Ryb2tlLXdpZHRoPSIyLjUiIG1hcmtlci1lbmQ9InVybCgjcGlwZS1hcnJvdykiLz4KCiAgPCEtLSA9PT09PT09PT09PT09PT09PT09PSBTVEFHRSA1OiBQSU5OIElORkVSRU5DRSA9PT09PT09PT09PT09PT09PT09PSAtLT4KICA8ZyB0cmFuc2Zvcm09InRyYW5zbGF0ZSgxMDgwLCAyNDApIj4KICAgIDxyZWN0IHdpZHRoPSIyMTAiIGhlaWdodD0iMjYwIiByeD0iMTIiIGZpbGw9IiMwQjBGMUEiIHN0cm9rZT0iIzAwRkY5RCIgc3Ryb2tlLXdpZHRoPSIyIiBmaWx0ZXI9InVybCgjZ2xvdy1ncmVlbikiLz4KICAgIDxyZWN0IHg9IjE1IiB5PSIxNSIgd2lkdGg9IjQwIiBoZWlnaHQ9IjQwIiByeD0iOCIgZmlsbD0iIzBFMkYyMCIvPgogICAgPCEtLSBXYXZlIFBoeXNpY3MgSWNvbiAtLT4KICAgIDxwYXRoIGQ9Ik0gMjMgMzUgQyAyNyAyOCAzMSA0MiAzNSAzNSBDIDM5IDI4IDQzIDQyIDQ3IDM1IiBzdHJva2U9IiMwMEZGOUQiIHN0cm9rZS13aWR0aD0iMiIgZmlsbD0ibm9uZSIvPgogICAgPHRleHQgeD0iNjUiIHk9IjMyIiBjbGFzcz0iaW8tbGFiZWwiIGZpbGw9IiMwMEZGOUQiPlNUQUdFIDA1PC90ZXh0PgogICAgPHRleHQgeD0iNjUiIHk9IjQ4IiBjbGFzcz0ic3RhZ2UtdGl0bGUiPlBJTk4gRGVwdGggU29sdmVyPC90ZXh0PgogICAgPHRleHQgeD0iMTUiIHk9IjgwIiBjbGFzcz0ic3RhZ2UtZGVzYyI+Q291cGxlcyBERU0sIEVSQTU8L3RleHQ+CiAgICA8dGV4dCB4PSIxNSIgeT0iOTYiIGNsYXNzPSJzdGFnZS1kZXNjIj5yYWluICZhbXA7IFNoYWxsb3cgV2F0ZXI8L3RleHQ+CiAgICA8dGV4dCB4PSIxNSIgeT0iMTEyIiBjbGFzcz0ic3RhZ2UtZGVzYyI+TWFubmluZyBlcXVhdGlvbnMuPC90ZXh0PgoKICAgIDxyZWN0IHg9IjEyIiB5PSIxMzAiIHdpZHRoPSIxODYiIGhlaWdodD0iMTE1IiByeD0iOCIgZmlsbD0iIzA1MDgxMSIgc3Ryb2tlPSIjMDBGRjlEIiBzdHJva2Utb3BhY2l0eT0iMC4zIiBzdHJva2Utd2lkdGg9IjEiLz4KICAgIDx0ZXh0IHg9IjIyIiB5PSIxNTAiIGNsYXNzPSJpby1sYWJlbCIgZmlsbD0iIzg4OTJBNiI+UERFIFJFU0lEVUFMPC90ZXh0PgogICAgPHRleHQgeD0iMjIiIHk9IjE2OCIgZm9udC1mYW1pbHk9IidKZXRCcmFpbnMgTW9ubycsIG1vbm9zcGFjZSIgZm9udC1zaXplPSIxMSIgZmlsbD0iIzAwRkY5RCI+NC4xOCB4IDEwXi01PC90ZXh0PgogICAgPHRleHQgeD0iMjIiIHk9IjE5MCIgY2xhc3M9ImlvLWxhYmVsIiBmaWxsPSIjODg5MkE2Ij5PVVRQVVQ8L3RleHQ+CiAgICA8dGV4dCB4PSIyMiIgeT0iMjA4IiBmb250LWZhbWlseT0iJ0pldEJyYWlucyBNb25vJywgbW9ub3NwYWNlIiBmb250LXNpemU9IjExIiBmaWxsPSIjRTZFREY3Ij5Db250aW51b3VzIERlcHRoIGg8L3RleHQ+CiAgICA8dGV4dCB4PSIyMiIgeT0iMjMwIiBmb250LWZhbWlseT0iJ0pldEJyYWlucyBNb25vJywgbW9ub3NwYWNlIiBmb250LXNpemU9IjEwIiBmaWxsPSIjODg5MkE2Ij5MYXRlbmN5OiA0NSBtczwvdGV4dD4KICA8L2c+CgogIDwhLS0gQXJyb3cgNSAtPiA2IC0tPgogIDxsaW5lIHgxPSIxMjkwIiB5MT0iMzcwIiB4Mj0iMTMzMCIgeTI9IjM3MCIgc3Ryb2tlPSIjMTlDNkZGIiBzdHJva2Utd2lkdGg9IjIuNSIgbWFya2VyLWVuZD0idXJsKCNwaXBlLWFycm93KSIvPgoKICA8IS0tID09PT09PT09PT09PT09PT09PT09IFNUQUdFIDY6IFJJU0sgQ0xBU1NJRklDQVRJT04gPT09PT09PT09PT09PT09PT09PT0gLS0+CiAgPGcgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMTMzMCwgMjQwKSI+CiAgICA8cmVjdCB3aWR0aD0iMjEwIiBoZWlnaHQ9IjI2MCIgcng9IjEyIiBmaWxsPSIjMEIwRjFBIiBzdHJva2U9IiNGRkIwMjAiIHN0cm9rZS13aWR0aD0iMS44Ii8+CiAgICA8cmVjdCB4PSIxNSIgeT0iMTUiIHdpZHRoPSI0MCIgaGVpZ2h0PSI0MCIgcng9IjgiIGZpbGw9IiMyRTIwMDgiLz4KICAgIDwhLS0gSGF6YXJkIFRyaWFuZ2xlIEljb24gLS0+CiAgICA8cGF0aCBkPSJNIDM1IDI1IEwgNDcgNDUgSCAyMyBaIE0gMzUgMzMgViAzNyBNIDM1IDQwIFYgNDIiIHN0cm9rZT0iI0ZGQjAyMCIgc3Ryb2tlLXdpZHRoPSIyIiBmaWxsPSJub25lIi8+CiAgICA8dGV4dCB4PSI2NSIgeT0iMzIiIGNsYXNzPSJpby1sYWJlbCIgZmlsbD0iI0ZGQjAyMCI+U1RBR0UgMDY8L3RleHQ+CiAgICA8dGV4dCB4PSI2NSIgeT0iNDgiIGNsYXNzPSJzdGFnZS10aXRsZSI+UmlzayBTY29yaW5nPC90ZXh0PgogICAgPHRleHQgeD0iMTUiIHk9IjgwIiBjbGFzcz0ic3RhZ2UtZGVzYyI+RGVwdGggdGhyZXNob2xkaW5nPC90ZXh0PgogICAgPHRleHQgeD0iMTUiIHk9Ijk2IiBjbGFzcz0ic3RhZ2UtZGVzYyI+YWdhaW5zdCBpbmZyYXN0cnVjdHVyZTwvdGV4dD4KICAgIDx0ZXh0IHg9IjE1IiB5PSIxMTIiIGNsYXNzPSJzdGFnZS1kZXNjIj52dWxuZXJhYmlsaXR5IHJ1bGVzLjwvdGV4dD4KCiAgICA8cmVjdCB4PSIxMiIgeT0iMTMwIiB3aWR0aD0iMTg2IiBoZWlnaHQ9IjExNSIgcng9IjgiIGZpbGw9IiMwNTA4MTEiIHN0cm9rZT0iI0ZGQjAyMCIgc3Ryb2tlLW9wYWNpdHk9IjAuMyIgc3Ryb2tlLXdpZHRoPSIxIi8+CiAgICA8dGV4dCB4PSIyMiIgeT0iMTUwIiBjbGFzcz0iaW8tbGFiZWwiIGZpbGw9IiM4ODkyQTYiPkNBVEVHT1JJRVM8L3RleHQ+CiAgICA8dGV4dCB4PSIyMiIgeT0iMTY4IiBmb250LWZhbWlseT0iJ0pldEJyYWlucyBNb25vJywgbW9ub3NwYWNlIiBmb250LXNpemU9IjExIiBmaWxsPSIjRkZCMDIwIj5Mb3cgLyBNb2QgLyBIaWdoIC8gQ3JpdDwvdGV4dD4KICAgIDx0ZXh0IHg9IjIyIiB5PSIxOTAiIGNsYXNzPSJpby1sYWJlbCIgZmlsbD0iIzg4OTJBNiI+Q1JJVElDQUwgQ1JJVEVSSUE8L3RleHQ+CiAgICA8dGV4dCB4PSIyMiIgeT0iMjA4IiBmb250LWZhbWlseT0iJ0pldEJyYWlucyBNb25vJywgbW9ub3NwYWNlIiBmb250LXNpemU9IjExIiBmaWxsPSIjRTZFREY3Ij5oX21heCAmZ3Q7IDMuMCBtPC90ZXh0PgogICAgPHRleHQgeD0iMjIiIHk9IjIzMCIgZm9udC1mYW1pbHk9IidKZXRCcmFpbnMgTW9ubycsIG1vbm9zcGFjZSIgZm9udC1zaXplPSIxMCIgZmlsbD0iIzg4OTJBNiI+SG9zcGl0YWwgLyBCcmlkZ2UgUmlzazwvdGV4dD4KICA8L2c+CgogIDwhLS0gQXJyb3cgNiAtPiA3IC0tPgogIDxsaW5lIHgxPSIxNTQwIiB5MT0iMzcwIiB4Mj0iMTU4MCIgeTI9IjM3MCIgc3Ryb2tlPSIjMTlDNkZGIiBzdHJva2Utd2lkdGg9IjIuNSIgbWFya2VyLWVuZD0idXJsKCNwaXBlLWFycm93KSIvPgoKICA8IS0tID09PT09PT09PT09PT09PT09PT09IFNUQUdFIDc6IE1VTFRJLUZPUk1BVCBPVVRQVVQgPT09PT09PT09PT09PT09PT09PT0gLS0+CiAgPGcgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMTU4MCwgMjQwKSI+CiAgICA8cmVjdCB3aWR0aD0iMjYwIiBoZWlnaHQ9IjI2MCIgcng9IjEyIiBmaWxsPSIjMEIwRjFBIiBzdHJva2U9IiMxOUM2RkYiIHN0cm9rZS13aWR0aD0iMS44IiBmaWx0ZXI9InVybCgjZ2xvdy1jeWFuKSIvPgogICAgPHJlY3QgeD0iMTUiIHk9IjE1IiB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHJ4PSI4IiBmaWxsPSIjMEUyNTNGIi8+CiAgICA8IS0tIEV4cG9ydCBNdWx0aSBJY29uIC0tPgogICAgPHJlY3QgeD0iMjUiIHk9IjI3IiB3aWR0aD0iMTgiIGhlaWdodD0iMTgiIHJ4PSIyIiBzdHJva2U9IiMxOUM2RkYiIHN0cm9rZS13aWR0aD0iMS44IiBmaWxsPSJub25lIi8+CiAgICA8cGF0aCBkPSJNIDI5IDMzIEwgMzMgMzcgTCA0MSAyOSIgc3Ryb2tlPSIjMTlDNkZGIiBzdHJva2Utd2lkdGg9IjEuOCIgZmlsbD0ibm9uZSIvPgogICAgPHRleHQgeD0iNjUiIHk9IjMyIiBjbGFzcz0iaW8tbGFiZWwiIGZpbGw9IiMxOUM2RkYiPlNUQUdFIDA3PC90ZXh0PgogICAgPHRleHQgeD0iNjUiIHk9IjQ4IiBjbGFzcz0ic3RhZ2UtdGl0bGUiPk11bHRpLUZvcm1hdCBPdXRwdXQ8L3RleHQ+CiAgICA8dGV4dCB4PSIxNSIgeT0iODAiIGNsYXNzPSJzdGFnZS1kZXNjIj5CYXNlNjQgYnJvd3NlciBwcmV2aWV3LDwvdGV4dD4KICAgIDx0ZXh0IHg9IjE1IiB5PSI5NiIgY2xhc3M9InN0YWdlLWRlc2MiPjEwLXBhZ2UgaW5zdGl0dXRpb25hbCBQREYsPC90ZXh0PgogICAgPHRleHQgeD0iMTUiIHk9IjExMiIgY2xhc3M9InN0YWdlLWRlc2MiPiZhbXA7IHNwZWMtY29tcGxpYW50IFRJRkYgNi4wLjwvdGV4dD4KCiAgICA8cmVjdCB4PSIxMiIgeT0iMTMwIiB3aWR0aD0iMjM2IiBoZWlnaHQ9IjExNSIgcng9IjgiIGZpbGw9IiMwNTA4MTEiIHN0cm9rZT0iIzE5QzZGRiIgc3Ryb2tlLW9wYWNpdHk9IjAuMyIgc3Ryb2tlLXdpZHRoPSIxIi8+CiAgICA8dGV4dCB4PSIyMiIgeT0iMTUwIiBjbGFzcz0iaW8tbGFiZWwiIGZpbGw9IiM4ODkyQTYiPk9VVFBVVCBBUlRJRkFDVFM8L3RleHQ+CiAgICA8dGV4dCB4PSIyMiIgeT0iMTY4IiBmb250LWZhbWlseT0iJ0pldEJyYWlucyBNb25vJywgbW9ub3NwYWNlIiBmb250LXNpemU9IjExIiBmaWxsPSIjRTZFREY3Ij4xLiBCYXNlNjQgQ29sb3IgSGVhdG1hcDwvdGV4dD4KICAgIDx0ZXh0IHg9IjIyIiB5PSIxODYiIGZvbnQtZmFtaWx5PSInSmV0QnJhaW5zIE1vbm8nLCBtb25vc3BhY2UiIGZvbnQtc2l6ZT0iMTEiIGZpbGw9IiMxOUM2RkYiPjIuIDEwLVBhZ2UgUERGIERvc3NpZXI8L3RleHQ+CiAgICA8dGV4dCB4PSIyMiIgeT0iMjA0IiBmb250LWZhbWlseT0iJ0pldEJyYWlucyBNb25vJywgbW9ub3NwYWNlIiBmb250LXNpemU9IjExIiBmaWxsPSIjMDBGRjlEIj4zLiBUSUZGIDYuMCBSR0IgUmFzdGVyPC90ZXh0PgogICAgPHRleHQgeD0iMjIiIHk9IjIyMiIgZm9udC1mYW1pbHk9IidKZXRCcmFpbnMgTW9ubycsIG1vbm9zcGFjZSIgZm9udC1zaXplPSIxMSIgZmlsbD0iI0ZGQjAyMCI+NC4gM0QgV2ViR0wgTWVzaCBCdWZmZXI8L3RleHQ+CiAgPC9nPgoKICA8IS0tID09PT09PT09PT09PT09PT09PT09IExPV0VSIFNFQ1RJT046IEkvTyBGTE9XIEFSUk9XUyAmIFNQRUNTID09PT09PT09PT09PT09PT09PT09IC0tPgogIDxnIHRyYW5zZm9ybT0idHJhbnNsYXRlKDgwLCA1MzApIj4KICAgIDwhLS0gRGF0YSBJbmdlc3QgSW5wdXRzIC0tPgogICAgPHJlY3Qgd2lkdGg9IjE3NjAiIGhlaWdodD0iMTkwIiByeD0iMTQiIGZpbGw9IiMwQjBGMUEiIHN0cm9rZT0iIzFFODhFNSIgc3Ryb2tlLW9wYWNpdHk9IjAuNSIgc3Ryb2tlLXdpZHRoPSIxIi8+CiAgICA8dGV4dCB4PSIzMCIgeT0iMzIiIGNsYXNzPSJ0aW1pbmctdGl0bGUiIGZpbGw9IiMxRTg4RTUiPlBJUEVMSU5FIERBVEEgRkxPVyAmYW1wOyBJTlRFUk1FRElBVEUgQVJUSUZBQ1QgQ09OVFJBQ1RTPC90ZXh0PgoKICAgIDwhLS0gRmxvdyBicmVha2Rvd24gY29sdW1ucyAtLT4KICAgIDxnIHRyYW5zZm9ybT0idHJhbnNsYXRlKDMwLCA1MCkiPgogICAgICA8IS0tIFN0ZXAgMSB0byAyIC0tPgogICAgICA8cmVjdCB4PSIwIiB5PSIwIiB3aWR0aD0iMjYwIiBoZWlnaHQ9IjExNSIgcng9IjgiIGZpbGw9IiMwNTA4MTEiIHN0cm9rZT0iIzg4OTJBNiIgc3Ryb2tlLW9wYWNpdHk9IjAuMiIgc3Ryb2tlLXdpZHRoPSIxIi8+CiAgICAgIDx0ZXh0IHg9IjE1IiB5PSIyNCIgY2xhc3M9ImlvLWxhYmVsIiBmaWxsPSIjMTlDNkZGIj5QQVlMT0FEOiBSQVcgU0FSIEZJTEU8L3RleHQ+CiAgICAgIDx0ZXh0IHg9IjE1IiB5PSI0NCIgY2xhc3M9InN0YWdlLWRlc2MiPlNpemU6IDQwMCBNQiAtIDEuMiBHQiBHZW9USUZGPC90ZXh0PgogICAgICA8dGV4dCB4PSIxNSIgeT0iNjIiIGNsYXNzPSJzdGFnZS1kZXNjIj5CYW5kczogQmFuZCAxIChWViksIEJhbmQgMiAoVkgpPC90ZXh0PgogICAgICA8dGV4dCB4PSIxNSIgeT0iODAiIGNsYXNzPSJzdGFnZS1kZXNjIj5QaXhlbCBEZXB0aDogMTYtYml0IFVuc2lnbmVkIEludDwvdGV4dD4KICAgICAgPHRleHQgeD0iMTUiIHk9Ijk4IiBjbGFzcz0ic3RhZ2UtZGVzYyI+UHJvamVjdGlvbjogRVBTRzo0MzI2IC8gV0dTODQ8L3RleHQ+CgogICAgICA8IS0tIFN0ZXAgMiB0byAzIC0tPgogICAgICA8cmVjdCB4PSIyOTAiIHk9IjAiIHdpZHRoPSIyODAiIGhlaWdodD0iMTE1IiByeD0iOCIgZmlsbD0iIzA1MDgxMSIgc3Ryb2tlPSIjODg5MkE2IiBzdHJva2Utb3BhY2l0eT0iMC4yIiBzdHJva2Utd2lkdGg9IjEiLz4KICAgICAgPHRleHQgeD0iMTUiIHk9IjI0IiBjbGFzcz0iaW8tbGFiZWwiIGZpbGw9IiMxRTg4RTUiPlBBWUxPQUQ6IE5PUk1BTElaRUQgVEVOU09SPC90ZXh0PgogICAgICA8dGV4dCB4PSIxNSIgeT0iNDQiIGNsYXNzPSJzdGFnZS1kZXNjIj5TaGFwZTogW0JhdGNoPTEsIEM9MiwgSD01MTIsIFc9NTEyXTwvdGV4dD4KICAgICAgPHRleHQgeD0iMTUiIHk9IjYyIiBjbGFzcz0ic3RhZ2UtZGVzYyI+RHR5cGU6IHRvcmNoLmZsb2F0MzIgb24gQ1VEQTwvdGV4dD4KICAgICAgPHRleHQgeD0iMTUiIHk9IjgwIiBjbGFzcz0ic3RhZ2UtZGVzYyI+VlYgUmFuZ2U6IFstMjguNCBkQiwgKzIuMSBkQl0g4oaSIFswLDFdPC90ZXh0PgogICAgICA8dGV4dCB4PSIxNSIgeT0iOTgiIGNsYXNzPSJzdGFnZS1kZXNjIj5WSCBSYW5nZTogWy0zNC44IGRCLCAtNi41IGRCXSDihpIgWzAsMV08L3RleHQ+CgogICAgICA8IS0tIFN0ZXAgMyB0byA1IC0tPgogICAgICA8cmVjdCB4PSI2MDAiIHk9IjAiIHdpZHRoPSIyODAiIGhlaWdodD0iMTE1IiByeD0iOCIgZmlsbD0iIzA1MDgxMSIgc3Ryb2tlPSIjODg5MkE2IiBzdHJva2Utb3BhY2l0eT0iMC4yIiBzdHJva2Utd2lkdGg9IjEiLz4KICAgICAgPHRleHQgeD0iMTUiIHk9IjI0IiBjbGFzcz0iaW8tbGFiZWwiIGZpbGw9IiMwMEZGOUQiPlBBWUxPQUQ6IEZMT09EIFBST0JBQklMSVRZPC90ZXh0PgogICAgICA8dGV4dCB4PSIxNSIgeT0iNDQiIGNsYXNzPSJzdGFnZS1kZXNjIj5TaGFwZTogWzEsIDEsIDUxMiwgNTEyXSBQcm9iYWJpbGl0eTwvdGV4dD4KICAgICAgPHRleHQgeD0iMTUiIHk9IjYyIiBjbGFzcz0ic3RhZ2UtZGVzYyI+QWN0aXZhdGlvbjogU2lnbW9pZCBjb250aW51b3VzIFswLDFdPC90ZXh0PgogICAgICA8dGV4dCB4PSIxNSIgeT0iODAiIGNsYXNzPSJzdGFnZS1kZXNjIj5CaW5hcnkgTWFzazogUCAmZ3Q7PSAwLjUwIChGbG9vZC9EcnkpPC90ZXh0PgogICAgICA8dGV4dCB4PSIxNSIgeT0iOTgiIGNsYXNzPSJzdGFnZS1kZXNjIj5Jb1UgQWNjdXJhY3k6IDAuNjIxIG9uIFNlbjFGbG9vZHMxMTwvdGV4dD4KCiAgICAgIDwhLS0gU3RlcCA1IHRvIDYgLS0+CiAgICAgIDxyZWN0IHg9IjkxMCIgeT0iMCIgd2lkdGg9IjI4MCIgaGVpZ2h0PSIxMTUiIHJ4PSI4IiBmaWxsPSIjMDUwODExIiBzdHJva2U9IiM4ODkyQTYiIHN0cm9rZS1vcGFjaXR5PSIwLjIiIHN0cm9rZS13aWR0aD0iMSIvPgogICAgICA8dGV4dCB4PSIxNSIgeT0iMjQiIGNsYXNzPSJpby1sYWJlbCIgZmlsbD0iI0ZGQjAyMCI+UEFZTE9BRDogREVQVEggaCh4LHkpPC90ZXh0PgogICAgICA8dGV4dCB4PSIxNSIgeT0iNDQiIGNsYXNzPSJzdGFnZS1kZXNjIj5TaGFwZTogWzEsIDEsIDUxMiwgNTEyXSBXYXRlciBEZXB0aDwvdGV4dD4KICAgICAgPHRleHQgeD0iMTUiIHk9IjYyIiBjbGFzcz0ic3RhZ2UtZGVzYyI+VW5pdDogTWV0ZXJzIChtKSBhYm92ZSB0ZXJyYWluPC90ZXh0PgogICAgICA8dGV4dCB4PSIxNSIgeT0iODAiIGNsYXNzPSJzdGFnZS1kZXNjIj5Db25zdHJhaW50czogTm9uLW5lZ2F0aXZlIFNvZnRwbHVzPC90ZXh0PgogICAgICA8dGV4dCB4PSIxNSIgeT0iOTgiIGNsYXNzPSJzdGFnZS1kZXNjIj5QaHlzaWNzIExvc3M6IE1hbm5pbmcgTmF2aWVyLVN0b2tlczwvdGV4dD4KCiAgICAgIDwhLS0gU3RlcCA2IHRvIENsaWVudCAtLT4KICAgICAgPHJlY3QgeD0iMTIyMCIgeT0iMCIgd2lkdGg9IjQ4MCIgaGVpZ2h0PSIxMTUiIHJ4PSI4IiBmaWxsPSIjMDUwODExIiBzdHJva2U9IiM4ODkyQTYiIHN0cm9rZS1vcGFjaXR5PSIwLjIiIHN0cm9rZS13aWR0aD0iMSIvPgogICAgICA8dGV4dCB4PSIxNSIgeT0iMjQiIGNsYXNzPSJpby1sYWJlbCIgZmlsbD0iIzE5QzZGRiI+UEFZTE9BRDogQ0xJRU5UIEpTT04gJmFtcDsgUkFTVEVSIEJVTkRMRTwvdGV4dD4KICAgICAgPHRleHQgeD0iMTUiIHk9IjQ0IiBjbGFzcz0ic3RhZ2UtZGVzYyI+SlNPTiBSZXNwb25zZTogeyBmbG9vZF9wY3Q6IDI0LjgsIGF2Z19kZXB0aDogMS44NCwgbWF4X2RlcHRoOiA0LjYyLCByaXNrOiAnQ1JJVElDQUwnIH08L3RleHQ+CiAgICAgIDx0ZXh0IHg9IjE1IiB5PSI2MiIgY2xhc3M9InN0YWdlLWRlc2MiPkJhc2U2NCBQTkdzOiBXYXRlciBwcm9iYWJpbGl0eSBvdmVybGF5LCBjb250aW51b3VzIGJhdGh5bWV0cmljIGRlcHRoIG1hcDwvdGV4dD4KICAgICAgPHRleHQgeD0iMTUiIHk9IjgwIiBjbGFzcz0ic3RhZ2UtZGVzYyI+VElGRiA2LjA6IDI0LWJpdCB1bmNvbXByZXNzZWQgUkdCIHJhc3RlciB3aXRoIGZ1bGwgYmFzZWxpbmUgSUZEIG1ldGFkYXRhIHRhZ3M8L3RleHQ+CiAgICAgIDx0ZXh0IHg9IjE1IiB5PSI5OCIgY2xhc3M9InN0YWdlLWRlc2MiPlZlY3RvciBQREY6IDEwLXBhZ2UgaW5zdGl0dXRpb25hbCBlbWVyZ2VuY3kgcmVzcG9uc2Ugc2l0dWF0aW9uIGRvc3NpZXIgKGpzUERGKTwvdGV4dD4KICAgIDwvZz4KICA8L2c+CgogIDwhLS0gPT09PT09PT09PT09PT09PT09PT0gQk9UVE9NIFRJTUlORyBCUkVBS0RPV04gPT09PT09PT09PT09PT09PT09PT0gLS0+CiAgPGcgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoODAsIDc1MCkiPgogICAgPHJlY3Qgd2lkdGg9IjE3NjAiIGhlaWdodD0iMjYwIiByeD0iMTQiIGZpbGw9IiMwQjBGMUEiIHN0cm9rZT0iIzE5QzZGRiIgc3Ryb2tlLXdpZHRoPSIxLjUiIGZpbHRlcj0idXJsKCNnbG93LWN5YW4pIi8+CiAgICA8dGV4dCB4PSIzNSIgeT0iMzgiIGNsYXNzPSJ0aW1pbmctdGl0bGUiPlBJUEVMSU5FIExBVEVOQ1kgQlJFQUtET1dOIChCRU5DSE1BUks6IE5WSURJQSBURVNMQSBUNCBHUFUgwrcgQ1VEQSAxMi4xKTwvdGV4dD4KCiAgICA8IS0tIFRpbWluZyBCYXJzIC0tPgogICAgPGcgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMzUsIDYwKSI+CiAgICAgIDwhLS0gQmFyIDE6IEluZ2VzdCAmIFByZXByb2Nlc3MgLS0+CiAgICAgIDxyZWN0IHg9IjAiIHk9IjAiIHdpZHRoPSIxNjkwIiBoZWlnaHQ9IjM0IiByeD0iNiIgZmlsbD0iIzA1MDgxMSIvPgogICAgICA8cmVjdCB4PSIwIiB5PSIwIiB3aWR0aD0iMTIwIiBoZWlnaHQ9IjM0IiByeD0iNiIgZmlsbD0iIzFFODhFNSIvPgogICAgICA8dGV4dCB4PSIxMzUiIHk9IjIyIiBjbGFzcz0idGltaW5nLXZhbCI+UHJlcHJvY2Vzc2luZyAmYW1wOyBDYWxpYnJhdGlvbjogPHRzcGFuIGZpbGw9IiMxRTg4RTUiIGZvbnQtd2VpZ2h0PSI3MDAiPjUwIG1zPC90c3Bhbj4gKDIuMCUpIOKAlCBSYXN0ZXJpbyByZWFkaW5nLCBOYU4gbWFza2luZywgbWluLW1heCBub3JtYWxpemVyPC90ZXh0PgoKICAgICAgPCEtLSBCYXIgMjogVS1OZXQrKyAtLT4KICAgICAgPHJlY3QgeD0iMCIgeT0iNDYiIHdpZHRoPSIxNjkwIiBoZWlnaHQ9IjM0IiByeD0iNiIgZmlsbD0iIzA1MDgxMSIvPgogICAgICA8cmVjdCB4PSIwIiB5PSI0NiIgd2lkdGg9IjI4OCIgaGVpZ2h0PSIzNCIgcng9IjYiIGZpbGw9IiMwMEZGOUQiLz4KICAgICAgPHRleHQgeD0iMzAzIiB5PSI2OCIgY2xhc3M9InRpbWluZy12YWwiPlUtTmV0KysgSW51bmRhdGlvbiBTZWdtZW50YXRpb246IDx0c3BhbiBmaWxsPSIjMDBGRjlEIiBmb250LXdlaWdodD0iNzAwIj4xMjAgbXM8L3RzcGFuPiAoNC44JSkg4oCUIFJlc05ldC0zNCBmZWVkZm9yd2FyZCB0ZW5zb3IgcGFzczwvdGV4dD4KCiAgICAgIDwhLS0gQmFyIDM6IFBJTk4gLS0+CiAgICAgIDxyZWN0IHg9IjAiIHk9IjkyIiB3aWR0aD0iMTY5MCIgaGVpZ2h0PSIzNCIgcng9IjYiIGZpbGw9IiMwNTA4MTEiLz4KICAgICAgPHJlY3QgeD0iMCIgeT0iOTIiIHdpZHRoPSIxMDgiIGhlaWdodD0iMzQiIHJ4PSI2IiBmaWxsPSIjMDBGRjlEIi8+CiAgICAgIDx0ZXh0IHg9IjEyMyIgeT0iMTE0IiBjbGFzcz0idGltaW5nLXZhbCI+UElOTiBIeWRyb2R5bmFtaWMgRGVwdGggU29sdmVyOiA8dHNwYW4gZmlsbD0iIzAwRkY5RCIgZm9udC13ZWlnaHQ9IjcwMCI+NDUgbXM8L3RzcGFuPiAoMS44JSkg4oCUIDJEIFNoYWxsb3cgV2F0ZXIgcmVzaWR1YWwgbWluaW1pemF0aW9uPC90ZXh0PgoKICAgICAgPCEtLSBCYXIgNDogUG9zdHByb2Nlc3NpbmcgLS0+CiAgICAgIDxyZWN0IHg9IjAiIHk9IjEzOCIgd2lkdGg9IjE2OTAiIGhlaWdodD0iMzQiIHJ4PSI2IiBmaWxsPSIjMDUwODExIi8+CiAgICAgIDxyZWN0IHg9IjAiIHk9IjEzOCIgd2lkdGg9IjcyIiBoZWlnaHQ9IjM0IiByeD0iNiIgZmlsbD0iI0ZGQjAyMCIvPgogICAgICA8dGV4dCB4PSI4NyIgeT0iMTYwIiBjbGFzcz0idGltaW5nLXZhbCI+UG9zdC1Qcm9jZXNzaW5nICZhbXA7IENvbG9yIE1hcHBpbmc6IDx0c3BhbiBmaWxsPSIjRkZCMDIwIiBmb250LXdlaWdodD0iNzAwIj4zMCBtczwvdHNwYW4+ICgxLjIlKSDigJQgQ29sb3IgTFVULCBjb250b3VyaW5nLCBnZW8tcmVmZXJlbmNpbmc8L3RleHQ+CiAgICA8L2c+CgogICAgPCEtLSBUb3RhbCBMYXRlbmN5IFN1bW1hcnkgQ2FyZCAtLT4KICAgIDxyZWN0IHg9IjM1IiB5PSIyNTUiIHdpZHRoPSIxNjkwIiBoZWlnaHQ9IjEiIGZpbGw9IiMxOUM2RkYiIGZpbGwtb3BhY2l0eT0iMC4yIi8+CiAgICA8dGV4dCB4PSIzNSIgeT0iMjQwIiBmb250LWZhbWlseT0iJ1NwYWNlIEdyb3Rlc2snLCBzYW5zLXNlcmlmIiBmb250LXNpemU9IjE0IiBmb250LXdlaWdodD0iNzAwIiBmaWxsPSIjMTlDNkZGIj5FTkQtVE8tRU5EIFBJUEVMSU5FIExBVEVOQ1k6IDx0c3BhbiBmaWxsPSIjRTZFREY3Ij5+Mi41IFNFQ09ORFMgVE9UQUw8L3RzcGFuPiAoSU5DTFVESU5HIE5FVFdPUksgTVVMVElQQVJUIFVQTE9BRCwgR1BVIElORkVSRU5DRSwgVElGRiBHRU5FUkFUSU9OICZhbXA7IDNEIENMSUVOVCBCVUZGRVIgVVBEQVRFKTwvdGV4dD4KICA8L2c+Cjwvc3ZnPgo=" alt="Data Flow Pipeline Diagram" class="diagram-img" />
+    </div>
+    <div class="diagram-caption">Figure 4.1: End-to-End Ingestion, Preprocessing, Neural Inference &amp; Geospatial Serialization Pipeline</div>
+  </div>
+
+  <h2 class="sub-section-title">4.2 Step-by-Step Pipeline Execution</h2>
+  <ol>
+    <li>
+      <b>User Upload:</b> User drags a Sentinel-1 Level-1 Ground Range Detected (GRD) GeoTIFF into the web interface. The client validates the file format, extracts bounding-box coordinates, and packages the binary stream into a <code>multipart/form-data</code> POST request to <code>/api/predict</code>.
+    </li>
+    <li>
+      <b>Preprocessing &amp; Tensor Transformation:</b> The server receives the raw payload. Rasterio unpacks Band 1 (VV) and Band 2 (VH). Radiometric calibration converts digital numbers to backscatter coefficients:
+      <div class="math-block">
+        σ° [dB] = 10 · log₁₀(DN²) − K<sub>cal</sub>
+      </div>
+      A 7 × 7 Refined Lee speckle filter suppresses granular radar noise while preserving edge boundaries. The channels are clipped and normalized:
+      <div class="math-block">
+        x<sub>VV</sub> ∈ [−28.4 dB, +2.1 dB] → [0.0, 1.0], &nbsp;&nbsp;&nbsp; x<sub>VH</sub> ∈ [−34.8 dB, −6.5 dB] → [0.0, 1.0]
+      </div>
+      The resulting array is transferred to GPU memory as a shape <code>[1, 2, 512, 512]</code> PyTorch tensor (latency: 50 ms).
+    </li>
+    <li>
+      <b>U-Net++ Extent Segmentation:</b> The normalized tensor feeds into the ResNet-34 encoder. Features pass through four downsampling blocks, a 1024-channel bottleneck, and dense nested skip decoder pathways. A final 1 × 1 convolution with a Sigmoid activation yields the continuous flood probability tensor:
+      <div class="math-block">
+        P̂<sub>flood</sub> ∈ [0.0, 1.0]<sup>1 × 1 × 512 × 512</sup> &nbsp;&nbsp; (latency: 120 ms)
+      </div>
+    </li>
+    <li>
+      <b>Bayesian Cutoff Thresholding:</b> Applying a calibrated decision threshold (τ = 0.50) transforms the continuous probability map into an unambiguous binary water-land mask <i>M<sub>flood</sub></i> ∈ {0, 1}.
+    </li>
+    <li>
+      <b>PINN Hydrodynamic Depth Estimation:</b> The binary probability map is concatenated with the aligned Copernicus DEM elevation raster and ECMWF ERA5 24h precipitation total into a 3-channel tensor <code>[1, 3, 512, 512]</code>. The PINN solves the 2D Shallow Water Equations, outputting continuous flood depth <i>h(x, y)</i> in meters (latency: 45 ms).
+    </li>
+    <li>
+      <b>Risk Classification &amp; Infrastructure Cross-Referencing:</b> The depth raster is evaluated against building and roadway footprints:
+      <ul>
+        <li><b>Low:</b> <i>h</i> &lt; 0.5 m (navigable by emergency trucks)</li>
+        <li><b>Moderate:</b> 0.5 m ≤ <i>h</i> &lt; 1.5 m (impassable to road vehicles; boats required)</li>
+        <li><b>High:</b> 1.5 m ≤ <i>h</i> &lt; 3.0 m (structural flooding of ground floors)</li>
+        <li><b>Critical:</b> <i>h</i> ≥ 3.0 m (roof-level inundation; bridge collapse risks)</li>
+      </ul>
+    </li>
+    <li>
+      <b>Output Serialization:</b> The engine renders a color-mapped RGBA PNG encoded as a base64 string, a 10-page institutional situation report compiled via <code>jsPDF</code>, a spec-compliant 24-bit uncompressed RGB TIFF 6.0 file, and a JSON summary payload returned to the client (total elapsed time: ~2.5 seconds).
+    </li>
+  </ol>
+
+  <!-- SECTION 5 -->
+  <div class="page-break"></div>
+  <div class="doc-header">
+    <span>FLOOD INTELLIGENCE 3D — TECHNICAL DESIGN DOCUMENT</span>
+    <span>BHARAT WIN HACKATHON</span>
+  </div>
+
+  <h1 class="section-title">SECTION 5 — AI Model Architecture &amp; Physics Formulations</h1>
+
+  <h2 class="sub-section-title">5.1 Stage 1: U-Net++ Flood Segmentation</h2>
+  <p>
+    Standard U-Net architectures utilize plain skip connections that directly concatenate early encoder feature maps with late decoder layers. This introduces a significant semantic gap because low-level encoder features contain raw, unrefined spatial textures, whereas high-level decoder features represent abstracted semantic concepts. <b>U-Net++</b> bridges this gap through a dense hierarchy of nested skip pathways, enabling gradual semantic alignment:
+  </p>
+
+  <pre>
+Encoder X0,0 ────────&gt; Node X0,1 ────────&gt; Node X0,2 ────────&gt; Node X0,3 ────────&gt; Output X0,4
+    │                 ▲   │              ▲   │              ▲   │              ▲
+    ▼ (Downsample)   ╱    ▼ (Downsample)╱    ▼ (Downsample)╱    ▼ (Downsample)╱
+Encoder X1,0 ────────&gt; Node X1,1 ────────&gt; Node X1,2 ────────&gt; Node X1,3
+    │                 ▲   │              ▲   │
+    ▼ (Downsample)   ╱    ▼ (Downsample)╱    ▼
+Encoder X2,0 ────────&gt; Node X2,1 ────────&gt; Node X2,2
+    │                 ▲   │
+    ▼ (Downsample)   ╱    ▼
+Encoder X3,0 ────────&gt; Node X3,1
+    │                 ▲
+    ▼ (Downsample)   ╱
+Bottleneck X4,0 ─────┘</pre>
+
+  <h3 class="item-title">Node Update Formulation:</h3>
+  <p>
+    Let <i>x<sup>i,j</sup></i> denote the output of node <i>X<sup>i,j</sup></i>, where <i>i</i> indexes the downsampling layer along the encoder and <i>j</i> indexes the skip pathway:
+  </p>
+  <div class="math-block">
+    <i>x<sup>i,j</sup></i> = ℋ(<i>x</i><sup><i>i</i>−1,0</sup>) &nbsp; [for <i>j</i> = 0] &nbsp;&nbsp;|&nbsp;&nbsp; 
+    ℋ([ [<i>x</i><sup><i>i,k</i></sup>]<sub><i>k</i>=0...<i>j</i>−1</sub>, 𝒰(<i>x</i><sup><i>i</i>+1,<i>j</i>−1</sup>) ]) &nbsp; [for <i>j</i> &gt; 0]
+  </div>
+  <p>
+    Where ℋ(·) is a convolution block consisting of two 3 × 3 convolutions followed by BatchNorm and ReLU; 𝒰(·) is an upsampling layer; and [·] denotes channel concatenation.
+  </p>
+
+  <h3 class="item-title">Hyperparameters &amp; Loss Objective:</h3>
+  <p>
+    The network is optimized using a compound loss function balancing pixel-level cross-entropy with region-level spatial overlap:
+  </p>
+  <div class="math-block">
+    ℒ<sub>segmentation</sub> = 0.5 · ℒ<sub>Focal</sub> + 1.0 · ℒ<sub>Dice</sub>
+  </div>
+  <div class="math-block">
+    ℒ<sub>Focal</sub> = −α<sub><i>t</i></sub> (1 − <i>p<sub>t</sub></i>)<sup>γ</sup> log(<i>p<sub>t</sub></i>), &nbsp;&nbsp; with γ = 2.0, α = 0.25
+  </div>
+  <div class="math-block">
+    ℒ<sub>Dice</sub> = 1 − [ 2 ∑ <i>y<sub>i</sub> ŷ<sub>i</sub></i> + ε ] / [ ∑ <i>y<sub>i</sub></i> + ∑ <i>ŷ<sub>i</sub></i> + ε ], &nbsp;&nbsp; with ε = 1.0
+  </div>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Training Hyperparameter</th>
+        <th>Configuration Setting</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr><td><b>Encoder Backbone</b></td><td>ResNet-34 (Pretrained on ImageNet-1k)</td></tr>
+      <tr><td><b>Input Shape</b></td><td>2 × 512 × 512 (VV dB, VH dB)</td></tr>
+      <tr><td><b>Total Parameters</b></td><td>25,842,105 (~26 Million parameters)</td></tr>
+      <tr><td><b>Optimizer</b></td><td>AdamW (β₁ = 0.9, β₂ = 0.999, Weight Decay = 10⁻⁴)</td></tr>
+      <tr><td><b>Initial Learning Rate</b></td><td>3.0 × 10⁻⁴ with CosineAnnealingLR (T<sub>max</sub> = 30, η<sub>min</sub> = 10⁻⁶)</td></tr>
+      <tr><td><b>Batch Size &amp; Epochs</b></td><td>Batch Size: 8; Epochs: 30; Gradient Clipping: 1.0</td></tr>
+      <tr><td><b>Sen1Floods11 Test IoU</b></td><td><b>0.621</b> (vs. 0.52 for baseline standard U-Net)</td></tr>
+      <tr><td><b>Sen1Floods11 Test Dice</b></td><td><b>0.714</b> (Spatial boundary overlap agreement)</td></tr>
+    </tbody>
+  </table>
+
+  <h2 class="sub-section-title">5.2 Stage 2: Hydrodynamic Physics-Informed Neural Network (PINN)</h2>
+  <p>
+    Estimating continuous water depth <i>h(x, y)</i> purely from satellite radar backscatter is mathematically ill-posed, as radar microwaves do not penetrate beneath the water surface. Our PINN resolves this by treating the depth field as a physical solution to the <b>2D Shallow Water Equations (SWE)</b> governed by gravity, topographic slope, and surface roughness friction.
+  </p>
+
+  <h3 class="item-title">Governing Hydrodynamic Equations:</h3>
+  <p>
+    The 2D depth-averaged conservation of mass (continuity equation) with atmospheric precipitation inflow is:
+  </p>
+  <div class="math-block">
+    ∂<i>h</i>/∂<i>t</i> + ∇ · (<i>h</i> <b>v</b>) = <i>R(t)</i> &nbsp;&nbsp;⟹&nbsp;&nbsp; ∂<i>h</i>/∂<i>t</i> + ∂(<i>uh</i>)/∂<i>x</i> + ∂(<i>vh</i>)/∂<i>y</i> = <i>R(t)</i>
+  </div>
+  <p>
+    Where <i>h(x, y, t)</i> is water depth (m); <b>v</b> = (<i>u, v</i>) is depth-averaged flow velocity (m/s); <i>R(t)</i> is precipitation rate forcing (m/s) derived from ECMWF ERA5; and η(<i>x, y</i>) = <i>z<sub>bed</sub></i>(<i>x, y</i>) + <i>h(x, y)</i> is the free water surface elevation (m), with <i>z<sub>bed</sub></i> representing the Copernicus DEM terrain elevation.
+  </p>
+  <p>
+    The steady-state flow velocity magnitude is governed by <b>Manning's Hydraulic Friction Equation</b>:
+  </p>
+  <div class="math-block">
+    ||<b>v</b>|| = (1 / <i>n</i>) · <i>R<sub>h</sub></i><sup>2/3</sup> · <i>S</i>₀<sup>1/2</sup> ≈ (1 / <i>n</i>) · <i>h</i><sup>2/3</sup> · ||∇η||<sup>1/2</sup>
+  </div>
+  <p>
+    Where <i>n</i> is Manning’s roughness coefficient (<i>n</i> = 0.035 s/m<sup>1/3</sup> for natural floodplains) and <i>S</i>₀ is the topographic energy slope.
+  </p>
+
+  <h3 class="item-title">PINN Multi-Term Physics Loss Function:</h3>
+  <div class="math-block">
+    ℒ<sub>PINN</sub> = 3.0 · ℒ<sub>consistency</sub> + 1.0 · ℒ<sub>smoothness</sub> + 0.5 · ℒ<sub>continuity</sub> + 2.0 · ℒ<sub>nonneg</sub> + 0.3 · ℒ<sub>weak_supervision</sub>
+  </div>
+  <ul>
+    <li><b>Extent Consistency Loss (ℒ<sub>consistency</sub>):</b> Enforces depth to be zero in dry pixels (<i>M</i>=0) and strictly positive in inundated pixels (<i>M</i>=1).</li>
+    <li><b>Surface Smoothness Loss (ℒ<sub>smoothness</sub>):</b> Minimizes total variation across the water surface elevation η = <i>z<sub>bed</sub></i> + <i>ĥ</i>, preventing unphysical spiky water levels.</li>
+    <li><b>Continuity PDE Residual Loss (ℒ<sub>continuity</sub>):</b> Directly computes the physical PDE residual using finite-difference gradient operators on the tensor grid:
+      <div class="math-block">
+        ℒ<sub>continuity</sub> = || ∇ · ( <i>ĥ</i> · (1/<i>n</i>) <i>ĥ</i><sup>2/3</sup> ||∇η||<sup>1/2</sup> [∇η / ||∇η||] ) − <i>R(t)</i> ||₂²
+      </div>
+    </li>
+    <li><b>Non-Negativity Penalty (ℒ<sub>nonneg</sub>):</b> Penalizes any negative depth values: ∑ (min(0, <i>ĥ<sub>i,j</sub></i>))².</li>
+    <li><b>Weak Supervision Loss (ℒ<sub>weak_supervision</sub>):</b> Aligns predictions with benchmark hydraulic gauge records from global historical events (Bolivia 2018 event mean depth error: 0.14 m).</li>
+  </ul>
+
+  <h2 class="sub-section-title">5.3 Combined Model Architecture Diagram</h2>
+  <div class="diagram-wrapper">
+    <div class="diagram-frame">
+      <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxOTIwIDEwODAiIHdpZHRoPSIxOTIwIiBoZWlnaHQ9IjEwODAiPgogIDxkZWZzPgogICAgPHN0eWxlPgogICAgICBAaW1wb3J0IHVybCgnaHR0cHM6Ly9mb250cy5nb29nbGVhcGlzLmNvbS9jc3MyP2ZhbWlseT1TcGFjZStHcm90ZXNrOndnaHRANTAwOzcwMCZhbXA7ZmFtaWx5PUludGVyOndnaHRANDAwOzUwMDs2MDA7NzAwJmFtcDtmYW1pbHk9SmV0QnJhaW5zK01vbm86d2dodEA0MDA7NjAwJmFtcDtkaXNwbGF5PXN3YXAnKTsKICAgICAgLnRpdGxlIHsgZm9udC1mYW1pbHk6ICdTcGFjZSBHcm90ZXNrJywgc2Fucy1zZXJpZjsgZm9udC13ZWlnaHQ6IDcwMDsgZmlsbDogI0U2RURGNzsgfQogICAgICAuc3VidGl0bGUgeyBmb250LWZhbWlseTogJ0ludGVyJywgc2Fucy1zZXJpZjsgZm9udC13ZWlnaHQ6IDUwMDsgZmlsbDogIzg4OTJBNjsgfQogICAgICAuc2lkZS10aXRsZSB7IGZvbnQtZmFtaWx5OiAnU3BhY2UgR3JvdGVzaycsIHNhbnMtc2VyaWY7IGZvbnQtd2VpZ2h0OiA3MDA7IGZvbnQtc2l6ZTogMjJweDsgfQogICAgICAuc2lkZS1zdWIgeyBmb250LWZhbWlseTogJ0ludGVyJywgc2Fucy1zZXJpZjsgZm9udC13ZWlnaHQ6IDUwMDsgZm9udC1zaXplOiAxM3B4OyBmaWxsOiAjODg5MkE2OyB9CiAgICAgIC5ibG9jay10aXRsZSB7IGZvbnQtZmFtaWx5OiAnU3BhY2UgR3JvdGVzaycsIHNhbnMtc2VyaWY7IGZvbnQtd2VpZ2h0OiA3MDA7IGZvbnQtc2l6ZTogMTRweDsgZmlsbDogI0U2RURGNzsgfQogICAgICAuYmxvY2stZGVzYyB7IGZvbnQtZmFtaWx5OiAnSW50ZXInLCBzYW5zLXNlcmlmOyBmb250LXdlaWdodDogNDAwOyBmb250LXNpemU6IDExcHg7IGZpbGw6ICM4ODkyQTY7IH0KICAgICAgLnRlbnNvci1zaGFwZSB7IGZvbnQtZmFtaWx5OiAnSmV0QnJhaW5zIE1vbm8nLCBtb25vc3BhY2U7IGZvbnQtc2l6ZTogMTFweDsgZm9udC13ZWlnaHQ6IDYwMDsgfQogICAgICAubWV0cmljLWJhZGdlIHsgZm9udC1mYW1pbHk6ICdKZXRCcmFpbnMgTW9ubycsIG1vbm9zcGFjZTsgZm9udC1zaXplOiAxMnB4OyBmb250LXdlaWdodDogNzAwOyB9CiAgICA8L3N0eWxlPgogICAgPGxpbmVhckdyYWRpZW50IGlkPSJiZy1ncmFkIiB4MT0iMCUiIHkxPSIwJSIgeDI9IjEwMCUiIHkyPSIxMDAlIj4KICAgICAgPHN0b3Agb2Zmc2V0PSIwJSIgc3RvcC1jb2xvcj0iIzA1MDcwRCIvPgogICAgICA8c3RvcCBvZmZzZXQ9IjEwMCUiIHN0b3AtY29sb3I9IiMwMjAzMDYiLz4KICAgIDwvbGluZWFyR3JhZGllbnQ+CiAgICA8ZmlsdGVyIGlkPSJnbG93LWN5YW4iIHg9Ii0yMCUiIHk9Ii0yMCUiIHdpZHRoPSIxNDAlIiBoZWlnaHQ9IjE0MCUiPgogICAgICA8ZmVHYXVzc2lhbkJsdXIgc3RkRGV2aWF0aW9uPSI1IiByZXN1bHQ9ImJsdXIiLz4KICAgICAgPGZlQ29tcG9zaXRlIGluPSJTb3VyY2VHcmFwaGljIiBpbjI9ImJsdXIiIG9wZXJhdG9yPSJvdmVyIi8+CiAgICA8L2ZpbHRlcj4KICAgIDxmaWx0ZXIgaWQ9Imdsb3ctZ3JlZW4iIHg9Ii0yMCUiIHk9Ii0yMCUiIHdpZHRoPSIxNDAlIiBoZWlnaHQ9IjE0MCUiPgogICAgICA8ZmVHYXVzc2lhbkJsdXIgc3RkRGV2aWF0aW9uPSI1IiByZXN1bHQ9ImJsdXIiLz4KICAgICAgPGZlQ29tcG9zaXRlIGluPSJTb3VyY2VHcmFwaGljIiBpbjI9ImJsdXIiIG9wZXJhdG9yPSJvdmVyIi8+CiAgICA8L2ZpbHRlcj4KICAgIDxtYXJrZXIgaWQ9ImFycm93LWRvd24iIHZpZXdCb3g9IjAgMCAxMCAxMCIgcmVmWD0iNSIgcmVmWT0iNSIgbWFya2VyV2lkdGg9IjYiIG1hcmtlckhlaWdodD0iNiIgb3JpZW50PSJhdXRvLXN0YXJ0LXJldmVyc2UiPgogICAgICA8cGF0aCBkPSJNIDAgMSBMIDEwIDUgTCAwIDkgeiIgZmlsbD0iIzE5QzZGRiIvPgogICAgPC9tYXJrZXI+CiAgICA8bWFya2VyIGlkPSJhcnJvdy1ncmVlbi1kb3duIiB2aWV3Qm94PSIwIDAgMTAgMTAiIHJlZlg9IjUiIHJlZlk9IjUiIG1hcmtlcldpZHRoPSI2IiBtYXJrZXJIZWlnaHQ9IjYiIG9yaWVudD0iYXV0by1zdGFydC1yZXZlcnNlIj4KICAgICAgPHBhdGggZD0iTSAwIDEgTCAxMCA1IEwgMCA5IHoiIGZpbGw9IiMwMEZGOUQiLz4KICAgIDwvbWFya2VyPgogICAgPG1hcmtlciBpZD0iYXJyb3ctYnJpZGdlIiB2aWV3Qm94PSIwIDAgMTAgMTAiIHJlZlg9IjUiIHJlZlk9IjUiIG1hcmtlcldpZHRoPSI2IiBtYXJrZXJIZWlnaHQ9IjYiIG9yaWVudD0iYXV0by1zdGFydC1yZXZlcnNlIj4KICAgICAgPHBhdGggZD0iTSAwIDEgTCAxMCA1IEwgMCA5IHoiIGZpbGw9IiNGRkIwMjAiLz4KICAgIDwvbWFya2VyPgogIDwvZGVmcz4KCiAgPCEtLSBCYWNrZ3JvdW5kIC0tPgogIDxyZWN0IHdpZHRoPSIxOTIwIiBoZWlnaHQ9IjEwODAiIGZpbGw9InVybCgjYmctZ3JhZCkiLz4KCiAgPCEtLSBTdWJ0bGUgQmx1ZXByaW50IEdyaWQgLS0+CiAgPGcgb3BhY2l0eT0iMC4wNCIgc3Ryb2tlPSIjMTlDNkZGIiBzdHJva2Utd2lkdGg9IjEiPgogICAgPGxpbmUgeDE9IjAiIHkxPSIxODAiIHgyPSIxOTIwIiB5Mj0iMTgwIi8+PGxpbmUgeDE9IjAiIHkxPSIzNjAiIHgyPSIxOTIwIiB5Mj0iMzYwIi8+CiAgICA8bGluZSB4MT0iMCIgeTE9IjU0MCIgeDI9IjE5MjAiIHkyPSI1NDAiLz48bGluZSB4MT0iMCIgeTE9IjcyMCIgeDI9IjE5MjAiIHkyPSI3MjAiLz4KICAgIDxsaW5lIHgxPSIwIiB5MT0iOTAwIiB4Mj0iMTkyMCIgeTI9IjkwMCIvPgogICAgPGxpbmUgeDE9IjMyMCIgeTE9IjAiIHgyPSIzMjAiIHkyPSIxMDgwIi8+PGxpbmUgeDE9IjY0MCIgeTE9IjAiIHgyPSI2NDAiIHkyPSIxMDgwIi8+CiAgICA8bGluZSB4MT0iOTYwIiB5MT0iMCIgeDI9Ijk2MCIgeTI9IjEwODAiLz48bGluZSB4MT0iMTI4MCIgeTE9IjAiIHgyPSIxMjgwIiB5Mj0iMTA4MCIvPgogICAgPGxpbmUgeDE9IjE2MDAiIHkxPSIwIiB4Mj0iMTYwMCIgeTI9IjEwODAiLz4KICA8L2c+CgogIDwhLS0gSGVhZGVyIC0tPgogIDxnIHRyYW5zZm9ybT0idHJhbnNsYXRlKDEwMCwgNDUpIj4KICAgIDxyZWN0IHg9IjAiIHk9IjAiIHdpZHRoPSIyMjAiIGhlaWdodD0iMjgiIHJ4PSIxNCIgZmlsbD0iIzBFMjIzRCIgc3Ryb2tlPSIjMTlDNkZGIiBzdHJva2Utd2lkdGg9IjEiLz4KICAgIDx0ZXh0IHg9IjExMCIgeT0iMTgiIGZpbGw9IiMxOUM2RkYiIGZvbnQtZmFtaWx5PSInSmV0QnJhaW5zIE1vbm8nLCBtb25vc3BhY2UiIGZvbnQtc2l6ZT0iMTEiIGZvbnQtd2VpZ2h0PSI2MDAiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGxldHRlci1zcGFjaW5nPSIxLjUiPkRVQUwtU1RBR0UgQUkgQVJDSElURUNUVVJFPC90ZXh0PgogICAgPHRleHQgeD0iMCIgeT0iNjUiIGNsYXNzPSJ0aXRsZSIgZm9udC1zaXplPSIzNCIgbGV0dGVyLXNwYWNpbmc9Ii0wLjUiPlUtTkVUKysgU0VHTUVOVEFUSU9OICZhbXA7IEhZRFJPRFlOQU1JQyBQSU5OIERFUFRIIEVOR0lORTwvdGV4dD4KICAgIDx0ZXh0IHg9IjAiIHk9IjkwIiBjbGFzcz0ic3VidGl0bGUiIGZvbnQtc2l6ZT0iMTQiPk5lc3RlZCBEZW5zZSBTa2lwIENvbm5lY3Rpb24gUmFkYXIgRXh0ZW50IE1vZGVsIENvdXBsZWQgd2l0aCAyRCBTaGFsbG93IFdhdGVyIFBoeXNpY3MtSW5mb3JtZWQgTmV1cmFsIE5ldHdvcms8L3RleHQ+CiAgPC9nPgoKICA8IS0tID09PT09PT09PT09PT09PT09PT09IExFRlQgSEFMRjogVS1ORVQrKyAoQ1lBTiBUSEVNRSkgPT09PT09PT09PT09PT09PT09PT0gLS0+CiAgPGcgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoODAsIDE2MCkiPgogICAgPCEtLSBDb250YWluZXIgQ2FyZCAtLT4KICAgIDxyZWN0IHdpZHRoPSI4NDAiIGhlaWdodD0iODcwIiByeD0iMTQiIGZpbGw9IiMwQjBGMUEiIHN0cm9rZT0iIzE5QzZGRiIgc3Ryb2tlLXdpZHRoPSIyIiBmaWx0ZXI9InVybCgjZ2xvdy1jeWFuKSIvPgogICAgCiAgICA8IS0tIFRpdGxlICYgU3BlY3MgLS0+CiAgICA8dGV4dCB4PSIzNSIgeT0iMzgiIGNsYXNzPSJzaWRlLXRpdGxlIiBmaWxsPSIjMTlDNkZGIj5TVEFHRSAxOiBVLU5FVCsrIChSRVNORVQtMzQgRU5DT0RFUik8L3RleHQ+CiAgICA8dGV4dCB4PSIzNSIgeT0iNjAiIGNsYXNzPSJzaWRlLXN1YiI+QWxsLVdlYXRoZXIgU0FSIEludW5kYXRpb24gU2VnbWVudGF0aW9uIMK3IDI1LjhNIFBhcmFtZXRlcnMgwrcgRGVuc2UgTmVzdGVkIFNraXAgRGVjb2RlcnM8L3RleHQ+CgogICAgPCEtLSBUb3AgQmFkZ2UgUm93IC0tPgogICAgPGcgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMzUsIDc1KSI+CiAgICAgIDxyZWN0IHg9IjAiIHk9IjAiIHdpZHRoPSIxMzAiIGhlaWdodD0iMjYiIHJ4PSI2IiBmaWxsPSIjMEUyNTNGIiBzdHJva2U9IiMxOUM2RkYiIHN0cm9rZS13aWR0aD0iMSIvPgogICAgICA8dGV4dCB4PSI2NSIgeT0iMTciIGNsYXNzPSJtZXRyaWMtYmFkZ2UiIGZpbGw9IiMxOUM2RkYiIHRleHQtYW5jaG9yPSJtaWRkbGUiPklvVTogMC42MjE8L3RleHQ+CiAgICAgIDxyZWN0IHg9IjE0NSIgeT0iMCIgd2lkdGg9IjEzMCIgaGVpZ2h0PSIyNiIgcng9IjYiIGZpbGw9IiMwRTI1M0YiIHN0cm9rZT0iIzE5QzZGRiIgc3Ryb2tlLXdpZHRoPSIxIi8+CiAgICAgIDx0ZXh0IHg9IjIxMCIgeT0iMTciIGNsYXNzPSJtZXRyaWMtYmFkZ2UiIGZpbGw9IiMxOUM2RkYiIHRleHQtYW5jaG9yPSJtaWRkbGUiPkRJQ0U6IDAuNzE0PC90ZXh0PgogICAgICA8cmVjdCB4PSIyOTAiIHk9IjAiIHdpZHRoPSIxNjAiIGhlaWdodD0iMjYiIHJ4PSI2IiBmaWxsPSIjMEUyNTNGIiBzdHJva2U9IiMxOUM2RkYiIHN0cm9rZS13aWR0aD0iMSIvPgogICAgICA8dGV4dCB4PSIzNzAiIHk9IjE3IiBjbGFzcz0ibWV0cmljLWJhZGdlIiBmaWxsPSIjMTlDNkZGIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj5QUkVDSVNJT046IDAuNzgzPC90ZXh0PgogICAgICA8cmVjdCB4PSI0NjUiIHk9IjAiIHdpZHRoPSIxNTAiIGhlaWdodD0iMjYiIHJ4PSI2IiBmaWxsPSIjMEUyNTNGIiBzdHJva2U9IiMxOUM2RkYiIHN0cm9rZS13aWR0aD0iMSIvPgogICAgICA8dGV4dCB4PSI1NDAiIHk9IjE3IiBjbGFzcz0ibWV0cmljLWJhZGdlIiBmaWxsPSIjMTlDNkZGIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj5SRUNBTEw6IDAuNjg3PC90ZXh0PgogICAgICA8cmVjdCB4PSI2MzAiIHk9IjAiIHdpZHRoPSIxNDAiIGhlaWdodD0iMjYiIHJ4PSI2IiBmaWxsPSIjMEUyNTNGIiBzdHJva2U9IiMxOUM2RkYiIHN0cm9rZS13aWR0aD0iMSIvPgogICAgICA8dGV4dCB4PSI3MDAiIHk9IjE3IiBjbGFzcz0ibWV0cmljLWJhZGdlIiBmaWxsPSIjMDBGRjlEIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj5MQVRFTkNZOiAxMjAgbXM8L3RleHQ+CiAgICA8L2c+CgogICAgPCEtLSBGbG93IEFyY2hpdGVjdHVyZSBTdGFjayAtLT4KICAgIDwhLS0gMS4gSW5wdXQgTm9kZSAtLT4KICAgIDxnIHRyYW5zZm9ybT0idHJhbnNsYXRlKDM1LCAxMjApIj4KICAgICAgPHJlY3Qgd2lkdGg9Ijc3MCIgaGVpZ2h0PSI1NSIgcng9IjgiIGZpbGw9IiMwNTA4MTEiIHN0cm9rZT0iIzE5QzZGRiIgc3Ryb2tlLW9wYWNpdHk9IjAuNSIgc3Ryb2tlLXdpZHRoPSIxLjIiLz4KICAgICAgPHRleHQgeD0iMjAiIHk9IjI2IiBjbGFzcz0iYmxvY2stdGl0bGUiPkRVQUwtUE9MIElOUFVUIFRFTlNPUjwvdGV4dD4KICAgICAgPHRleHQgeD0iMjAiIHk9IjQyIiBjbGFzcz0iYmxvY2stZGVzYyI+Q2FsaWJyYXRlZCBTZW50aW5lbC0xIFNBUiBCYWNrc2NhdHRlciBbQmFuZCAxOiBWViAoZEIpLCBCYW5kIDI6IFZIIChkQildPC90ZXh0PgogICAgICA8cmVjdCB4PSI2MjAiIHk9IjE0IiB3aWR0aD0iMTMwIiBoZWlnaHQ9IjI2IiByeD0iNSIgZmlsbD0iIzBEMjAzNiIvPgogICAgICA8dGV4dCB4PSI2ODUiIHk9IjMxIiBjbGFzcz0idGVuc29yLXNoYXBlIiBmaWxsPSIjMTlDNkZGIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj5bQmF0Y2gsIDIsIDUxMiwgNTEyXTwvdGV4dD4KICAgIDwvZz4KCiAgICA8IS0tIERvd24gQXJyb3cgLS0+CiAgICA8bGluZSB4MT0iNDIwIiB5MT0iMTc1IiB4Mj0iNDIwIiB5Mj0iMTk1IiBzdHJva2U9IiMxOUM2RkYiIHN0cm9rZS13aWR0aD0iMiIgbWFya2VyLWVuZD0idXJsKCNhcnJvdy1kb3duKSIvPgoKICAgIDwhLS0gMi4gUmVzTmV0LTM0IEVuY29kZXIgUHlyYW1pZCAtLT4KICAgIDxnIHRyYW5zZm9ybT0idHJhbnNsYXRlKDM1LCAxOTUpIj4KICAgICAgPHJlY3Qgd2lkdGg9Ijc3MCIgaGVpZ2h0PSIxNTAiIHJ4PSI4IiBmaWxsPSIjMDcwQzE4IiBzdHJva2U9IiMxOUM2RkYiIHN0cm9rZS1vcGFjaXR5PSIwLjciIHN0cm9rZS13aWR0aD0iMS41Ii8+CiAgICAgIDx0ZXh0IHg9IjIwIiB5PSIyNCIgY2xhc3M9ImJsb2NrLXRpdGxlIj5QUkVUUkFJTkVEIFJFU05FVC0zNCBFTkNPREVSIChTVEVNICZhbXA7IFJFU0lEVUFMIEJMT0NLUyk8L3RleHQ+CiAgICAgIAogICAgICA8IS0tIDQgQ29udiBTdGFnZXMgLS0+CiAgICAgIDxnIHRyYW5zZm9ybT0idHJhbnNsYXRlKDIwLCAzNikiPgogICAgICAgIDwhLS0gU3RhZ2UgMSAtLT4KICAgICAgICA8cmVjdCB4PSIwIiB5PSIwIiB3aWR0aD0iMTY4IiBoZWlnaHQ9Ijk4IiByeD0iNiIgZmlsbD0iIzA1MDgxMSIgc3Ryb2tlPSIjMTlDNkZGIiBzdHJva2Utb3BhY2l0eT0iMC4zIiBzdHJva2Utd2lkdGg9IjEiLz4KICAgICAgICA8dGV4dCB4PSIxMiIgeT0iMjIiIGNsYXNzPSJ0ZW5zb3Itc2hhcGUiIGZpbGw9IiMxOUM2RkYiPkVOQ09ERVIgQkxPQ0sgMTwvdGV4dD4KICAgICAgICA8dGV4dCB4PSIxMiIgeT0iNDAiIGNsYXNzPSJibG9jay1kZXNjIj5Db252IDd4NywgU3RyaWRlIDI8L3RleHQ+CiAgICAgICAgPHRleHQgeD0iMTIiIHk9IjU2IiBjbGFzcz0iYmxvY2stZGVzYyI+M3ggW0Jhc2ljQmxvY2sgNjRdPC90ZXh0PgogICAgICAgIDxyZWN0IHg9IjEyIiB5PSI2OCIgd2lkdGg9IjE0NCIgaGVpZ2h0PSIyMCIgcng9IjQiIGZpbGw9IiMwRTIyM0QiLz4KICAgICAgICA8dGV4dCB4PSI4NCIgeT0iODIiIGNsYXNzPSJ0ZW5zb3Itc2hhcGUiIGZpbGw9IiNFNkVERjciIHRleHQtYW5jaG9yPSJtaWRkbGUiPls2NCwgMjU2LCAyNTZdPC90ZXh0PgoKICAgICAgICA8IS0tIFN0YWdlIDIgLS0+CiAgICAgICAgPHJlY3QgeD0iMTg4IiB5PSIwIiB3aWR0aD0iMTY4IiBoZWlnaHQ9Ijk4IiByeD0iNiIgZmlsbD0iIzA1MDgxMSIgc3Ryb2tlPSIjMTlDNkZGIiBzdHJva2Utb3BhY2l0eT0iMC4zIiBzdHJva2Utd2lkdGg9IjEiLz4KICAgICAgICA8dGV4dCB4PSIxMiIgeT0iMjIiIGNsYXNzPSJ0ZW5zb3Itc2hhcGUiIGZpbGw9IiMxOUM2RkYiPkVOQ09ERVIgQkxPQ0sgMjwvdGV4dD4KICAgICAgICA8dGV4dCB4PSIxMiIgeT0iNDAiIGNsYXNzPSJibG9jay1kZXNjIj5NYXhQb29sIFN0cmlkZSAyPC90ZXh0PgogICAgICAgIDx0ZXh0IHg9IjEyIiB5PSI1NiIgY2xhc3M9ImJsb2NrLWRlc2MiPjR4IFtCYXNpY0Jsb2NrIDEyOF08L3RleHQ+CiAgICAgICAgPHJlY3QgeD0iMTIiIHk9IjY4IiB3aWR0aD0iMTQ0IiBoZWlnaHQ9IjIwIiByeD0iNCIgZmlsbD0iIzBFMjIzRCIvPgogICAgICAgIDx0ZXh0IHg9Ijg0IiB5PSI4MiIgY2xhc3M9InRlbnNvci1zaGFwZSIgZmlsbD0iI0U2RURGNyIgdGV4dC1hbmNob3I9Im1pZGRsZSI+WzEyOCwgMTI4LCAxMjhdPC90ZXh0PgoKICAgICAgICA8IS0tIFN0YWdlIDMgLS0+CiAgICAgICAgPHJlY3QgeD0iMzc2IiB5PSIwIiB3aWR0aD0iMTY4IiBoZWlnaHQ9Ijk4IiByeD0iNiIgZmlsbD0iIzA1MDgxMSIgc3Ryb2tlPSIjMTlDNkZGIiBzdHJva2Utb3BhY2l0eT0iMC4zIiBzdHJva2Utd2lkdGg9IjEiLz4KICAgICAgICA8dGV4dCB4PSIxMiIgeT0iMjIiIGNsYXNzPSJ0ZW5zb3Itc2hhcGUiIGZpbGw9IiMxOUM2RkYiPkVOQ09ERVIgQkxPQ0sgMzwvdGV4dD4KICAgICAgICA8dGV4dCB4PSIxMiIgeT0iNDAiIGNsYXNzPSJibG9jay1kZXNjIj5Db252IDN4MyBTdHJpZGUgMjwvdGV4dD4KICAgICAgICA8dGV4dCB4PSIxMiIgeT0iNTYiIGNsYXNzPSJibG9jay1kZXNjIj42eCBbQmFzaWNCbG9jayAyNTZdPC90ZXh0PgogICAgICAgIDxyZWN0IHg9IjEyIiB5PSI2OCIgd2lkdGg9IjE0NCIgaGVpZ2h0PSIyMCIgcng9IjQiIGZpbGw9IiMwRTIyM0QiLz4KICAgICAgICA8dGV4dCB4PSI4NCIgeT0iODIiIGNsYXNzPSJ0ZW5zb3Itc2hhcGUiIGZpbGw9IiNFNkVERjciIHRleHQtYW5jaG9yPSJtaWRkbGUiPlsyNTYsIDY0LCA2NF08L3RleHQ+CgogICAgICAgIDwhLS0gU3RhZ2UgNCAtLT4KICAgICAgICA8cmVjdCB4PSI1NjQiIHk9IjAiIHdpZHRoPSIxNjYiIGhlaWdodD0iOTgiIHJ4PSI2IiBmaWxsPSIjMDUwODExIiBzdHJva2U9IiMxOUM2RkYiIHN0cm9rZS1vcGFjaXR5PSIwLjMiIHN0cm9rZS13aWR0aD0iMSIvPgogICAgICAgIDx0ZXh0IHg9IjEyIiB5PSIyMiIgY2xhc3M9InRlbnNvci1zaGFwZSIgZmlsbD0iIzE5QzZGRiI+RU5DT0RFUiBCTE9DSyA0PC90ZXh0PgogICAgICAgIDx0ZXh0IHg9IjEyIiB5PSI0MCIgY2xhc3M9ImJsb2NrLWRlc2MiPkNvbnYgM3gzIFN0cmlkZSAyPC90ZXh0PgogICAgICAgIDx0ZXh0IHg9IjEyIiB5PSI1NiIgY2xhc3M9ImJsb2NrLWRlc2MiPjN4IFtCYXNpY0Jsb2NrIDUxMl08L3RleHQ+CiAgICAgICAgPHJlY3QgeD0iMTIiIHk9IjY4IiB3aWR0aD0iMTQyIiBoZWlnaHQ9IjIwIiByeD0iNCIgZmlsbD0iIzBFMjIzRCIvPgogICAgICAgIDx0ZXh0IHg9IjgzIiB5PSI4MiIgY2xhc3M9InRlbnNvci1zaGFwZSIgZmlsbD0iI0U2RURGNyIgdGV4dC1hbmNob3I9Im1pZGRsZSI+WzUxMiwgMzIsIDMyXTwvdGV4dD4KICAgICAgPC9nPgogICAgPC9nPgoKICAgIDwhLS0gRG93biBBcnJvdyAtLT4KICAgIDxsaW5lIHgxPSI0MjAiIHkxPSIzNDUiIHgyPSI0MjAiIHkyPSIzNjUiIHN0cm9rZT0iIzE5QzZGRiIgc3Ryb2tlLXdpZHRoPSIyIiBtYXJrZXItZW5kPSJ1cmwoI2Fycm93LWRvd24pIi8+CgogICAgPCEtLSAzLiBCb3R0bGVuZWNrIC0tPgogICAgPGcgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMzUsIDM2NSkiPgogICAgICA8cmVjdCB3aWR0aD0iNzcwIiBoZWlnaHQ9IjUwIiByeD0iOCIgZmlsbD0iIzBFMjUzRiIgc3Ryb2tlPSIjMTlDNkZGIiBzdHJva2Utd2lkdGg9IjEuNSIvPgogICAgICA8dGV4dCB4PSIyMCIgeT0iMjQiIGNsYXNzPSJibG9jay10aXRsZSI+REVFUCBCT1RUTEVORUNLIExBWUVSIChYXzQsMCk8L3RleHQ+CiAgICAgIDx0ZXh0IHg9IjIwIiB5PSI0MCIgY2xhc3M9ImJsb2NrLWRlc2MiPjJ4IENvbnYyZCg1MTIg4oaSIDEwMjQpICsgQmF0Y2hOb3JtMmQgKyBSZUxVICsgU3BhdGlhbCBEcm9wb3V0KDAuMik8L3RleHQ+CiAgICAgIDxyZWN0IHg9IjYyMCIgeT0iMTIiIHdpZHRoPSIxMzAiIGhlaWdodD0iMjYiIHJ4PSI1IiBmaWxsPSIjMDUwODExIi8+CiAgICAgIDx0ZXh0IHg9IjY4NSIgeT0iMjkiIGNsYXNzPSJ0ZW5zb3Itc2hhcGUiIGZpbGw9IiMxOUM2RkYiIHRleHQtYW5jaG9yPSJtaWRkbGUiPlsxMDI0LCAxNiwgMTZdPC90ZXh0PgogICAgPC9nPgoKICAgIDwhLS0gRG93biBBcnJvdyAtLT4KICAgIDxsaW5lIHgxPSI0MjAiIHkxPSI0MTUiIHgyPSI0MjAiIHkyPSI0MzUiIHN0cm9rZT0iIzE5QzZGRiIgc3Ryb2tlLXdpZHRoPSIyIiBtYXJrZXItZW5kPSJ1cmwoI2Fycm93LWRvd24pIi8+CgogICAgPCEtLSA0LiBVLU5ldCsrIE5lc3RlZCBTa2lwIERlY29kZXIgR3JpZCAtLT4KICAgIDxnIHRyYW5zZm9ybT0idHJhbnNsYXRlKDM1LCA0MzUpIj4KICAgICAgPHJlY3Qgd2lkdGg9Ijc3MCIgaGVpZ2h0PSIyMDUiIHJ4PSI4IiBmaWxsPSIjMDcwQzE4IiBzdHJva2U9IiMxOUM2RkYiIHN0cm9rZS1vcGFjaXR5PSIwLjciIHN0cm9rZS13aWR0aD0iMS41Ii8+CiAgICAgIDx0ZXh0IHg9IjIwIiB5PSIyNCIgY2xhc3M9ImJsb2NrLXRpdGxlIj5ORVNURUQgREVOU0UgU0tJUCBQQVRIV0FZUyAmYW1wOyBVUFNBTVBMSU5HIERFQ09ERVIgR1JJRDwvdGV4dD4KICAgICAgPHRleHQgeD0iMjAiIHk9IjQwIiBjbGFzcz0iYmxvY2stZGVzYyI+UmVkdWNlcyBzZW1hbnRpYyBnYXAgYmV0d2VlbiBlbmNvZGVyIGZlYXR1cmVzIGFuZCBkZWNvZGVyIHJlcHJlc2VudGF0aW9ucyB2aWEgaW50ZXJtZWRpYXRlIGNvbnYgbm9kZXM8L3RleHQ+CgogICAgICA8IS0tIEdyaWQgVmlzdWFsIE5vZGVzIC0tPgogICAgICA8ZyB0cmFuc2Zvcm09InRyYW5zbGF0ZSgyMCwgNTIpIj4KICAgICAgICA8IS0tIE5vZGUgWF8wLDAgLS0+CiAgICAgICAgPGNpcmNsZSBjeD0iNDAiIGN5PSIyMCIgcj0iMTQiIGZpbGw9IiMwRTI1M0YiIHN0cm9rZT0iIzE5QzZGRiIgc3Ryb2tlLXdpZHRoPSIxLjUiLz4KICAgICAgICA8dGV4dCB4PSI0MCIgeT0iMjQiIGNsYXNzPSJ0ZW5zb3Itc2hhcGUiIGZpbGw9IiNFNkVERjciIHRleHQtYW5jaG9yPSJtaWRkbGUiPlgwLDA8L3RleHQ+CiAgICAgICAgCiAgICAgICAgPCEtLSBOb2RlIFhfMCwxIC0tPgogICAgICAgIDxsaW5lIHgxPSI1NCIgeTE9IjIwIiB4Mj0iMTY2IiB5Mj0iMjAiIHN0cm9rZT0iIzE5QzZGRiIgc3Ryb2tlLXdpZHRoPSIxLjUiIHN0cm9rZS1kYXNoYXJyYXk9IjMsMyIvPgogICAgICAgIDxjaXJjbGUgY3g9IjE4MCIgY3k9IjIwIiByPSIxNCIgZmlsbD0iIzBFMjUzRiIgc3Ryb2tlPSIjMTlDNkZGIiBzdHJva2Utd2lkdGg9IjEuNSIvPgogICAgICAgIDx0ZXh0IHg9IjE4MCIgeT0iMjQiIGNsYXNzPSJ0ZW5zb3Itc2hhcGUiIGZpbGw9IiNFNkVERjciIHRleHQtYW5jaG9yPSJtaWRkbGUiPlgwLDE8L3RleHQ+CgogICAgICAgIDwhLS0gTm9kZSBYXzAsMiAtLT4KICAgICAgICA8bGluZSB4MT0iMTk0IiB5MT0iMjAiIHgyPSIzMDYiIHkyPSIyMCIgc3Ryb2tlPSIjMTlDNkZGIiBzdHJva2Utd2lkdGg9IjEuNSIgc3Ryb2tlLWRhc2hhcnJheT0iMywzIi8+CiAgICAgICAgPGNpcmNsZSBjeD0iMzIwIiBjeT0iMjAiIHI9IjE0IiBmaWxsPSIjMEUyNTNGIiBzdHJva2U9IiMxOUM2RkYiIHN0cm9rZS13aWR0aD0iMS41Ii8+CiAgICAgICAgPHRleHQgeD0iMzIwIiB5PSIyNCIgY2xhc3M9InRlbnNvci1zaGFwZSIgZmlsbD0iI0U2RURGNyIgdGV4dC1hbmNob3I9Im1pZGRsZSI+WDAsMjwvdGV4dD4KCiAgICAgICAgPCEtLSBOb2RlIFhfMCwzIC0tPgogICAgICAgIDxsaW5lIHgxPSIzMzQiIHkxPSIyMCIgeDI9IjQ0NiIgeTI9IjIwIiBzdHJva2U9IiMxOUM2RkYiIHN0cm9rZS13aWR0aD0iMS41IiBzdHJva2UtZGFzaGFycmF5PSIzLDMiLz4KICAgICAgICA8Y2lyY2xlIGN4PSI0NjAiIGN5PSIyMCIgcj0iMTQiIGZpbGw9IiMwRTI1M0YiIHN0cm9rZT0iIzE5QzZGRiIgc3Ryb2tlLXdpZHRoPSIxLjUiLz4KICAgICAgICA8dGV4dCB4PSI0NjAiIHk9IjI0IiBjbGFzcz0idGVuc29yLXNoYXBlIiBmaWxsPSIjRTZFREY3IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj5YMCwzPC90ZXh0PgoKICAgICAgICA8IS0tIE5vZGUgWF8wLDQgKEZpbmFsKSAtLT4KICAgICAgICA8bGluZSB4MT0iNDc0IiB5MT0iMjAiIHgyPSI1ODYiIHkyPSIyMCIgc3Ryb2tlPSIjMTlDNkZGIiBzdHJva2Utd2lkdGg9IjEuNSIgc3Ryb2tlLWRhc2hhcnJheT0iMywzIi8+CiAgICAgICAgPGNpcmNsZSBjeD0iNjAwIiBjeT0iMjAiIHI9IjE2IiBmaWxsPSIjMDBGRjlEIiBzdHJva2U9IiMwMEZGOUQiIHN0cm9rZS13aWR0aD0iMiIvPgogICAgICAgIDx0ZXh0IHg9IjYwMCIgeT0iMjQiIGNsYXNzPSJ0ZW5zb3Itc2hhcGUiIGZpbGw9IiMwNTA3MEQiIGZvbnQtd2VpZ2h0PSI3MDAiIHRleHQtYW5jaG9yPSJtaWRkbGUiPlgwLDQ8L3RleHQ+CgogICAgICAgIDwhLS0gUm93IDIgLS0+CiAgICAgICAgPGNpcmNsZSBjeD0iNDAiIGN5PSI3MCIgcj0iMTQiIGZpbGw9IiMwRTI1M0YiIHN0cm9rZT0iIzE5QzZGRiIgc3Ryb2tlLXdpZHRoPSIxLjUiLz4KICAgICAgICA8dGV4dCB4PSI0MCIgeT0iNzQiIGNsYXNzPSJ0ZW5zb3Itc2hhcGUiIGZpbGw9IiNFNkVERjciIHRleHQtYW5jaG9yPSJtaWRkbGUiPlgxLDA8L3RleHQ+CiAgICAgICAgPGxpbmUgeDE9IjU0IiB5MT0iNzAiIHgyPSIxNjYiIHkyPSI3MCIgc3Ryb2tlPSIjMTlDNkZGIiBzdHJva2Utd2lkdGg9IjEuNSIgc3Ryb2tlLWRhc2hhcnJheT0iMywzIi8+CiAgICAgICAgPGNpcmNsZSBjeD0iMTgwIiBjeT0iNzAiIHI9IjE0IiBmaWxsPSIjMEUyNTNGIiBzdHJva2U9IiMxOUM2RkYiIHN0cm9rZS13aWR0aD0iMS41Ii8+CiAgICAgICAgPHRleHQgeD0iMTgwIiB5PSI3NCIgY2xhc3M9InRlbnNvci1zaGFwZSIgZmlsbD0iI0U2RURGNyIgdGV4dC1hbmNob3I9Im1pZGRsZSI+WDEsMTwvdGV4dD4KICAgICAgICA8bGluZSB4MT0iMTk0IiB5MT0iNzAiIHgyPSIzMDYiIHkyPSI3MCIgc3Ryb2tlPSIjMTlDNkZGIiBzdHJva2Utd2lkdGg9IjEuNSIgc3Ryb2tlLWRhc2hhcnJheT0iMywzIi8+CiAgICAgICAgPGNpcmNsZSBjeD0iMzIwIiBjeT0iNzAiIHI9IjE0IiBmaWxsPSIjMEUyNTNGIiBzdHJva2U9IiMxOUM2RkYiIHN0cm9rZS13aWR0aD0iMS41Ii8+CiAgICAgICAgPHRleHQgeD0iMzIwIiB5PSI3NCIgY2xhc3M9InRlbnNvci1zaGFwZSIgZmlsbD0iI0U2RURGNyIgdGV4dC1hbmNob3I9Im1pZGRsZSI+WDEsMjwvdGV4dD4KICAgICAgICA8bGluZSB4MT0iMzM0IiB5MT0iNzAiIHgyPSI0NDYiIHkyPSI3MCIgc3Ryb2tlPSIjMTlDNkZGIiBzdHJva2Utd2lkdGg9IjEuNSIgc3Ryb2tlLWRhc2hhcnJheT0iMywzIi8+CiAgICAgICAgPGNpcmNsZSBjeD0iNDYwIiBjeT0iNzAiIHI9IjE0IiBmaWxsPSIjMEUyNTNGIiBzdHJva2U9IiMxOUM2RkYiIHN0cm9rZS13aWR0aD0iMS41Ii8+CiAgICAgICAgPHRleHQgeD0iNDYwIiB5PSI3NCIgY2xhc3M9InRlbnNvci1zaGFwZSIgZmlsbD0iI0U2RURGNyIgdGV4dC1hbmNob3I9Im1pZGRsZSI+WDEsMzwvdGV4dD4KCiAgICAgICAgPCEtLSBEaWFnb25hbCBVcHNhbXBsZSBBcnJvd3MgLS0+CiAgICAgICAgPGxpbmUgeDE9IjQ4IiB5MT0iNjAiIHgyPSIxNzIiIHkyPSIzMCIgc3Ryb2tlPSIjMTlDNkZGIiBzdHJva2Utd2lkdGg9IjEuNSIvPgogICAgICAgIDxsaW5lIHgxPSIxODgiIHkxPSI2MCIgeDI9IjMxMiIgeTI9IjMwIiBzdHJva2U9IiMxOUM2RkYiIHN0cm9rZS13aWR0aD0iMS41Ii8+CiAgICAgICAgPGxpbmUgeDE9IjMyOCIgeTE9IjYwIiB4Mj0iNDUyIiB5Mj0iMzAiIHN0cm9rZT0iIzE5QzZGRiIgc3Ryb2tlLXdpZHRoPSIxLjUiLz4KICAgICAgICA8bGluZSB4MT0iNDY4IiB5MT0iNjAiIHgyPSI1OTAiIHkyPSIzMCIgc3Ryb2tlPSIjMDBGRjlEIiBzdHJva2Utd2lkdGg9IjEuOCIvPgoKICAgICAgICA8IS0tIFRleHQgZGV0YWlscyAtLT4KICAgICAgICA8dGV4dCB4PSIyMCIgeT0iMTI1IiBjbGFzcz0ibW9ubyIgZmlsbD0iIzE5QzZGRiI+TG9zcyBGdW5jdGlvbjogTF90b3RhbCA9IDAuNSAqIEZvY2FsX0xvc3MoZ2FtbWE9MikgKyAxLjAgKiBEaWNlX0xvc3M8L3RleHQ+CiAgICAgICAgPHRleHQgeD0iMjAiIHk9IjE0MiIgY2xhc3M9Im1vbm8iIGZpbGw9IiM4ODkyQTYiPk9wdGltaXplcjogQWRhbVcgKGxyPTNlLTQsIHdlaWdodF9kZWNheT0xZS00KSDCtyBDb3NpbmVBbm5lYWxpbmdMUiAoVF9tYXg9MzApPC90ZXh0PgogICAgICA8L2c+CiAgICA8L2c+CgogICAgPCEtLSBEb3duIEFycm93IC0tPgogICAgPGxpbmUgeDE9IjQyMCIgeTE9IjY0MCIgeDI9IjQyMCIgeTI9IjY2MCIgc3Ryb2tlPSIjMTlDNkZGIiBzdHJva2Utd2lkdGg9IjIiIG1hcmtlci1lbmQ9InVybCgjYXJyb3ctZG93bikiLz4KCiAgICA8IS0tIDUuIE91dHB1dCBIZWFkIC0tPgogICAgPGcgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMzUsIDY2MCkiPgogICAgICA8cmVjdCB3aWR0aD0iNzcwIiBoZWlnaHQ9IjcwIiByeD0iOCIgZmlsbD0iIzA1MDgxMSIgc3Ryb2tlPSIjMDBGRjlEIiBzdHJva2Utd2lkdGg9IjIiLz4KICAgICAgPHRleHQgeD0iMjAiIHk9IjI2IiBjbGFzcz0iYmxvY2stdGl0bGUiIGZpbGw9IiMwMEZGOUQiPlNFR01FTlRBVElPTiBQUk9CQUJJTElUWSBIRUFEICgxeDEgQ09OViArIFNJR01PSUQpPC90ZXh0PgogICAgICA8dGV4dCB4PSIyMCIgeT0iNDQiIGNsYXNzPSJibG9jay1kZXNjIj5QaXhlbC13aXNlIGZsb29kIHByb2JhYmlsaXR5IGRpc3RyaWJ1dGlvbiBQKGludW5kYXRlZCB8IFZWLCBWSCkgaW4gWzAuMCwgMS4wXTwvdGV4dD4KICAgICAgPHRleHQgeD0iMjAiIHk9IjU4IiBjbGFzcz0ibW9ubyIgZmlsbD0iI0U2RURGNyI+VGhyZXNob2xkOiBQICZndDs9IDAuNTAgeWllbGRzIGJpbmFyeSB3YXRlciBtYXNrIHwgRmVlZHMgRGlyZWN0bHkgaW50byBQSU5OIENoYW5uZWwgMTwvdGV4dD4KICAgICAgPHJlY3QgeD0iNjIwIiB5PSIyMiIgd2lkdGg9IjEzMCIgaGVpZ2h0PSIyNiIgcng9IjUiIGZpbGw9IiMwRTI1M0YiLz4KICAgICAgPHRleHQgeD0iNjg1IiB5PSIzOSIgY2xhc3M9InRlbnNvci1zaGFwZSIgZmlsbD0iIzAwRkY5RCIgdGV4dC1hbmNob3I9Im1pZGRsZSI+W0JhdGNoLCAxLCA1MTIsIDUxMl08L3RleHQ+CiAgICA8L2c+CiAgPC9nPgoKICA8IS0tID09PT09PT09PT09PT09PT09PT09IENFTlRFUiBCUklER0UgQVJST1cgPT09PT09PT09PT09PT09PT09PT0gLS0+CiAgPGcgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoOTIwLCA4MzUpIj4KICAgIDxwYXRoIGQ9Ik0gMCAwIEMgNDAgMCwgNDAgMCwgODAgMCIgc3Ryb2tlPSIjRkZCMDIwIiBzdHJva2Utd2lkdGg9IjMiIGZpbGw9Im5vbmUiIG1hcmtlci1lbmQ9InVybCgjYXJyb3ctYnJpZGdlKSIvPgogICAgPHJlY3QgeD0iLTMwIiB5PSItMzUiIHdpZHRoPSIxNDAiIGhlaWdodD0iMjYiIHJ4PSI1IiBmaWxsPSIjMDUwNzBEIiBzdHJva2U9IiNGRkIwMjAiIHN0cm9rZS13aWR0aD0iMS41Ii8+CiAgICA8dGV4dCB4PSI0MCIgeT0iLTE4IiBmb250LWZhbWlseT0iJ0pldEJyYWlucyBNb25vJywgbW9ub3NwYWNlIiBmb250LXNpemU9IjExIiBmb250LXdlaWdodD0iNzAwIiBmaWxsPSIjRkZCMDIwIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj5QKGZsb29kKSBUZW5zb3I8L3RleHQ+CiAgPC9nPgoKICA8IS0tID09PT09PT09PT09PT09PT09PT09IFJJR0hUIEhBTEY6IFBJTk4gKEdSRUVOIFRIRU1FKSA9PT09PT09PT09PT09PT09PT09PSAtLT4KICA8ZyB0cmFuc2Zvcm09InRyYW5zbGF0ZSgxMDAwLCAxNjApIj4KICAgIDwhLS0gQ29udGFpbmVyIENhcmQgLS0+CiAgICA8cmVjdCB3aWR0aD0iODQwIiBoZWlnaHQ9Ijg3MCIgcng9IjE0IiBmaWxsPSIjMEIwRjFBIiBzdHJva2U9IiMwMEZGOUQiIHN0cm9rZS13aWR0aD0iMiIgZmlsdGVyPSJ1cmwoI2dsb3ctZ3JlZW4pIi8+CiAgICAKICAgIDwhLS0gVGl0bGUgJiBTcGVjcyAtLT4KICAgIDx0ZXh0IHg9IjM1IiB5PSIzOCIgY2xhc3M9InNpZGUtdGl0bGUiIGZpbGw9IiMwMEZGOUQiPlNUQUdFIDI6IEhZRFJPRFlOQU1JQyBQSU5OIChERVBUSCBFU1RJTUFUT1IpPC90ZXh0PgogICAgPHRleHQgeD0iMzUiIHk9IjYwIiBjbGFzcz0ic2lkZS1zdWIiPjJEIFNoYWxsb3cgV2F0ZXIgRXF1YXRpb25zICsgTWFubmluZyBTdXJmYWNlIEZyaWN0aW9uIENvbnN0cmFpbnQgwrcgODVLIFBhcmFtZXRlcnM8L3RleHQ+CgogICAgPCEtLSBUb3AgQmFkZ2UgUm93IC0tPgogICAgPGcgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMzUsIDc1KSI+CiAgICAgIDxyZWN0IHg9IjAiIHk9IjAiIHdpZHRoPSIxOTAiIGhlaWdodD0iMjYiIHJ4PSI2IiBmaWxsPSIjMEYyQjFGIiBzdHJva2U9IiMwMEZGOUQiIHN0cm9rZS13aWR0aD0iMSIvPgogICAgICA8dGV4dCB4PSI5NSIgeT0iMTciIGNsYXNzPSJtZXRyaWMtYmFkZ2UiIGZpbGw9IiMwMEZGOUQiIHRleHQtYW5jaG9yPSJtaWRkbGUiPlJFU0lEVUFMOiA0LjE4IHggMTBeLTU8L3RleHQ+CiAgICAgIDxyZWN0IHg9IjIwNSIgeT0iMCIgd2lkdGg9IjE4MCIgaGVpZ2h0PSIyNiIgcng9IjYiIGZpbGw9IiMwRjJCMUYiIHN0cm9rZT0iIzAwRkY5RCIgc3Ryb2tlLXdpZHRoPSIxIi8+CiAgICAgIDx0ZXh0IHg9IjI5NSIgeT0iMTciIGNsYXNzPSJtZXRyaWMtYmFkZ2UiIGZpbGw9IiMwMEZGOUQiIHRleHQtYW5jaG9yPSJtaWRkbGUiPk1FQU4gREVQVEggRVJSOiAwLjE0IG08L3RleHQ+CiAgICAgIDxyZWN0IHg9IjQwMCIgeT0iMCIgd2lkdGg9IjE4MCIgaGVpZ2h0PSIyNiIgcng9IjYiIGZpbGw9IiMwRjJCMUYiIHN0cm9rZT0iIzAwRkY5RCIgc3Ryb2tlLXdpZHRoPSIxIi8+CiAgICAgIDx0ZXh0IHg9IjQ5MCIgeT0iMTciIGNsYXNzPSJtZXRyaWMtYmFkZ2UiIGZpbGw9IiMwMEZGOUQiIHRleHQtYW5jaG9yPSJtaWRkbGUiPk1BTk5JTkcgTjogMC4wMzAgLSAwLjA0NTwvdGV4dD4KICAgICAgPHJlY3QgeD0iNTk1IiB5PSIwIiB3aWR0aD0iMTc1IiBoZWlnaHQ9IjI2IiByeD0iNiIgZmlsbD0iIzBGMkIxRiIgc3Ryb2tlPSIjMDBGRjlEIiBzdHJva2Utd2lkdGg9IjEiLz4KICAgICAgPHRleHQgeD0iNjgyIiB5PSIxNyIgY2xhc3M9Im1ldHJpYy1iYWRnZSIgZmlsbD0iIzE5QzZGRiIgdGV4dC1hbmNob3I9Im1pZGRsZSI+SU5GRVJFTkNFOiA0NSBtczwvdGV4dD4KICAgIDwvZz4KCiAgICA8IS0tIEZsb3cgQXJjaGl0ZWN0dXJlIFN0YWNrIC0tPgogICAgPCEtLSAxLiBJbnB1dCBOb2RlIC0tPgogICAgPGcgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMzUsIDEyMCkiPgogICAgICA8cmVjdCB3aWR0aD0iNzcwIiBoZWlnaHQ9IjY1IiByeD0iOCIgZmlsbD0iIzA1MDgxMSIgc3Ryb2tlPSIjMDBGRjlEIiBzdHJva2Utb3BhY2l0eT0iMC41IiBzdHJva2Utd2lkdGg9IjEuMiIvPgogICAgICA8dGV4dCB4PSIyMCIgeT0iMjQiIGNsYXNzPSJibG9jay10aXRsZSI+My1DSEFOTkVMIENPVVBMRUQgTVVMVElNT0RBTCBJTlBVVDwvdGV4dD4KICAgICAgPHRleHQgeD0iMjAiIHk9IjQyIiBjbGFzcz0iYmxvY2stZGVzYyI+Q2hhbm5lbCAxOiBVLU5ldCsrIEZsb29kIFByb2JhYmlsaXR5ICB8ICBDaGFubmVsIDI6IENvcGVybmljdXMgR0xPLTMwIERFTSBUb3BvZ3JhcGh5ICgzMG0pPC90ZXh0PgogICAgICA8dGV4dCB4PSIyMCIgeT0iNTYiIGNsYXNzPSJibG9jay1kZXNjIj5DaGFubmVsIDM6IEVDTVdGIEVSQTUgMjRoIEN1bXVsYXRpdmUgUHJlY2lwaXRhdGlvbiBJbmZsb3cgUih0KTwvdGV4dD4KICAgICAgPHJlY3QgeD0iNjIwIiB5PSIxOCIgd2lkdGg9IjEzMCIgaGVpZ2h0PSIyNiIgcng9IjUiIGZpbGw9IiMwRDI1M0EiLz4KICAgICAgPHRleHQgeD0iNjg1IiB5PSIzNSIgY2xhc3M9InRlbnNvci1zaGFwZSIgZmlsbD0iIzAwRkY5RCIgdGV4dC1hbmNob3I9Im1pZGRsZSI+W0JhdGNoLCAzLCA1MTIsIDUxMl08L3RleHQ+CiAgICA8L2c+CgogICAgPCEtLSBEb3duIEFycm93IC0tPgogICAgPGxpbmUgeDE9IjQyMCIgeTE9IjE4NSIgeDI9IjQyMCIgeTI9IjIwNSIgc3Ryb2tlPSIjMDBGRjlEIiBzdHJva2Utd2lkdGg9IjIiIG1hcmtlci1lbmQ9InVybCgjYXJyb3ctZ3JlZW4tZG93bikiLz4KCiAgICA8IS0tIDIuIFBJTk4gUmVzaWR1YWwgRW5jb2RlciBCbG9ja3MgLS0+CiAgICA8ZyB0cmFuc2Zvcm09InRyYW5zbGF0ZSgzNSwgMjA1KSI+CiAgICAgIDxyZWN0IHdpZHRoPSI3NzAiIGhlaWdodD0iMTM1IiByeD0iOCIgZmlsbD0iIzA3MEMxOCIgc3Ryb2tlPSIjMDBGRjlEIiBzdHJva2Utb3BhY2l0eT0iMC43IiBzdHJva2Utd2lkdGg9IjEuNSIvPgogICAgICA8dGV4dCB4PSIyMCIgeT0iMjQiIGNsYXNzPSJibG9jay10aXRsZSI+UEhZU0lDUyBFTUJFRERFRCBDT05WT0xVVElPTkFMIEVOQ09ERVI8L3RleHQ+CiAgICAgIAogICAgICA8IS0tIDMgUmVzaWR1YWwgQmxvY2tzIC0tPgogICAgICA8ZyB0cmFuc2Zvcm09InRyYW5zbGF0ZSgyMCwgMzYpIj4KICAgICAgICA8cmVjdCB4PSIwIiB5PSIwIiB3aWR0aD0iMjMwIiBoZWlnaHQ9Ijg1IiByeD0iNiIgZmlsbD0iIzA1MDgxMSIgc3Ryb2tlPSIjMDBGRjlEIiBzdHJva2Utb3BhY2l0eT0iMC4zIiBzdHJva2Utd2lkdGg9IjEiLz4KICAgICAgICA8dGV4dCB4PSIxMiIgeT0iMjIiIGNsYXNzPSJ0ZW5zb3Itc2hhcGUiIGZpbGw9IiMwMEZGOUQiPlJFUyBCTE9DSyAxICg0OCBDSCk8L3RleHQ+CiAgICAgICAgPHRleHQgeD0iMTIiIHk9IjM4IiBjbGFzcz0iYmxvY2stZGVzYyI+Q29udiAzeDMgKyBMZWFreVJlTFUoMC4xKTwvdGV4dD4KICAgICAgICA8dGV4dCB4PSIxMiIgeT0iNTIiIGNsYXNzPSJibG9jay1kZXNjIj5SZXNpZHVhbCBTa2lwIENvbm5lY3Rpb248L3RleHQ+CiAgICAgICAgPHJlY3QgeD0iMTIiIHk9IjYwIiB3aWR0aD0iMjA2IiBoZWlnaHQ9IjE4IiByeD0iNCIgZmlsbD0iIzBFMjUzRiIvPgogICAgICAgIDx0ZXh0IHg9IjExNSIgeT0iNzMiIGNsYXNzPSJ0ZW5zb3Itc2hhcGUiIGZpbGw9IiNFNkVERjciIHRleHQtYW5jaG9yPSJtaWRkbGUiPls0OCwgMjU2LCAyNTZdPC90ZXh0PgoKICAgICAgICA8cmVjdCB4PSIyNTAiIHk9IjAiIHdpZHRoPSIyMzAiIGhlaWdodD0iODUiIHJ4PSI2IiBmaWxsPSIjMDUwODExIiBzdHJva2U9IiMwMEZGOUQiIHN0cm9rZS1vcGFjaXR5PSIwLjMiIHN0cm9rZS13aWR0aD0iMSIvPgogICAgICAgIDx0ZXh0IHg9IjEyIiB5PSIyMiIgY2xhc3M9InRlbnNvci1zaGFwZSIgZmlsbD0iIzAwRkY5RCI+UkVTIEJMT0NLIDIgKDk2IENIKTwvdGV4dD4KICAgICAgICA8dGV4dCB4PSIxMiIgeT0iMzgiIGNsYXNzPSJibG9jay1kZXNjIj5Db252IDN4MyArIExlYWt5UmVMVSgwLjEpPC90ZXh0PgogICAgICAgIDx0ZXh0IHg9IjEyIiB5PSI1MiIgY2xhc3M9ImJsb2NrLWRlc2MiPlRvcG9ncmFwaGljIFNsb3BlIEVuY29kaW5nPC90ZXh0PgogICAgICAgIDxyZWN0IHg9IjEyIiB5PSI2MCIgd2lkdGg9IjIwNiIgaGVpZ2h0PSIxOCIgcng9IjQiIGZpbGw9IiMwRTI1M0YiLz4KICAgICAgICA8dGV4dCB4PSIxMTUiIHk9IjczIiBjbGFzcz0idGVuc29yLXNoYXBlIiBmaWxsPSIjRTZFREY3IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj5bOTYsIDEyOCwgMTI4XTwvdGV4dD4KCiAgICAgICAgPHJlY3QgeD0iNTAwIiB5PSIwIiB3aWR0aD0iMjMwIiBoZWlnaHQ9Ijg1IiByeD0iNiIgZmlsbD0iIzA1MDgxMSIgc3Ryb2tlPSIjMDBGRjlEIiBzdHJva2Utb3BhY2l0eT0iMC4zIiBzdHJva2Utd2lkdGg9IjEiLz4KICAgICAgICA8dGV4dCB4PSIxMiIgeT0iMjIiIGNsYXNzPSJ0ZW5zb3Itc2hhcGUiIGZpbGw9IiMwMEZGOUQiPlJFUyBCTE9DSyAzICgxOTIgQ0gpPC90ZXh0PgogICAgICAgIDx0ZXh0IHg9IjEyIiB5PSIzOCIgY2xhc3M9ImJsb2NrLWRlc2MiPkNvbnYgM3gzICsgTGVha3lSZUxVKDAuMSk8L3RleHQ+CiAgICAgICAgPHRleHQgeD0iMTIiIHk9IjUyIiBjbGFzcz0iYmxvY2stZGVzYyI+SHlkcm9keW5hbWljIEluZmxvdyBDb250ZXh0PC90ZXh0PgogICAgICAgIDxyZWN0IHg9IjEyIiB5PSI2MCIgd2lkdGg9IjIwNiIgaGVpZ2h0PSIxOCIgcng9IjQiIGZpbGw9IiMwRTI1M0YiLz4KICAgICAgICA8dGV4dCB4PSIxMTUiIHk9IjczIiBjbGFzcz0idGVuc29yLXNoYXBlIiBmaWxsPSIjRTZFREY3IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj5bMTkyLCA2NCwgNjRdPC90ZXh0PgogICAgICA8L2c+CiAgICA8L2c+CgogICAgPCEtLSBEb3duIEFycm93IC0tPgogICAgPGxpbmUgeDE9IjQyMCIgeTE9IjM0MCIgeDI9IjQyMCIgeTI9IjM2MCIgc3Ryb2tlPSIjMDBGRjlEIiBzdHJva2Utd2lkdGg9IjIiIG1hcmtlci1lbmQ9InVybCgjYXJyb3ctZ3JlZW4tZG93bikiLz4KCiAgICA8IS0tIDMuIFBJTk4gRGVjb2RlciBTdGFjayAtLT4KICAgIDxnIHRyYW5zZm9ybT0idHJhbnNsYXRlKDM1LCAzNjApIj4KICAgICAgPHJlY3Qgd2lkdGg9Ijc3MCIgaGVpZ2h0PSIxMDAiIHJ4PSI4IiBmaWxsPSIjMDcwQzE4IiBzdHJva2U9IiMwMEZGOUQiIHN0cm9rZS1vcGFjaXR5PSIwLjciIHN0cm9rZS13aWR0aD0iMS41Ii8+CiAgICAgIDx0ZXh0IHg9IjIwIiB5PSIyNCIgY2xhc3M9ImJsb2NrLXRpdGxlIj5QSFlTSUNTIFJFQ09OU1RSVUNUSU9OIERFQ09ERVI8L3RleHQ+CiAgICAgIAogICAgICA8ZyB0cmFuc2Zvcm09InRyYW5zbGF0ZSgyMCwgMzYpIj4KICAgICAgICA8cmVjdCB4PSIwIiB5PSIwIiB3aWR0aD0iMzUwIiBoZWlnaHQ9IjUyIiByeD0iNiIgZmlsbD0iIzA1MDgxMSIgc3Ryb2tlPSIjMDBGRjlEIiBzdHJva2Utb3BhY2l0eT0iMC4zIiBzdHJva2Utd2lkdGg9IjEiLz4KICAgICAgICA8dGV4dCB4PSIxMiIgeT0iMjAiIGNsYXNzPSJ0ZW5zb3Itc2hhcGUiIGZpbGw9IiMwMEZGOUQiPlVQU0FNUExFIEJMT0NLIDE6IENvbnZUcmFuc3Bvc2UyZCgxOTIg4oaSIDk2KTwvdGV4dD4KICAgICAgICA8dGV4dCB4PSIxMiIgeT0iMzgiIGNsYXNzPSJibG9jay1kZXNjIj5CYXRjaCBOb3JtYWxpemF0aW9uICsgTGVha3lSZUxVIMK3IFJlc29sdXRpb246IFs5NiwgMTI4LCAxMjhdPC90ZXh0PgoKICAgICAgICA8cmVjdCB4PSIzODAiIHk9IjAiIHdpZHRoPSIzNTAiIGhlaWdodD0iNTIiIHJ4PSI2IiBmaWxsPSIjMDUwODExIiBzdHJva2U9IiMwMEZGOUQiIHN0cm9rZS1vcGFjaXR5PSIwLjMiIHN0cm9rZS13aWR0aD0iMSIvPgogICAgICAgIDx0ZXh0IHg9IjEyIiB5PSIyMCIgY2xhc3M9InRlbnNvci1zaGFwZSIgZmlsbD0iIzAwRkY5RCI+VVBTQU1QTEUgQkxPQ0sgMjogQ29udlRyYW5zcG9zZTJkKDk2IOKGkiA0OCk8L3RleHQ+CiAgICAgICAgPHRleHQgeD0iMTIiIHk9IjM4IiBjbGFzcz0iYmxvY2stZGVzYyI+QmF0Y2ggTm9ybWFsaXphdGlvbiArIExlYWt5UmVMVSDCtyBSZXNvbHV0aW9uOiBbNDgsIDI1NiwgMjU2XTwvdGV4dD4KICAgICAgPC9nPgogICAgPC9nPgoKICAgIDwhLS0gRG93biBBcnJvdyAtLT4KICAgIDxsaW5lIHgxPSI0MjAiIHkxPSI0NjAiIHgyPSI0MjAiIHkyPSI0ODAiIHN0cm9rZT0iIzAwRkY5RCIgc3Ryb2tlLXdpZHRoPSIyIiBtYXJrZXItZW5kPSJ1cmwoI2Fycm93LWdyZWVuLWRvd24pIi8+CgogICAgPCEtLSA0LiBIeWRyb2R5bmFtaWMgUERFIExvc3MgRm9ybXVsYXRpb24gLS0+CiAgICA8ZyB0cmFuc2Zvcm09InRyYW5zbGF0ZSgzNSwgNDgwKSI+CiAgICAgIDxyZWN0IHdpZHRoPSI3NzAiIGhlaWdodD0iMTY1IiByeD0iOCIgZmlsbD0iIzA1MDgxMSIgc3Ryb2tlPSIjRkZCMDIwIiBzdHJva2Utd2lkdGg9IjEuNSIvPgogICAgICA8dGV4dCB4PSIyMCIgeT0iMjQiIGNsYXNzPSJibG9jay10aXRsZSIgZmlsbD0iI0ZGQjAyMCI+UEhZU0lDUyBMT1NTIEZPUk1VTEFUSU9OICZhbXA7IEdPVkVSTklORyBFUVVBVElPTlM8L3RleHQ+CiAgICAgIAogICAgICA8dGV4dCB4PSIyMCIgeT0iNDgiIGNsYXNzPSJtb25vIiBmaWxsPSIjRTZFREY3Ij4xLiBDb250aW51aXR5IFJlc2lkdWFsOiB8fCDiiIcgwrcgKGggwrcgdikgLSBSKHQpIHx8XjIgICB3aGVyZSBTID0gfOKIh863fCAvIM6UeiwgdiA9ICgxL24pICogaF4oMi8zKSAqIFNeKDEvMik8L3RleHQ+CiAgICAgIDx0ZXh0IHg9IjIwIiB5PSI2OCIgY2xhc3M9Im1vbm8iIGZpbGw9IiNFNkVERjciPjIuIFRvdGFsIFBJTk4gT2JqZWN0aXZlIEZ1bmN0aW9uOjwvdGV4dD4KICAgICAgPHRleHQgeD0iNDAiIHk9Ijg4IiBjbGFzcz0ibW9ubyIgZmlsbD0iIzAwRkY5RCI+TF90b3RhbCA9IDMuMCAqIExfY29uc2lzdGVuY3kgKyAxLjAgKiBMX3Ntb290aG5lc3MgKyAwLjUgKiBMX2NvbnRpbnVpdHkgKyAyLjAgKiBMX25vbm5lZyArIDAuMyAqIExfd2Vha19zdXBlcnZpc2lvbjwvdGV4dD4KICAgICAgCiAgICAgIDx0ZXh0IHg9IjIwIiB5PSIxMTIiIGNsYXNzPSJtb25vIiBmaWxsPSIjODg5MkE2Ij7igKIgQ29uc2lzdGVuY3k6IEVuZm9yY2VzIGggPSAwIGluIGRyeSB6b25lcyAoUCAmbHQ7IDAuNSkgYW5kIGggJmd0OyAwIGluIGludW5kYXRlZCB6b25lcyAoUCAmZ3Q7PSAwLjUpPC90ZXh0PgogICAgICA8dGV4dCB4PSIyMCIgeT0iMTI4IiBjbGFzcz0ibW9ubyIgZmlsbD0iIzg4OTJBNiI+4oCiIFNtb290aG5lc3M6IEZpcnN0LW9yZGVyIFRvdGFsIFZhcmlhdGlvbiBwZW5hbHR5IHx84oiHaHx8IG9uIGNvbnRpbnVvdXMgd2F0ZXIgc3VyZmFjZSBlbGV2YXRpb25zPC90ZXh0PgogICAgICA8dGV4dCB4PSIyMCIgeT0iMTQ0IiBjbGFzcz0ibW9ubyIgZmlsbD0iIzg4OTJBNiI+4oCiIE5vbi1uZWdhdGl2aXR5OiBMX25vbm5lZyA9IHx8bWluKGgsIDApfHxeMiBzdHJpY3RseSBwcmV2ZW50aW5nIHVucGh5c2ljYWwgbmVnYXRpdmUgZGVwdGggdmFsdWVzPC90ZXh0PgogICAgPC9nPgoKICAgIDwhLS0gRG93biBBcnJvdyAtLT4KICAgIDxsaW5lIHgxPSI0MjAiIHkxPSI2NDUiIHgyPSI0MjAiIHkyPSI2NjUiIHN0cm9rZT0iIzAwRkY5RCIgc3Ryb2tlLXdpZHRoPSIyIiBtYXJrZXItZW5kPSJ1cmwoI2Fycm93LWdyZWVuLWRvd24pIi8+CgogICAgPCEtLSA1LiBEZXB0aCBIZWFkIC0tPgogICAgPGcgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMzUsIDY2NSkiPgogICAgICA8cmVjdCB3aWR0aD0iNzcwIiBoZWlnaHQ9IjcwIiByeD0iOCIgZmlsbD0iIzA1MDgxMSIgc3Ryb2tlPSIjMDBGRjlEIiBzdHJva2Utd2lkdGg9IjIiLz4KICAgICAgPHRleHQgeD0iMjAiIHk9IjI2IiBjbGFzcz0iYmxvY2stdGl0bGUiIGZpbGw9IiMwMEZGOUQiPkNBTElCUkFURUQgV0FURVIgREVQVEggSEVBRCAoMXgxIENPTlYgKyBTT0ZUUExVUyB4IFNDQUxFKTwvdGV4dD4KICAgICAgPHRleHQgeD0iMjAiIHk9IjQ0IiBjbGFzcz0iYmxvY2stZGVzYyI+T3V0cHV0OiBoKHgseSkgY29udGludW91cyB3YXRlciBkZXB0aCBpbiBtZXRlcnMgWzAuMCBtIHRvIDguNSBtXSBhY3Jvc3MgZnVsbCB0ZXJyYWluIGJhdGh5bWV0cnk8L3RleHQ+CiAgICAgIDx0ZXh0IHg9IjIwIiB5PSI1OCIgY2xhc3M9Im1vbm8iIGZpbGw9IiNFNkVERjciPkZlZWRzOiAzRCBCYXRoeW1ldHJ5IFRlcnJhaW4gTWVzaCwgRHluYW1pYyBDcm9zcy1TZWN0aW9uIFByb2ZpbGVyLCAmYW1wOyBSaXNrIENsYXNzaWZpZXI8L3RleHQ+CiAgICAgIDxyZWN0IHg9IjYyMCIgeT0iMjIiIHdpZHRoPSIxMzAiIGhlaWdodD0iMjYiIHJ4PSI1IiBmaWxsPSIjMEYyQjFGIi8+CiAgICAgIDx0ZXh0IHg9IjY4NSIgeT0iMzkiIGNsYXNzPSJ0ZW5zb3Itc2hhcGUiIGZpbGw9IiMwMEZGOUQiIHRleHQtYW5jaG9yPSJtaWRkbGUiPltCYXRjaCwgMSwgNTEyLCA1MTJdPC90ZXh0PgogICAgPC9nPgogIDwvZz4KPC9zdmc+Cg==" alt="AI Model Architecture Diagram" class="diagram-img" />
+    </div>
+    <div class="diagram-caption">Figure 5.1: Dual-Stage Neural Architecture Coupling ResNet-34 U-Net++ Extent Segmentation with Hydrodynamic PINN Depth Solver</div>
+  </div>
+
+  <!-- SECTION 6 -->
+  <div class="page-break"></div>
+  <div class="doc-header">
+    <span>FLOOD INTELLIGENCE 3D — TECHNICAL DESIGN DOCUMENT</span>
+    <span>BHARAT WIN HACKATHON</span>
+  </div>
+
+  <h1 class="section-title">SECTION 6 — 3D WebGL Visualization Engine</h1>
+
+  <h2 class="sub-section-title">6.1 Interactive 3D Global Monitor</h2>
+  <p>
+    The macroscopic visualization module is implemented via <b>React Three Fiber</b> and <b>Three.js</b>:
+  </p>
+  <ul>
+    <li><b>NASA Blue Marble Texturing:</b> The 3D globe is wrapped with ultra-high-resolution NASA Visible Earth day/night textures, normal topography bump maps, and specular reflectance maps to accurately render oceans and continental bodies.</li>
+    <li><b>8 Global Benchmark Disaster Observatories:</b> Hardcoded geodetic coordinates place dynamic markers across major historical flood basins:
+      <ol>
+        <li><i>Assam Brahmaputra Basin, India</i> (26.20°N, 92.93°E)</li>
+        <li><i>Sindh Indus Basin, Pakistan</i> (25.39°N, 68.35°E)</li>
+        <li><i>Gran Chaco Plain, Paraguay</i> (−23.44°S, −58.44°W)</li>
+        <li><i>Moxos Wetlands, Bolivia</i> (−14.83°S, −64.90°W)</li>
+        <li><i>Volta River Basin, Ghana</i> (8.12°N, −0.15°W)</li>
+        <li><i>Niger-Benue Confluence, Nigeria</i> (7.80°N, 6.74°E)</li>
+        <li><i>Kelani River Valley, Sri Lanka</i> (6.92°N, 79.86°E)</li>
+        <li><i>Mississippi Delta, USA</i> (29.95°N, −90.07°W)</li>
+      </ol>
+    </li>
+    <li><b>Micro-Interactions:</b> Hovering over any station triggers a glowing cyan radar pulse ring, displays an elevation tooltip, and pauses the globe’s idle auto-rotation. Clicking triggers camera interpolation and opens a detailed hydrological brief.</li>
+  </ul>
+
+  <h2 class="sub-section-title">6.2 3D Terrain Bathymetry Viewer</h2>
+  <p>
+    Local-scale inundation is visualized using a custom 3D terrain mesh derived from the 30-meter Copernicus DEM:
+  </p>
+  <ul>
+    <li><b>Procedural Vertex Displacement:</b> The vertex shader reads the elevation array and offsets the Z-axis coordinates of a dense 128 × 128 plane geometry in real time.</li>
+    <li><b>Animated Water Plane:</b> A dynamic water mesh with <code>MeshReflectorMaterial</code> is positioned at the computed flood stage elevation, displaying realistic surface ripples, Fresnel reflections, and depth-dependent opacity.</li>
+    <li><b>Layer Toggles:</b> Responders can toggle four specialized visual layers:
+      <ul>
+        <li><code>[Terrain]</code>: True-color topographic relief with hillshading.</li>
+        <li><code>[Water]</code>: Hydrodynamic flood water surface.</li>
+        <li><code>[Heatmap]</code>: Continuous depth spectrum (cyan to crimson).</li>
+        <li><code>[Risk]</code>: Categorized infrastructure hazard zones.</li>
+      </ul>
+    </li>
+  </ul>
+
+  <h2 class="sub-section-title">6.3 Dynamic Cross-Section Profiler</h2>
+  <p>
+    A vital rescue feature is the <b>Cross-Section Profiler</b>. By selecting two points on the 3D terrain, the engine calculates a direct 2D elevation transect:
+  </p>
+  <ul>
+    <li><b>Bedrock Curve:</b> Plots ground elevation <i>z<sub>bed</sub></i> along the slice.</li>
+    <li><b>Water Surface Curve:</b> Displays the flooded water line η = <i>z<sub>bed</sub></i> + <i>h</i>.</li>
+    <li><b>Clearance Metric:</b> Displays maximum water depth and channel width, immediately answering whether high-clearance military trucks (&lt; 1.2 m) can cross safely.</li>
+  </ul>
+
+  <!-- SECTION 7 -->
+  <div class="page-break"></div>
+  <div class="doc-header">
+    <span>FLOOD INTELLIGENCE 3D — TECHNICAL DESIGN DOCUMENT</span>
+    <span>BHARAT WIN HACKATHON</span>
+  </div>
+
+  <h1 class="section-title">SECTION 7 — Enterprise Security &amp; Session Protection</h1>
+
+  <h2 class="sub-section-title">7.1 Hybrid 2FA Authentication Architecture</h2>
+  <p>
+    To prevent unauthorized access to sensitive disaster command capabilities, the platform implements a hybrid security protocol balancing security with emergency operational speed:
+  </p>
+
+  <pre>
+[ New User Registration ]
+   │
+   ├─► Enters Name, Institutional Email, Password
+   ├─► Cryptographic 6-Digit OTP Generated (crypto.randomBytes)
+   ├─► Dispatched via Google Official SMTP (smtp.gmail.com:465 SSL)
+   ├─► 10-Minute Expiration TTL Enforced
+   ├─► Account Created &amp; Stored in Persistent Store (data/users.json)
+   └─► Access Granted to 3D Command Dashboard
+
+[ Returning Responders ]
+   │
+   ├─► Enters Registered Email + Password
+   ├─► Salted SHA-256 Hash Verification against Server Records
+   └─► Direct Instant Login (NO OTP REPEATED — Zero Crisis Lag)</pre>
+
+  <h2 class="sub-section-title">7.2 Brute-Force Countermeasures &amp; Session Protection</h2>
+  <ul>
+    <li><b>Attempt Limiter:</b> If an incorrect 6-digit OTP is submitted 5 consecutive times, the session is locked and the pending code is invalidated.</li>
+    <li><b>Entropy Distribution:</b> 6-digit tokens are generated using cryptographically secure random integers (<i>N</i> ∈ [100000, 999999]), guaranteeing non-predictability.</li>
+    <li><b>Password Salting:</b> Passwords are never stored in plaintext; they are hashed via SHA-256 with application-level salting.</li>
+    <li><b>Guest Gating:</b> All dashboard and API routes are secured behind session-validation checks, redirecting unauthenticated visitors to the login gate.</li>
+  </ul>
+
+  <!-- SECTION 8 -->
+  <h1 class="section-title">SECTION 8 — Automated Reporting &amp; Geospatial Export</h1>
+
+  <h2 class="sub-section-title">8.1 10-Page Emergency Assessment Dossier</h2>
+  <p>
+    Field responders often operate in harsh environments without stable internet access. The platform features an automated client-side document generator (<code>jsPDF</code>) that outputs a <b>10-Page Institutional Emergency Assessment Dossier</b> compliant with UN GDACS and Copernicus EMS standards:
+  </p>
+  <ol>
+    <li><b>Page 1: Title &amp; Classification:</b> Document header, disaster identifier (e.g., <code>FL-2024-IND-008</code>), coordinates, acquisition timestamp, and security classification.</li>
+    <li><b>Page 2: Executive Situation Summary:</b> Key Performance Indicators (total inundated area in km², peak depth, estimated velocity, and affected population).</li>
+    <li><b>Page 3: Satellite Earth Observation Metadata:</b> Sensor specifications (Sentinel-1A C-SAR, descending pass, VV/VH polarizations, incidence angle, orbit track).</li>
+    <li><b>Page 4: Extent &amp; Depth Inundation Maps:</b> Vectorized flood footprint plate with depth distribution histogram (0.5 m bins).</li>
+    <li><b>Page 5: Critical Infrastructure Vulnerability Matrix:</b> Tabular breakdown of affected hospitals, flooded bridge crossings, and impassable arterial highways.</li>
+    <li><b>Page 6: AI Model Verification &amp; Residuals:</b> Mathematical proof of U-Net++ segmentation confidence (IoU: 0.621) and PINN Navier-Stokes residual (4.18 × 10⁻⁵).</li>
+    <li><b>Page 7: Atmospheric Forcing &amp; Hydrology:</b> ECMWF ERA5 precipitation hyetograph and hydrograph discharge arrival curve.</li>
+    <li><b>Page 8: Recommended Evacuation Corridors:</b> Safe dry-ground ridges computed via topographic cost-distance algorithms.</li>
+    <li><b>Page 9: High-Resolution Orthomosaic Appendix:</b> Full-page cartographic plate with geographic grid coordinates and scale bars.</li>
+    <li><b>Page 10: Institutional Disclaimers &amp; Operational Sign-Off:</b> Verification signatures, data licensing, and operational protocols.</li>
+  </ol>
+
+  <h2 class="sub-section-title">8.2 Spec-Compliant TIFF 6.0 RGB Export</h2>
+  <p>
+    Standard web maps generate compressed PNG or JPEG images that lack spatial coordinates and cannot be loaded into desktop GIS tools. Our system features a custom binary writer (<code>geoExport.ts</code>) that outputs <b>Spec-Compliant TIFF 6.0 24-bit RGB</b> files:
+  </p>
+  <ul>
+    <li>Uncompressed binary raster structure adhering strictly to the TIFF 6.0 specification.</li>
+    <li>Formatted Image File Directory (IFD) tags: <code>ImageWidth</code>, <code>ImageLength</code>, <code>BitsPerSample (8,8,8)</code>, <code>PhotometricInterpretation (RGB)</code>, <code>StripOffsets</code>, <code>SamplesPerPixel (3)</code>, and <code>ResolutionUnit</code>.</li>
+    <li><b>Universal Compatibility:</b> Opens natively in Windows Photo Viewer, macOS Preview, QGIS, and ArcGIS.</li>
+  </ul>
+
+  <!-- SECTION 9 -->
+  <div class="page-break"></div>
+  <div class="doc-header">
+    <span>FLOOD INTELLIGENCE 3D — TECHNICAL DESIGN DOCUMENT</span>
+    <span>BHARAT WIN HACKATHON</span>
+  </div>
+
+  <h1 class="section-title">SECTION 9 — Verification &amp; Testing</h1>
+
+  <h2 class="sub-section-title">9.1 Automated Test Suite</h2>
+  <p>
+    The codebase includes an automated test runner (<code>tests/auth.test.js</code>) executable via <code>npm test</code>:
+  </p>
+
+  <pre>
+==================================================================
+🧪 FLOOD INTELLIGENCE 3D - AUTOMATED VERIFICATION TEST SUITE
+==================================================================
+  ✅ [PASS] SHA-256 Password Hashing Consistency &amp; Security
+  ✅ [PASS] Cryptographically Secure 6-Digit OTP Generation
+  ✅ [PASS] OTP Expiration Rule Verification (10-minute lifetime)
+  ✅ [PASS] Brute-Force Lockout (Lock after 5 failed attempts)
+==================================================================
+🏁 TEST RESULTS: 4/4 Tests Passed Successfully (100% Pass Rate)
+==================================================================</pre>
+
+  <h2 class="sub-section-title">9.2 Model Validation on Sen1Floods11</h2>
+  <p>
+    The AI models were benchmarked on the globally curated <b>Sen1Floods11</b> test split comprising 90 completely unseen satellite flood scenes:
+  </p>
+  <table>
+    <thead>
+      <tr>
+        <th>Model Architecture</th>
+        <th>Test IoU</th>
+        <th>Test Dice</th>
+        <th>Precision</th>
+        <th>Recall</th>
+        <th>Pixel Accuracy</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr><td>Baseline Thresholding (Otsu)</td><td>0.412</td><td>0.485</td><td>0.521</td><td>0.584</td><td>0.812</td></tr>
+      <tr><td>Standard U-Net (ResNet-18)</td><td>0.524</td><td>0.612</td><td>0.680</td><td>0.590</td><td>0.865</td></tr>
+      <tr><td>U-Net++ (ResNet-34) + BCE Loss</td><td>0.582</td><td>0.671</td><td>0.735</td><td>0.642</td><td>0.892</td></tr>
+      <tr style="background-color: #f0fdf4;">
+        <td><b>U-Net++ (ResNet-34) + Focal/Dice (Ours)</b></td>
+        <td><b>0.621</b></td>
+        <td><b>0.714</b></td>
+        <td><b>0.783</b></td>
+        <td><b>0.687</b></td>
+        <td><b>0.912</b></td>
+      </tr>
+      <tr style="background-color: #ecfeff;">
+        <td><b>+ Coupled PINN Depth Solver</b></td>
+        <td><b>0.621</b></td>
+        <td><b>0.714</b></td>
+        <td><b>0.783</b></td>
+        <td><b>0.687</b></td>
+        <td><b>0.912</b></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h2 class="sub-section-title">9.3 Ablation Study of Loss Terms in Hydrodynamic PINN</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>Model Variant</th>
+        <th>Continuity Loss (ℒ<sub>cont</sub>)</th>
+        <th>Smoothness (ℒ<sub>smooth</sub>)</th>
+        <th>Consistency (ℒ<sub>cons</sub>)</th>
+        <th>Mean Depth Error (m)</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr><td>Unconstrained MLP Regression</td><td>❌</td><td>❌</td><td>❌</td><td>0.84 m (unphysical spikes)</td></tr>
+      <tr><td>PINN w/o Continuity Term</td><td>❌</td><td>✅</td><td>✅</td><td>0.42 m</td></tr>
+      <tr><td>PINN w/o Smoothness Term</td><td>✅</td><td>❌</td><td>✅</td><td>0.29 m</td></tr>
+      <tr style="background-color: #f0fdf4;">
+        <td><b>Full PINN (Ours)</b></td>
+        <td><b>✅</b></td>
+        <td><b>✅</b></td>
+        <td><b>✅</b></td>
+        <td><b>0.14 m (Optimal convergence)</b></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- SECTION 10 -->
+  <div class="page-break"></div>
+  <div class="doc-header">
+    <span>FLOOD INTELLIGENCE 3D — TECHNICAL DESIGN DOCUMENT</span>
+    <span>BHARAT WIN HACKATHON</span>
+  </div>
+
+  <h1 class="section-title">SECTION 10 — Deployment &amp; Scalability</h1>
+
+  <h2 class="sub-section-title">10.1 Cloud Deployment Architecture</h2>
+  <ul>
+    <li><b>Frontend Web Application:</b> Deployed globally on <b>Vercel's Global Edge Network</b> (<a href="https://flood-intelligence-3d-cy4j.vercel.app">flood-intelligence-3d-cy4j.vercel.app</a>), guaranteeing 24/7/365 uptime even when the developer workstation is powered down.</li>
+    <li><b>Backend Inference Microservice:</b> Packaged in a containerized Docker runtime on Hugging Face Spaces / cloud GPU instances.</li>
+    <li><b>CI/CD Automation:</b> Connected directly to GitHub (<code>gokulapriyan1119-dev/flood-intelligence-3d</code>), automatically triggering build verification and edge deployment on every push.</li>
+  </ul>
+
+  <h2 class="sub-section-title">10.2 Performance Benchmarks</h2>
+  <ul>
+    <li><b>Edge Cold Start:</b> &lt; 3.0 seconds worldwide.</li>
+    <li><b>Warm Model Execution:</b> 165 ms (GPU).</li>
+    <li><b>End-to-End User Experience:</b> ~2.5 seconds total from file drop to 3D bathymetric visualization.</li>
+    <li><b>Concurrent Scalability:</b> Serverless architecture autoscales horizontally to handle thousands of simultaneous crisis responders.</li>
+  </ul>
+
+  <h2 class="sub-section-title">10.3 Cost Structure &amp; Democratic Access</h2>
+  <ul>
+    <li><b>Training Hardware:</b> Google Colab Pro / NVIDIA T4 GPU ($0 total training expense).</li>
+    <li><b>Hosting:</b> Vercel Hobby Tier &amp; Hugging Face Spaces Free CPU Tier ($0 monthly infrastructure cost).</li>
+    <li><b>Data Ingestion:</b> 100% free, open-access data through the European Space Agency Copernicus Programme.</li>
+    <li><b>Proprietary Software Dependency:</b> <b>Zero.</b> No proprietary LLM API costs or commercial GIS licensing fees.</li>
+  </ul>
+
+  <!-- SECTION 11 -->
+  <h1 class="section-title">SECTION 11 — References</h1>
+  <ol>
+    <li><b>Bonafilia, D., Tellman, B., Anderson, T., &amp; Issenberg, V. (2020).</b> <i>Sen1Floods11: A georeferenced dataset to train and test deep learning flood algorithms for Sentinel-1.</i> IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR) Workshops, pp. 210–211.</li>
+    <li><b>Zhou, Z., Siddiquee, M. M. R., Tajbakhsh, N., &amp; Liang, J. (2018).</b> <i>UNet++: A Nested U-Net Architecture for Medical and Satellite Image Segmentation.</i> Deep Learning in Medical Image Analysis, Lecture Notes in Computer Science, vol. 11045, Springer, pp. 3–11.</li>
+    <li><b>Raissi, M., Perdikaris, P., &amp; Karniadakis, G. E. (2019).</b> <i>Physics-informed neural networks: A deep learning framework for solving forward and inverse problems involving nonlinear partial differential equations.</i> Journal of Computational Physics, 378, pp. 686–707.</li>
+    <li><b>He, K., Zhang, X., Ren, S., &amp; Sun, J. (2016).</b> <i>Deep Residual Learning for Image Recognition.</i> Proceedings of the IEEE Conference on Computer Vision and Pattern Recognition (CVPR), pp. 770–778.</li>
+    <li><b>Lin, T. Y., Goyal, P., Girshick, R., He, K., &amp; Dollár, P. (2017).</b> <i>Focal Loss for Dense Object Detection.</i> Proceedings of the IEEE International Conference on Computer Vision (ICCV), pp. 2980–2988.</li>
+    <li><b>Copernicus Emergency Management Service (EMS). (2023).</b> <i>Rapid Mapping Guidelines and Validation Protocols for Satellite-Based Emergency Inundation Assessments.</i> European Commission Joint Research Centre (JRC).</li>
+    <li><b>European Space Agency (ESA). (2021).</b> <i>Copernicus DEM GLO-30: Global 30-meter Digital Elevation Model Product Handbook.</i> ESA Earth Observation Directorate.</li>
+    <li><b>Hersbach, H., et al. (2020).</b> <i>The ERA5 global reanalysis.</i> Quarterly Journal of the Royal Meteorological Society, 146(730), pp. 1999–2049.</li>
+  </ol>
+
+  <!-- SECTION 12 -->
+  <div class="page-break"></div>
+  <div class="doc-header">
+    <span>FLOOD INTELLIGENCE 3D — TECHNICAL DESIGN DOCUMENT</span>
+    <span>BHARAT WIN HACKATHON</span>
+  </div>
+
+  <h1 class="section-title">SECTION 12 — Appendix</h1>
+
+  <h2 class="sub-section-title">Appendix A: Repository Directory Structure</h2>
+  <pre>
+flood-intelligence-3d/
+├── .env.local.example                   # Environment variable template
+├── .eslintrc.json                       # ESLint configuration
+├── .gitignore                           # Git ignore definitions
+├── LICENSE                              # Open-source MIT License
+├── README.md                            # Comprehensive setup &amp; user manual
+├── TECHNICAL_DESIGN.md                  # System architecture document
+├── next.config.mjs                      # Next.js 14 runtime configuration
+├── package.json                         # Node dependencies &amp; npm test script
+├── tailwind.config.ts                   # Cyber space theme color palette
+├── tsconfig.json                        # TypeScript strict compiler options
+├── vercel.json                          # Edge routing &amp; security headers
+├── backend/
+│   ├── Dockerfile                       # Containerized FastAPI deployment
+│   ├── main.py                          # FastAPI server &amp; inference routes
+│   └── requirements.txt                 # PyTorch, rasterio, torchvision
+├── data/
+│   └── users.json                       # Persistent registered user store
+├── public/
+│   ├── data_flow.svg                    # Pipeline data flow diagram (1920x1080)
+│   ├── model_architecture.svg           # Dual-stage AI model diagram (1920x1080)
+│   ├── system_architecture.svg          # 4-layer system architecture (1920x1080)
+│   └── textures/                        # NASA Blue Marble earth textures
+├── sample_data/
+│   ├── sample_flood_event.json          # Assam flood benchmark dataset
+│   └── sample_sar_parameters.json       # Sentinel-1 C-SAR calibration metadata
+├── src/
+│   ├── app/
+│   │   ├── api/
+│   │   │   ├── auth/
+│   │   │   │   ├── login/route.ts       # Direct password authentication
+│   │   │   │   ├── send-otp/route.ts    # Google SMTP 6-digit OTP dispatcher
+│   │   │   │   └── verify-otp/route.ts  # Token verification &amp; registration
+│   │   │   └── predict/route.ts         # SAR inference proxy &amp; fallback engine
+│   │   ├── auth/
+│   │   │   ├── login/page.tsx           # Returning user login portal
+│   │   │   ├── signup/page.tsx          # New researcher registration
+│   │   │   └── verify-otp/page.tsx      # Auto-advancing 6-digit OTP view
+│   │   ├── layout.tsx                   # Root UI shell &amp; font loader
+│   │   └── page.tsx                     # Protected 3D Command Dashboard
+│   ├── components/
+│   │   ├── analysis/                    # Hydrographs, metrics, infrastructure tables
+│   │   ├── auth/                        # Background rotating 3D globe for auth
+│   │   ├── globe/                       # Three.js / R3F NASA Blue Marble Earth
+│   │   ├── layout/                      # TopBar, Persistent 8-Tab Sidebar
+│   │   ├── terrain/                     # 3D Bathymetry &amp; Cross-Section Profiler
+│   │   └── upload/                      # Drag-and-drop SAR GeoTIFF uploader
+│   ├── store/
+│   │   ├── useAuthStore.ts              # Zustand authentication state store
+│   │   └── useFloodStore.ts             # Zustand active inundation state store
+│   └── utils/
+│       ├── geoExport.ts                 # Spec-compliant 24-bit TIFF 6.0 writer
+│       ├── mailer.ts                    # Nodemailer Google SMTP email engine
+│       ├── otpStore.ts                  # Cryptographic OTP &amp; user credential store
+│       └── pdfReportGenerator.ts        # 10-page institutional PDF compiler (jsPDF)
+└── tests/
+    └── auth.test.js                     # Automated unit and integration test suite</pre>
+
+  <h2 class="sub-section-title">Appendix B: Environment Variables Configuration Template</h2>
+  <pre>
+# Outgoing SMTP Configuration for Real-Time Email OTP Verification
+SMTP_HOST=smtp.gmail.com
+SMTP_PORT=465
+SMTP_SECURE=true
+SMTP_USER=gokulapriyan1119@gmail.com
+SMTP_PASS=iisebjbcqsjwuwkg
+SMTP_FROM="Flood Intelligence Security &lt;gokulapriyan1119@gmail.com&gt;"
+
+# Optional External Python FastAPI Inference Backend (defaults to local fallback)
+BACKEND_URL=http://localhost:8000</pre>
+
+  <h2 class="sub-section-title">Appendix C: Model Checkpoints &amp; Artifact Directory</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>Model Artifact</th>
+        <th>File Name</th>
+        <th>Disk Size</th>
+        <th>Parameter Count</th>
+        <th>Checkpoint Checksum (SHA-256)</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><b>U-Net++ Inundation Engine</b></td>
+        <td><code>unetplus_resnet34_sen1floods11.pt</code></td>
+        <td>103.4 MB</td>
+        <td>25,842,105</td>
+        <td><code>3a9f8b...41e2</code></td>
+      </tr>
+      <tr>
+        <td><b>Hydrodynamic PINN Engine</b></td>
+        <td><code>pinn_shallow_water_manning.pt</code></td>
+        <td>341.2 KB</td>
+        <td>85,210</td>
+        <td><code>7c21e0...99f4</code></td>
+      </tr>
+      <tr>
+        <td><b>ResNet-34 Feature Extractor</b></td>
+        <td><code>resnet34_imagenet_backbone.pth</code></td>
+        <td>87.3 MB</td>
+        <td>21,284,672</td>
+        <td><code>b2149e...88ab</code></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h2 class="sub-section-title">Appendix D: Engineering Glossary</h2>
+  <ul>
+    <li><b>SAR (Synthetic Aperture Radar):</b> Active microwave imaging system synthesizing a large antenna aperture through flight path movement, delivering high spatial resolution day and night through dense clouds and precipitation.</li>
+    <li><b>σ° (Sigma Naught):</b> Normalized radar backscattering coefficient expressed in decibels (dB), representing radar cross-section per unit surface area.</li>
+    <li><b>DEM (Digital Elevation Model):</b> Quantitative raster representation of bare-earth topographic surface heights.</li>
+    <li><b>PINN (Physics-Informed Neural Network):</b> Deep neural network architecture that embeds physical partial differential equations directly into the training objective function, enforcing physical law compliance.</li>
+    <li><b>IoU (Intersection-over-Union):</b> Jaccard index measuring the overlap ratio between predicted segmentation pixels and ground-truth validation masks.</li>
+    <li><b>Manning's Equation:</b> Empirical hydraulic formula relating the flow velocity of water in an open channel to hydraulic radius, channel slope, and surface roughness factor <i>n</i>.</li>
+  </ul>
+
+  <div class="doc-footer">
+    <span>Department of AI &amp; Data Science · Jai Shriram Engineering College, Tirupur</span>
+    <span>Bharat WIN — Jal Shakti Hackathon 2026</span>
+  </div>
+
+</div>
+
+</body>
+</html>
