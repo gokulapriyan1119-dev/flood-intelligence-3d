@@ -6,7 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "test": "node tests/auth.test.js"
   },
   "dependencies": {
     "@react-three/drei": "^9.120.4",

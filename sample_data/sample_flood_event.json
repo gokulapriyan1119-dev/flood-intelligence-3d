@@ -1,0 +1,32 @@
+{
+  "eventId": "FL-2024-IND-008",
+  "name": "Assam Brahmaputra Basin Inundation",
+  "country": "India",
+  "region": "Assam State",
+  "coordinates": {
+    "latitude": 26.2006,
+    "longitude": 92.9376
+  },
+  "sensor": "Sentinel-1A C-SAR (5.405 GHz)",
+  "pass": "Descending Orbit 136",
+  "acquisitionDate": "2024-07-04T00:15:30Z",
+  "polarizations": ["VV", "VH"],
+  "spatialResolution": "10m GSD (Ground Sample Distance)",
+  "demModel": "Copernicus DEM GLO-30",
+  "precipitation24h_mm": 248.5,
+  "hydrologicalMetrics": {
+    "floodExtent_sqkm": 1420.5,
+    "peakWaterDepth_m": 4.62,
+    "meanWaterDepth_m": 1.84,
+    "estimatedVelocity_ms": 1.45,
+    "pinnResidualNavierStokes": 4.18e-5,
+    "segmentationIoU": 0.621
+  },
+  "infrastructureRisk": {
+    "hospitalsAtRisk": 14,
+    "bridgesVulnerable": 8,
+    "submergedRoads_km": 142.8,
+    "displacedPopulationEstimate": 85000,
+    "riskLevel": "CRITICAL"
+  }
+}

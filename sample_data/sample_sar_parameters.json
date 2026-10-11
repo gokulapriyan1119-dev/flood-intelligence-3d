@@ -1,0 +1,24 @@
+{
+  "productType": "S1A_IW_GRDH_1SDV",
+  "mission": "Sentinel-1A",
+  "instrument": "C-SAR",
+  "mode": "Interferometric Wide (IW)",
+  "resolutionClass": "High Resolution (GRDH)",
+  "polarisation": "Dual (VV + VH)",
+  "centerFrequency_GHz": 5.405,
+  "radiometricCalibration": {
+    "sigma0_VV_min_dB": -28.4,
+    "sigma0_VV_max_dB": 2.1,
+    "sigma0_VH_min_dB": -34.8,
+    "sigma0_VH_max_dB": -6.5,
+    "waterThreshold_dB": -16.5
+  },
+  "incidenceAngle": {
+    "nearRange_deg": 29.1,
+    "farRange_deg": 46.0
+  },
+  "speckleFilter": {
+    "type": "Refined Lee",
+    "windowSize": "7x7"
+  }
+}
