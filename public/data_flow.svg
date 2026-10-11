@@ -1,0 +1,304 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080" width="1920" height="1080">
+  <defs>
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&amp;family=Inter:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400;600&amp;display=swap');
+      .title { font-family: 'Space Grotesk', sans-serif; font-weight: 700; fill: #E6EDF7; }
+      .subtitle { font-family: 'Inter', sans-serif; font-weight: 500; fill: #8892A6; }
+      .stage-title { font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 17px; fill: #E6EDF7; }
+      .stage-desc { font-family: 'Inter', sans-serif; font-weight: 400; font-size: 12px; fill: #8892A6; }
+      .io-label { font-family: 'JetBrains Mono', monospace; font-size: 11px; font-weight: 600; }
+      .timing-title { font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 16px; fill: #19C6FF; }
+      .timing-val { font-family: 'JetBrains Mono', monospace; font-size: 13px; fill: #E6EDF7; }
+    </style>
+    <linearGradient id="bg-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#05070D"/>
+      <stop offset="100%" stop-color="#020306"/>
+    </linearGradient>
+    <filter id="glow-cyan" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="5" result="blur"/>
+      <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+    </filter>
+    <marker id="pipe-arrow" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#19C6FF"/>
+    </marker>
+    <marker id="io-arrow-down" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#00FF9D"/>
+    </marker>
+    <marker id="io-arrow-up" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#FFB020"/>
+    </marker>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1920" height="1080" fill="url(#bg-grad)"/>
+
+  <!-- Blueprint Grid -->
+  <g opacity="0.04" stroke="#19C6FF" stroke-width="1">
+    <line x1="0" y1="180" x2="1920" y2="180"/><line x1="0" y1="360" x2="1920" y2="360"/>
+    <line x1="0" y1="540" x2="1920" y2="540"/><line x1="0" y1="720" x2="1920" y2="720"/>
+    <line x1="0" y1="900" x2="1920" y2="900"/>
+    <line x1="320" y1="0" x2="320" y2="1080"/><line x1="640" y1="0" x2="640" y2="1080"/>
+    <line x1="960" y1="0" x2="960" y2="1080"/><line x1="1280" y1="0" x2="1280" y2="1080"/>
+    <line x1="1600" y1="0" x2="1600" y2="1080"/>
+  </g>
+
+  <!-- Header -->
+  <g transform="translate(100, 55)">
+    <rect x="0" y="0" width="180" height="28" rx="14" fill="#0E223D" stroke="#19C6FF" stroke-width="1"/>
+    <text x="90" y="18" fill="#19C6FF" font-family="'JetBrains Mono', monospace" font-size="11" font-weight="600" text-anchor="middle" letter-spacing="1.5">PIPELINE EXECUTION</text>
+    <text x="0" y="65" class="title" font-size="34" letter-spacing="-0.5">END-TO-END DATA FLOW &amp; INFERENCE PIPELINE</text>
+    <text x="0" y="90" class="subtitle" font-size="14">Sentinel-1 Ingestion → U-Net++ Extent Segmentation → PINN Navier-Stokes Depth Solver → Risk Cartography</text>
+  </g>
+
+  <!-- Main Pipeline Stages (Horizontal Track) -->
+  <!-- Track Guide Line -->
+  <line x1="150" y1="370" x2="1770" y2="370" stroke="#19C6FF" stroke-width="2" stroke-opacity="0.3" stroke-dasharray="6,6"/>
+
+  <!-- ==================== STAGE 1: USER UPLOAD ==================== -->
+  <g transform="translate(80, 240)">
+    <!-- Stage Card -->
+    <rect width="210" height="260" rx="12" fill="#0B0F1A" stroke="#19C6FF" stroke-width="1.8" filter="url(#glow-cyan)"/>
+    <rect x="15" y="15" width="40" height="40" rx="8" fill="#0E253F"/>
+    <!-- Upload Icon -->
+    <path d="M 35 25 L 35 45 M 27 33 L 35 25 L 43 33 M 23 41 V 45 H 47 V 41" stroke="#19C6FF" stroke-width="2" fill="none" stroke-linecap="round"/>
+    <text x="65" y="32" class="io-label" fill="#19C6FF">STAGE 01</text>
+    <text x="65" y="48" class="stage-title">User Upload</text>
+    <text x="15" y="80" class="stage-desc">Direct drag-and-drop</text>
+    <text x="15" y="96" class="stage-desc">GeoTIFF ingestion portal</text>
+    <text x="15" y="112" class="stage-desc">via Next.js client.</text>
+
+    <!-- Specs Box inside Card -->
+    <rect x="12" y="130" width="186" height="115" rx="8" fill="#050811" stroke="#19C6FF" stroke-opacity="0.3" stroke-width="1"/>
+    <text x="22" y="150" class="io-label" fill="#8892A6">INPUT FORMAT</text>
+    <text x="22" y="168" font-family="'JetBrains Mono', monospace" font-size="11" fill="#E6EDF7">Dual-Pol SAR (.tif)</text>
+    <text x="22" y="190" class="io-label" fill="#8892A6">CHANNELS</text>
+    <text x="22" y="208" font-family="'JetBrains Mono', monospace" font-size="11" fill="#19C6FF">VV + VH Backscatter</text>
+    <text x="22" y="230" font-family="'JetBrains Mono', monospace" font-size="10" fill="#8892A6">Dimensions: 512x512</text>
+  </g>
+
+  <!-- Arrow 1 -> 2 -->
+  <line x1="290" y1="370" x2="330" y2="370" stroke="#19C6FF" stroke-width="2.5" marker-end="url(#pipe-arrow)"/>
+
+  <!-- ==================== STAGE 2: PREPROCESS ==================== -->
+  <g transform="translate(330, 240)">
+    <rect width="210" height="260" rx="12" fill="#0B0F1A" stroke="#1E88E5" stroke-width="1.8"/>
+    <rect x="15" y="15" width="40" height="40" rx="8" fill="#102540"/>
+    <!-- Preprocess Cog Icon -->
+    <circle cx="35" cy="35" r="9" stroke="#1E88E5" stroke-width="2" fill="none"/>
+    <path d="M 35 22 V 26 M 35 44 V 48 M 22 35 H 26 M 44 35 H 48" stroke="#1E88E5" stroke-width="2"/>
+    <text x="65" y="32" class="io-label" fill="#1E88E5">STAGE 02</text>
+    <text x="65" y="48" class="stage-title">Preprocessing</text>
+    <text x="15" y="80" class="stage-desc">Rasterio parsing,</text>
+    <text x="15" y="96" class="stage-desc">NaN imputation, and</text>
+    <text x="15" y="112" class="stage-desc">per-band normalization.</text>
+
+    <rect x="12" y="130" width="186" height="115" rx="8" fill="#050811" stroke="#1E88E5" stroke-opacity="0.3" stroke-width="1"/>
+    <text x="22" y="150" class="io-label" fill="#8892A6">CALIBRATION</text>
+    <text x="22" y="168" font-family="'JetBrains Mono', monospace" font-size="11" fill="#E6EDF7">sigma0 (dB) scale</text>
+    <text x="22" y="190" class="io-label" fill="#8892A6">SPECKLE FILTER</text>
+    <text x="22" y="208" font-family="'JetBrains Mono', monospace" font-size="11" fill="#1E88E5">Refined Lee 7x7</text>
+    <text x="22" y="230" font-family="'JetBrains Mono', monospace" font-size="10" fill="#8892A6">Range: [0.0, 1.0]</text>
+  </g>
+
+  <!-- Arrow 2 -> 3 -->
+  <line x1="540" y1="370" x2="580" y2="370" stroke="#19C6FF" stroke-width="2.5" marker-end="url(#pipe-arrow)"/>
+
+  <!-- ==================== STAGE 3: U-NET++ ==================== -->
+  <g transform="translate(580, 240)">
+    <rect width="210" height="260" rx="12" fill="#0B0F1A" stroke="#00FF9D" stroke-width="2" filter="url(#glow-cyan)"/>
+    <rect x="15" y="15" width="40" height="40" rx="8" fill="#0E2F20"/>
+    <!-- Neural Net Icon -->
+    <circle cx="28" cy="30" r="3" fill="#00FF9D"/><circle cx="28" cy="40" r="3" fill="#00FF9D"/>
+    <circle cx="42" cy="27" r="3" fill="#00FF9D"/><circle cx="42" cy="35" r="3" fill="#00FF9D"/><circle cx="42" cy="43" r="3" fill="#00FF9D"/>
+    <line x1="28" y1="30" x2="42" y2="27" stroke="#00FF9D" stroke-width="1.2"/>
+    <line x1="28" y1="40" x2="42" y2="43" stroke="#00FF9D" stroke-width="1.2"/>
+    <text x="65" y="32" class="io-label" fill="#00FF9D">STAGE 03</text>
+    <text x="65" y="48" class="stage-title">U-Net++ Model</text>
+    <text x="15" y="80" class="stage-desc">ResNet-34 encoder</text>
+    <text x="15" y="96" class="stage-desc">with nested skip paths</text>
+    <text x="15" y="112" class="stage-desc">for boundary recovery.</text>
+
+    <rect x="12" y="130" width="186" height="115" rx="8" fill="#050811" stroke="#00FF9D" stroke-opacity="0.3" stroke-width="1"/>
+    <text x="22" y="150" class="io-label" fill="#8892A6">INFERENCE TIME</text>
+    <text x="22" y="168" font-family="'JetBrains Mono', monospace" font-size="11" fill="#00FF9D">120 ms (T4 GPU)</text>
+    <text x="22" y="190" class="io-label" fill="#8892A6">ACCURACY</text>
+    <text x="22" y="208" font-family="'JetBrains Mono', monospace" font-size="11" fill="#E6EDF7">Test IoU: 0.621</text>
+    <text x="22" y="230" font-family="'JetBrains Mono', monospace" font-size="10" fill="#8892A6">Dice Score: 0.714</text>
+  </g>
+
+  <!-- Arrow 3 -> 4 -->
+  <line x1="790" y1="370" x2="830" y2="370" stroke="#19C6FF" stroke-width="2.5" marker-end="url(#pipe-arrow)"/>
+
+  <!-- ==================== STAGE 4: THRESHOLD ==================== -->
+  <g transform="translate(830, 240)">
+    <rect width="210" height="260" rx="12" fill="#0B0F1A" stroke="#19C6FF" stroke-width="1.8"/>
+    <rect x="15" y="15" width="40" height="40" rx="8" fill="#0D253A"/>
+    <!-- Binary Filter Icon -->
+    <path d="M 25 35 H 35 V 27 H 45" stroke="#19C6FF" stroke-width="2" fill="none"/>
+    <text x="65" y="32" class="io-label" fill="#19C6FF">STAGE 04</text>
+    <text x="65" y="48" class="stage-title">Thresholding</text>
+    <text x="15" y="80" class="stage-desc">Optimal Bayes cutoff</text>
+    <text x="15" y="96" class="stage-desc">converting probability</text>
+    <text x="15" y="112" class="stage-desc">to binary flood mask.</text>
+
+    <rect x="12" y="130" width="186" height="115" rx="8" fill="#050811" stroke="#19C6FF" stroke-opacity="0.3" stroke-width="1"/>
+    <text x="22" y="150" class="io-label" fill="#8892A6">OPERATOR</text>
+    <text x="22" y="168" font-family="'JetBrains Mono', monospace" font-size="11" fill="#E6EDF7">P(flood) &gt;= 0.50</text>
+    <text x="22" y="190" class="io-label" fill="#8892A6">OUTPUT TENSOR</text>
+    <text x="22" y="208" font-family="'JetBrains Mono', monospace" font-size="11" fill="#19C6FF">Binary Mask [1,H,W]</text>
+    <text x="22" y="230" font-family="'JetBrains Mono', monospace" font-size="10" fill="#8892A6">Flood / Dry Pixels</text>
+  </g>
+
+  <!-- Arrow 4 -> 5 -->
+  <line x1="1040" y1="370" x2="1080" y2="370" stroke="#19C6FF" stroke-width="2.5" marker-end="url(#pipe-arrow)"/>
+
+  <!-- ==================== STAGE 5: PINN INFERENCE ==================== -->
+  <g transform="translate(1080, 240)">
+    <rect width="210" height="260" rx="12" fill="#0B0F1A" stroke="#00FF9D" stroke-width="2" filter="url(#glow-green)"/>
+    <rect x="15" y="15" width="40" height="40" rx="8" fill="#0E2F20"/>
+    <!-- Wave Physics Icon -->
+    <path d="M 23 35 C 27 28 31 42 35 35 C 39 28 43 42 47 35" stroke="#00FF9D" stroke-width="2" fill="none"/>
+    <text x="65" y="32" class="io-label" fill="#00FF9D">STAGE 05</text>
+    <text x="65" y="48" class="stage-title">PINN Depth Solver</text>
+    <text x="15" y="80" class="stage-desc">Couples DEM, ERA5</text>
+    <text x="15" y="96" class="stage-desc">rain &amp; Shallow Water</text>
+    <text x="15" y="112" class="stage-desc">Manning equations.</text>
+
+    <rect x="12" y="130" width="186" height="115" rx="8" fill="#050811" stroke="#00FF9D" stroke-opacity="0.3" stroke-width="1"/>
+    <text x="22" y="150" class="io-label" fill="#8892A6">PDE RESIDUAL</text>
+    <text x="22" y="168" font-family="'JetBrains Mono', monospace" font-size="11" fill="#00FF9D">4.18 x 10^-5</text>
+    <text x="22" y="190" class="io-label" fill="#8892A6">OUTPUT</text>
+    <text x="22" y="208" font-family="'JetBrains Mono', monospace" font-size="11" fill="#E6EDF7">Continuous Depth h</text>
+    <text x="22" y="230" font-family="'JetBrains Mono', monospace" font-size="10" fill="#8892A6">Latency: 45 ms</text>
+  </g>
+
+  <!-- Arrow 5 -> 6 -->
+  <line x1="1290" y1="370" x2="1330" y2="370" stroke="#19C6FF" stroke-width="2.5" marker-end="url(#pipe-arrow)"/>
+
+  <!-- ==================== STAGE 6: RISK CLASSIFICATION ==================== -->
+  <g transform="translate(1330, 240)">
+    <rect width="210" height="260" rx="12" fill="#0B0F1A" stroke="#FFB020" stroke-width="1.8"/>
+    <rect x="15" y="15" width="40" height="40" rx="8" fill="#2E2008"/>
+    <!-- Hazard Triangle Icon -->
+    <path d="M 35 25 L 47 45 H 23 Z M 35 33 V 37 M 35 40 V 42" stroke="#FFB020" stroke-width="2" fill="none"/>
+    <text x="65" y="32" class="io-label" fill="#FFB020">STAGE 06</text>
+    <text x="65" y="48" class="stage-title">Risk Scoring</text>
+    <text x="15" y="80" class="stage-desc">Depth thresholding</text>
+    <text x="15" y="96" class="stage-desc">against infrastructure</text>
+    <text x="15" y="112" class="stage-desc">vulnerability rules.</text>
+
+    <rect x="12" y="130" width="186" height="115" rx="8" fill="#050811" stroke="#FFB020" stroke-opacity="0.3" stroke-width="1"/>
+    <text x="22" y="150" class="io-label" fill="#8892A6">CATEGORIES</text>
+    <text x="22" y="168" font-family="'JetBrains Mono', monospace" font-size="11" fill="#FFB020">Low / Mod / High / Crit</text>
+    <text x="22" y="190" class="io-label" fill="#8892A6">CRITICAL CRITERIA</text>
+    <text x="22" y="208" font-family="'JetBrains Mono', monospace" font-size="11" fill="#E6EDF7">h_max &gt; 3.0 m</text>
+    <text x="22" y="230" font-family="'JetBrains Mono', monospace" font-size="10" fill="#8892A6">Hospital / Bridge Risk</text>
+  </g>
+
+  <!-- Arrow 6 -> 7 -->
+  <line x1="1540" y1="370" x2="1580" y2="370" stroke="#19C6FF" stroke-width="2.5" marker-end="url(#pipe-arrow)"/>
+
+  <!-- ==================== STAGE 7: MULTI-FORMAT OUTPUT ==================== -->
+  <g transform="translate(1580, 240)">
+    <rect width="260" height="260" rx="12" fill="#0B0F1A" stroke="#19C6FF" stroke-width="1.8" filter="url(#glow-cyan)"/>
+    <rect x="15" y="15" width="40" height="40" rx="8" fill="#0E253F"/>
+    <!-- Export Multi Icon -->
+    <rect x="25" y="27" width="18" height="18" rx="2" stroke="#19C6FF" stroke-width="1.8" fill="none"/>
+    <path d="M 29 33 L 33 37 L 41 29" stroke="#19C6FF" stroke-width="1.8" fill="none"/>
+    <text x="65" y="32" class="io-label" fill="#19C6FF">STAGE 07</text>
+    <text x="65" y="48" class="stage-title">Multi-Format Output</text>
+    <text x="15" y="80" class="stage-desc">Base64 browser preview,</text>
+    <text x="15" y="96" class="stage-desc">10-page institutional PDF,</text>
+    <text x="15" y="112" class="stage-desc">&amp; spec-compliant TIFF 6.0.</text>
+
+    <rect x="12" y="130" width="236" height="115" rx="8" fill="#050811" stroke="#19C6FF" stroke-opacity="0.3" stroke-width="1"/>
+    <text x="22" y="150" class="io-label" fill="#8892A6">OUTPUT ARTIFACTS</text>
+    <text x="22" y="168" font-family="'JetBrains Mono', monospace" font-size="11" fill="#E6EDF7">1. Base64 Color Heatmap</text>
+    <text x="22" y="186" font-family="'JetBrains Mono', monospace" font-size="11" fill="#19C6FF">2. 10-Page PDF Dossier</text>
+    <text x="22" y="204" font-family="'JetBrains Mono', monospace" font-size="11" fill="#00FF9D">3. TIFF 6.0 RGB Raster</text>
+    <text x="22" y="222" font-family="'JetBrains Mono', monospace" font-size="11" fill="#FFB020">4. 3D WebGL Mesh Buffer</text>
+  </g>
+
+  <!-- ==================== LOWER SECTION: I/O FLOW ARROWS & SPECS ==================== -->
+  <g transform="translate(80, 530)">
+    <!-- Data Ingest Inputs -->
+    <rect width="1760" height="190" rx="14" fill="#0B0F1A" stroke="#1E88E5" stroke-opacity="0.5" stroke-width="1"/>
+    <text x="30" y="32" class="timing-title" fill="#1E88E5">PIPELINE DATA FLOW &amp; INTERMEDIATE ARTIFACT CONTRACTS</text>
+
+    <!-- Flow breakdown columns -->
+    <g transform="translate(30, 50)">
+      <!-- Step 1 to 2 -->
+      <rect x="0" y="0" width="260" height="115" rx="8" fill="#050811" stroke="#8892A6" stroke-opacity="0.2" stroke-width="1"/>
+      <text x="15" y="24" class="io-label" fill="#19C6FF">PAYLOAD: RAW SAR FILE</text>
+      <text x="15" y="44" class="stage-desc">Size: 400 MB - 1.2 GB GeoTIFF</text>
+      <text x="15" y="62" class="stage-desc">Bands: Band 1 (VV), Band 2 (VH)</text>
+      <text x="15" y="80" class="stage-desc">Pixel Depth: 16-bit Unsigned Int</text>
+      <text x="15" y="98" class="stage-desc">Projection: EPSG:4326 / WGS84</text>
+
+      <!-- Step 2 to 3 -->
+      <rect x="290" y="0" width="280" height="115" rx="8" fill="#050811" stroke="#8892A6" stroke-opacity="0.2" stroke-width="1"/>
+      <text x="15" y="24" class="io-label" fill="#1E88E5">PAYLOAD: NORMALIZED TENSOR</text>
+      <text x="15" y="44" class="stage-desc">Shape: [Batch=1, C=2, H=512, W=512]</text>
+      <text x="15" y="62" class="stage-desc">Dtype: torch.float32 on CUDA</text>
+      <text x="15" y="80" class="stage-desc">VV Range: [-28.4 dB, +2.1 dB] → [0,1]</text>
+      <text x="15" y="98" class="stage-desc">VH Range: [-34.8 dB, -6.5 dB] → [0,1]</text>
+
+      <!-- Step 3 to 5 -->
+      <rect x="600" y="0" width="280" height="115" rx="8" fill="#050811" stroke="#8892A6" stroke-opacity="0.2" stroke-width="1"/>
+      <text x="15" y="24" class="io-label" fill="#00FF9D">PAYLOAD: FLOOD PROBABILITY</text>
+      <text x="15" y="44" class="stage-desc">Shape: [1, 1, 512, 512] Probability</text>
+      <text x="15" y="62" class="stage-desc">Activation: Sigmoid continuous [0,1]</text>
+      <text x="15" y="80" class="stage-desc">Binary Mask: P &gt;= 0.50 (Flood/Dry)</text>
+      <text x="15" y="98" class="stage-desc">IoU Accuracy: 0.621 on Sen1Floods11</text>
+
+      <!-- Step 5 to 6 -->
+      <rect x="910" y="0" width="280" height="115" rx="8" fill="#050811" stroke="#8892A6" stroke-opacity="0.2" stroke-width="1"/>
+      <text x="15" y="24" class="io-label" fill="#FFB020">PAYLOAD: DEPTH h(x,y)</text>
+      <text x="15" y="44" class="stage-desc">Shape: [1, 1, 512, 512] Water Depth</text>
+      <text x="15" y="62" class="stage-desc">Unit: Meters (m) above terrain</text>
+      <text x="15" y="80" class="stage-desc">Constraints: Non-negative Softplus</text>
+      <text x="15" y="98" class="stage-desc">Physics Loss: Manning Navier-Stokes</text>
+
+      <!-- Step 6 to Client -->
+      <rect x="1220" y="0" width="480" height="115" rx="8" fill="#050811" stroke="#8892A6" stroke-opacity="0.2" stroke-width="1"/>
+      <text x="15" y="24" class="io-label" fill="#19C6FF">PAYLOAD: CLIENT JSON &amp; RASTER BUNDLE</text>
+      <text x="15" y="44" class="stage-desc">JSON Response: { flood_pct: 24.8, avg_depth: 1.84, max_depth: 4.62, risk: 'CRITICAL' }</text>
+      <text x="15" y="62" class="stage-desc">Base64 PNGs: Water probability overlay, continuous bathymetric depth map</text>
+      <text x="15" y="80" class="stage-desc">TIFF 6.0: 24-bit uncompressed RGB raster with full baseline IFD metadata tags</text>
+      <text x="15" y="98" class="stage-desc">Vector PDF: 10-page institutional emergency response situation dossier (jsPDF)</text>
+    </g>
+  </g>
+
+  <!-- ==================== BOTTOM TIMING BREAKDOWN ==================== -->
+  <g transform="translate(80, 750)">
+    <rect width="1760" height="260" rx="14" fill="#0B0F1A" stroke="#19C6FF" stroke-width="1.5" filter="url(#glow-cyan)"/>
+    <text x="35" y="38" class="timing-title">PIPELINE LATENCY BREAKDOWN (BENCHMARK: NVIDIA TESLA T4 GPU · CUDA 12.1)</text>
+
+    <!-- Timing Bars -->
+    <g transform="translate(35, 60)">
+      <!-- Bar 1: Ingest & Preprocess -->
+      <rect x="0" y="0" width="1690" height="34" rx="6" fill="#050811"/>
+      <rect x="0" y="0" width="120" height="34" rx="6" fill="#1E88E5"/>
+      <text x="135" y="22" class="timing-val">Preprocessing &amp; Calibration: <tspan fill="#1E88E5" font-weight="700">50 ms</tspan> (2.0%) — Rasterio reading, NaN masking, min-max normalizer</text>
+
+      <!-- Bar 2: U-Net++ -->
+      <rect x="0" y="46" width="1690" height="34" rx="6" fill="#050811"/>
+      <rect x="0" y="46" width="288" height="34" rx="6" fill="#00FF9D"/>
+      <text x="303" y="68" class="timing-val">U-Net++ Inundation Segmentation: <tspan fill="#00FF9D" font-weight="700">120 ms</tspan> (4.8%) — ResNet-34 feedforward tensor pass</text>
+
+      <!-- Bar 3: PINN -->
+      <rect x="0" y="92" width="1690" height="34" rx="6" fill="#050811"/>
+      <rect x="0" y="92" width="108" height="34" rx="6" fill="#00FF9D"/>
+      <text x="123" y="114" class="timing-val">PINN Hydrodynamic Depth Solver: <tspan fill="#00FF9D" font-weight="700">45 ms</tspan> (1.8%) — 2D Shallow Water residual minimization</text>
+
+      <!-- Bar 4: Postprocessing -->
+      <rect x="0" y="138" width="1690" height="34" rx="6" fill="#050811"/>
+      <rect x="0" y="138" width="72" height="34" rx="6" fill="#FFB020"/>
+      <text x="87" y="160" class="timing-val">Post-Processing &amp; Color Mapping: <tspan fill="#FFB020" font-weight="700">30 ms</tspan> (1.2%) — Color LUT, contouring, geo-referencing</text>
+    </g>
+
+    <!-- Total Latency Summary Card -->
+    <rect x="35" y="255" width="1690" height="1" fill="#19C6FF" fill-opacity="0.2"/>
+    <text x="35" y="240" font-family="'Space Grotesk', sans-serif" font-size="14" font-weight="700" fill="#19C6FF">END-TO-END PIPELINE LATENCY: <tspan fill="#E6EDF7">~2.5 SECONDS TOTAL</tspan> (INCLUDING NETWORK MULTIPART UPLOAD, GPU INFERENCE, TIFF GENERATION &amp; 3D CLIENT BUFFER UPDATE)</text>
+  </g>
+</svg>

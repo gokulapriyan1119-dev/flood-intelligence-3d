@@ -1,0 +1,342 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080" width="1920" height="1080">
+  <defs>
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&amp;family=Inter:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400;600&amp;display=swap');
+      .title { font-family: 'Space Grotesk', sans-serif; font-weight: 700; fill: #E6EDF7; }
+      .subtitle { font-family: 'Inter', sans-serif; font-weight: 500; fill: #8892A6; }
+      .side-title { font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 22px; }
+      .side-sub { font-family: 'Inter', sans-serif; font-weight: 500; font-size: 13px; fill: #8892A6; }
+      .block-title { font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 14px; fill: #E6EDF7; }
+      .block-desc { font-family: 'Inter', sans-serif; font-weight: 400; font-size: 11px; fill: #8892A6; }
+      .tensor-shape { font-family: 'JetBrains Mono', monospace; font-size: 11px; font-weight: 600; }
+      .metric-badge { font-family: 'JetBrains Mono', monospace; font-size: 12px; font-weight: 700; }
+    </style>
+    <linearGradient id="bg-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#05070D"/>
+      <stop offset="100%" stop-color="#020306"/>
+    </linearGradient>
+    <filter id="glow-cyan" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="5" result="blur"/>
+      <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+    </filter>
+    <filter id="glow-green" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="5" result="blur"/>
+      <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+    </filter>
+    <marker id="arrow-down" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#19C6FF"/>
+    </marker>
+    <marker id="arrow-green-down" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#00FF9D"/>
+    </marker>
+    <marker id="arrow-bridge" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#FFB020"/>
+    </marker>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1920" height="1080" fill="url(#bg-grad)"/>
+
+  <!-- Subtle Blueprint Grid -->
+  <g opacity="0.04" stroke="#19C6FF" stroke-width="1">
+    <line x1="0" y1="180" x2="1920" y2="180"/><line x1="0" y1="360" x2="1920" y2="360"/>
+    <line x1="0" y1="540" x2="1920" y2="540"/><line x1="0" y1="720" x2="1920" y2="720"/>
+    <line x1="0" y1="900" x2="1920" y2="900"/>
+    <line x1="320" y1="0" x2="320" y2="1080"/><line x1="640" y1="0" x2="640" y2="1080"/>
+    <line x1="960" y1="0" x2="960" y2="1080"/><line x1="1280" y1="0" x2="1280" y2="1080"/>
+    <line x1="1600" y1="0" x2="1600" y2="1080"/>
+  </g>
+
+  <!-- Header -->
+  <g transform="translate(100, 45)">
+    <rect x="0" y="0" width="220" height="28" rx="14" fill="#0E223D" stroke="#19C6FF" stroke-width="1"/>
+    <text x="110" y="18" fill="#19C6FF" font-family="'JetBrains Mono', monospace" font-size="11" font-weight="600" text-anchor="middle" letter-spacing="1.5">DUAL-STAGE AI ARCHITECTURE</text>
+    <text x="0" y="65" class="title" font-size="34" letter-spacing="-0.5">U-NET++ SEGMENTATION &amp; HYDRODYNAMIC PINN DEPTH ENGINE</text>
+    <text x="0" y="90" class="subtitle" font-size="14">Nested Dense Skip Connection Radar Extent Model Coupled with 2D Shallow Water Physics-Informed Neural Network</text>
+  </g>
+
+  <!-- ==================== LEFT HALF: U-NET++ (CYAN THEME) ==================== -->
+  <g transform="translate(80, 160)">
+    <!-- Container Card -->
+    <rect width="840" height="870" rx="14" fill="#0B0F1A" stroke="#19C6FF" stroke-width="2" filter="url(#glow-cyan)"/>
+    
+    <!-- Title & Specs -->
+    <text x="35" y="38" class="side-title" fill="#19C6FF">STAGE 1: U-NET++ (RESNET-34 ENCODER)</text>
+    <text x="35" y="60" class="side-sub">All-Weather SAR Inundation Segmentation · 25.8M Parameters · Dense Nested Skip Decoders</text>
+
+    <!-- Top Badge Row -->
+    <g transform="translate(35, 75)">
+      <rect x="0" y="0" width="130" height="26" rx="6" fill="#0E253F" stroke="#19C6FF" stroke-width="1"/>
+      <text x="65" y="17" class="metric-badge" fill="#19C6FF" text-anchor="middle">IoU: 0.621</text>
+      <rect x="145" y="0" width="130" height="26" rx="6" fill="#0E253F" stroke="#19C6FF" stroke-width="1"/>
+      <text x="210" y="17" class="metric-badge" fill="#19C6FF" text-anchor="middle">DICE: 0.714</text>
+      <rect x="290" y="0" width="160" height="26" rx="6" fill="#0E253F" stroke="#19C6FF" stroke-width="1"/>
+      <text x="370" y="17" class="metric-badge" fill="#19C6FF" text-anchor="middle">PRECISION: 0.783</text>
+      <rect x="465" y="0" width="150" height="26" rx="6" fill="#0E253F" stroke="#19C6FF" stroke-width="1"/>
+      <text x="540" y="17" class="metric-badge" fill="#19C6FF" text-anchor="middle">RECALL: 0.687</text>
+      <rect x="630" y="0" width="140" height="26" rx="6" fill="#0E253F" stroke="#19C6FF" stroke-width="1"/>
+      <text x="700" y="17" class="metric-badge" fill="#00FF9D" text-anchor="middle">LATENCY: 120 ms</text>
+    </g>
+
+    <!-- Flow Architecture Stack -->
+    <!-- 1. Input Node -->
+    <g transform="translate(35, 120)">
+      <rect width="770" height="55" rx="8" fill="#050811" stroke="#19C6FF" stroke-opacity="0.5" stroke-width="1.2"/>
+      <text x="20" y="26" class="block-title">DUAL-POL INPUT TENSOR</text>
+      <text x="20" y="42" class="block-desc">Calibrated Sentinel-1 SAR Backscatter [Band 1: VV (dB), Band 2: VH (dB)]</text>
+      <rect x="620" y="14" width="130" height="26" rx="5" fill="#0D2036"/>
+      <text x="685" y="31" class="tensor-shape" fill="#19C6FF" text-anchor="middle">[Batch, 2, 512, 512]</text>
+    </g>
+
+    <!-- Down Arrow -->
+    <line x1="420" y1="175" x2="420" y2="195" stroke="#19C6FF" stroke-width="2" marker-end="url(#arrow-down)"/>
+
+    <!-- 2. ResNet-34 Encoder Pyramid -->
+    <g transform="translate(35, 195)">
+      <rect width="770" height="150" rx="8" fill="#070C18" stroke="#19C6FF" stroke-opacity="0.7" stroke-width="1.5"/>
+      <text x="20" y="24" class="block-title">PRETRAINED RESNET-34 ENCODER (STEM &amp; RESIDUAL BLOCKS)</text>
+      
+      <!-- 4 Conv Stages -->
+      <g transform="translate(20, 36)">
+        <!-- Stage 1 -->
+        <rect x="0" y="0" width="168" height="98" rx="6" fill="#050811" stroke="#19C6FF" stroke-opacity="0.3" stroke-width="1"/>
+        <text x="12" y="22" class="tensor-shape" fill="#19C6FF">ENCODER BLOCK 1</text>
+        <text x="12" y="40" class="block-desc">Conv 7x7, Stride 2</text>
+        <text x="12" y="56" class="block-desc">3x [BasicBlock 64]</text>
+        <rect x="12" y="68" width="144" height="20" rx="4" fill="#0E223D"/>
+        <text x="84" y="82" class="tensor-shape" fill="#E6EDF7" text-anchor="middle">[64, 256, 256]</text>
+
+        <!-- Stage 2 -->
+        <rect x="188" y="0" width="168" height="98" rx="6" fill="#050811" stroke="#19C6FF" stroke-opacity="0.3" stroke-width="1"/>
+        <text x="12" y="22" class="tensor-shape" fill="#19C6FF">ENCODER BLOCK 2</text>
+        <text x="12" y="40" class="block-desc">MaxPool Stride 2</text>
+        <text x="12" y="56" class="block-desc">4x [BasicBlock 128]</text>
+        <rect x="12" y="68" width="144" height="20" rx="4" fill="#0E223D"/>
+        <text x="84" y="82" class="tensor-shape" fill="#E6EDF7" text-anchor="middle">[128, 128, 128]</text>
+
+        <!-- Stage 3 -->
+        <rect x="376" y="0" width="168" height="98" rx="6" fill="#050811" stroke="#19C6FF" stroke-opacity="0.3" stroke-width="1"/>
+        <text x="12" y="22" class="tensor-shape" fill="#19C6FF">ENCODER BLOCK 3</text>
+        <text x="12" y="40" class="block-desc">Conv 3x3 Stride 2</text>
+        <text x="12" y="56" class="block-desc">6x [BasicBlock 256]</text>
+        <rect x="12" y="68" width="144" height="20" rx="4" fill="#0E223D"/>
+        <text x="84" y="82" class="tensor-shape" fill="#E6EDF7" text-anchor="middle">[256, 64, 64]</text>
+
+        <!-- Stage 4 -->
+        <rect x="564" y="0" width="166" height="98" rx="6" fill="#050811" stroke="#19C6FF" stroke-opacity="0.3" stroke-width="1"/>
+        <text x="12" y="22" class="tensor-shape" fill="#19C6FF">ENCODER BLOCK 4</text>
+        <text x="12" y="40" class="block-desc">Conv 3x3 Stride 2</text>
+        <text x="12" y="56" class="block-desc">3x [BasicBlock 512]</text>
+        <rect x="12" y="68" width="142" height="20" rx="4" fill="#0E223D"/>
+        <text x="83" y="82" class="tensor-shape" fill="#E6EDF7" text-anchor="middle">[512, 32, 32]</text>
+      </g>
+    </g>
+
+    <!-- Down Arrow -->
+    <line x1="420" y1="345" x2="420" y2="365" stroke="#19C6FF" stroke-width="2" marker-end="url(#arrow-down)"/>
+
+    <!-- 3. Bottleneck -->
+    <g transform="translate(35, 365)">
+      <rect width="770" height="50" rx="8" fill="#0E253F" stroke="#19C6FF" stroke-width="1.5"/>
+      <text x="20" y="24" class="block-title">DEEP BOTTLENECK LAYER (X_4,0)</text>
+      <text x="20" y="40" class="block-desc">2x Conv2d(512 → 1024) + BatchNorm2d + ReLU + Spatial Dropout(0.2)</text>
+      <rect x="620" y="12" width="130" height="26" rx="5" fill="#050811"/>
+      <text x="685" y="29" class="tensor-shape" fill="#19C6FF" text-anchor="middle">[1024, 16, 16]</text>
+    </g>
+
+    <!-- Down Arrow -->
+    <line x1="420" y1="415" x2="420" y2="435" stroke="#19C6FF" stroke-width="2" marker-end="url(#arrow-down)"/>
+
+    <!-- 4. U-Net++ Nested Skip Decoder Grid -->
+    <g transform="translate(35, 435)">
+      <rect width="770" height="205" rx="8" fill="#070C18" stroke="#19C6FF" stroke-opacity="0.7" stroke-width="1.5"/>
+      <text x="20" y="24" class="block-title">NESTED DENSE SKIP PATHWAYS &amp; UPSAMPLING DECODER GRID</text>
+      <text x="20" y="40" class="block-desc">Reduces semantic gap between encoder features and decoder representations via intermediate conv nodes</text>
+
+      <!-- Grid Visual Nodes -->
+      <g transform="translate(20, 52)">
+        <!-- Node X_0,0 -->
+        <circle cx="40" cy="20" r="14" fill="#0E253F" stroke="#19C6FF" stroke-width="1.5"/>
+        <text x="40" y="24" class="tensor-shape" fill="#E6EDF7" text-anchor="middle">X0,0</text>
+        
+        <!-- Node X_0,1 -->
+        <line x1="54" y1="20" x2="166" y2="20" stroke="#19C6FF" stroke-width="1.5" stroke-dasharray="3,3"/>
+        <circle cx="180" cy="20" r="14" fill="#0E253F" stroke="#19C6FF" stroke-width="1.5"/>
+        <text x="180" y="24" class="tensor-shape" fill="#E6EDF7" text-anchor="middle">X0,1</text>
+
+        <!-- Node X_0,2 -->
+        <line x1="194" y1="20" x2="306" y2="20" stroke="#19C6FF" stroke-width="1.5" stroke-dasharray="3,3"/>
+        <circle cx="320" cy="20" r="14" fill="#0E253F" stroke="#19C6FF" stroke-width="1.5"/>
+        <text x="320" y="24" class="tensor-shape" fill="#E6EDF7" text-anchor="middle">X0,2</text>
+
+        <!-- Node X_0,3 -->
+        <line x1="334" y1="20" x2="446" y2="20" stroke="#19C6FF" stroke-width="1.5" stroke-dasharray="3,3"/>
+        <circle cx="460" cy="20" r="14" fill="#0E253F" stroke="#19C6FF" stroke-width="1.5"/>
+        <text x="460" y="24" class="tensor-shape" fill="#E6EDF7" text-anchor="middle">X0,3</text>
+
+        <!-- Node X_0,4 (Final) -->
+        <line x1="474" y1="20" x2="586" y2="20" stroke="#19C6FF" stroke-width="1.5" stroke-dasharray="3,3"/>
+        <circle cx="600" cy="20" r="16" fill="#00FF9D" stroke="#00FF9D" stroke-width="2"/>
+        <text x="600" y="24" class="tensor-shape" fill="#05070D" font-weight="700" text-anchor="middle">X0,4</text>
+
+        <!-- Row 2 -->
+        <circle cx="40" cy="70" r="14" fill="#0E253F" stroke="#19C6FF" stroke-width="1.5"/>
+        <text x="40" y="74" class="tensor-shape" fill="#E6EDF7" text-anchor="middle">X1,0</text>
+        <line x1="54" y1="70" x2="166" y2="70" stroke="#19C6FF" stroke-width="1.5" stroke-dasharray="3,3"/>
+        <circle cx="180" cy="70" r="14" fill="#0E253F" stroke="#19C6FF" stroke-width="1.5"/>
+        <text x="180" y="74" class="tensor-shape" fill="#E6EDF7" text-anchor="middle">X1,1</text>
+        <line x1="194" y1="70" x2="306" y2="70" stroke="#19C6FF" stroke-width="1.5" stroke-dasharray="3,3"/>
+        <circle cx="320" cy="70" r="14" fill="#0E253F" stroke="#19C6FF" stroke-width="1.5"/>
+        <text x="320" y="74" class="tensor-shape" fill="#E6EDF7" text-anchor="middle">X1,2</text>
+        <line x1="334" y1="70" x2="446" y2="70" stroke="#19C6FF" stroke-width="1.5" stroke-dasharray="3,3"/>
+        <circle cx="460" cy="70" r="14" fill="#0E253F" stroke="#19C6FF" stroke-width="1.5"/>
+        <text x="460" y="74" class="tensor-shape" fill="#E6EDF7" text-anchor="middle">X1,3</text>
+
+        <!-- Diagonal Upsample Arrows -->
+        <line x1="48" y1="60" x2="172" y2="30" stroke="#19C6FF" stroke-width="1.5"/>
+        <line x1="188" y1="60" x2="312" y2="30" stroke="#19C6FF" stroke-width="1.5"/>
+        <line x1="328" y1="60" x2="452" y2="30" stroke="#19C6FF" stroke-width="1.5"/>
+        <line x1="468" y1="60" x2="590" y2="30" stroke="#00FF9D" stroke-width="1.8"/>
+
+        <!-- Text details -->
+        <text x="20" y="125" class="mono" fill="#19C6FF">Loss Function: L_total = 0.5 * Focal_Loss(gamma=2) + 1.0 * Dice_Loss</text>
+        <text x="20" y="142" class="mono" fill="#8892A6">Optimizer: AdamW (lr=3e-4, weight_decay=1e-4) · CosineAnnealingLR (T_max=30)</text>
+      </g>
+    </g>
+
+    <!-- Down Arrow -->
+    <line x1="420" y1="640" x2="420" y2="660" stroke="#19C6FF" stroke-width="2" marker-end="url(#arrow-down)"/>
+
+    <!-- 5. Output Head -->
+    <g transform="translate(35, 660)">
+      <rect width="770" height="70" rx="8" fill="#050811" stroke="#00FF9D" stroke-width="2"/>
+      <text x="20" y="26" class="block-title" fill="#00FF9D">SEGMENTATION PROBABILITY HEAD (1x1 CONV + SIGMOID)</text>
+      <text x="20" y="44" class="block-desc">Pixel-wise flood probability distribution P(inundated | VV, VH) in [0.0, 1.0]</text>
+      <text x="20" y="58" class="mono" fill="#E6EDF7">Threshold: P &gt;= 0.50 yields binary water mask | Feeds Directly into PINN Channel 1</text>
+      <rect x="620" y="22" width="130" height="26" rx="5" fill="#0E253F"/>
+      <text x="685" y="39" class="tensor-shape" fill="#00FF9D" text-anchor="middle">[Batch, 1, 512, 512]</text>
+    </g>
+  </g>
+
+  <!-- ==================== CENTER BRIDGE ARROW ==================== -->
+  <g transform="translate(920, 835)">
+    <path d="M 0 0 C 40 0, 40 0, 80 0" stroke="#FFB020" stroke-width="3" fill="none" marker-end="url(#arrow-bridge)"/>
+    <rect x="-30" y="-35" width="140" height="26" rx="5" fill="#05070D" stroke="#FFB020" stroke-width="1.5"/>
+    <text x="40" y="-18" font-family="'JetBrains Mono', monospace" font-size="11" font-weight="700" fill="#FFB020" text-anchor="middle">P(flood) Tensor</text>
+  </g>
+
+  <!-- ==================== RIGHT HALF: PINN (GREEN THEME) ==================== -->
+  <g transform="translate(1000, 160)">
+    <!-- Container Card -->
+    <rect width="840" height="870" rx="14" fill="#0B0F1A" stroke="#00FF9D" stroke-width="2" filter="url(#glow-green)"/>
+    
+    <!-- Title & Specs -->
+    <text x="35" y="38" class="side-title" fill="#00FF9D">STAGE 2: HYDRODYNAMIC PINN (DEPTH ESTIMATOR)</text>
+    <text x="35" y="60" class="side-sub">2D Shallow Water Equations + Manning Surface Friction Constraint · 85K Parameters</text>
+
+    <!-- Top Badge Row -->
+    <g transform="translate(35, 75)">
+      <rect x="0" y="0" width="190" height="26" rx="6" fill="#0F2B1F" stroke="#00FF9D" stroke-width="1"/>
+      <text x="95" y="17" class="metric-badge" fill="#00FF9D" text-anchor="middle">RESIDUAL: 4.18 x 10^-5</text>
+      <rect x="205" y="0" width="180" height="26" rx="6" fill="#0F2B1F" stroke="#00FF9D" stroke-width="1"/>
+      <text x="295" y="17" class="metric-badge" fill="#00FF9D" text-anchor="middle">MEAN DEPTH ERR: 0.14 m</text>
+      <rect x="400" y="0" width="180" height="26" rx="6" fill="#0F2B1F" stroke="#00FF9D" stroke-width="1"/>
+      <text x="490" y="17" class="metric-badge" fill="#00FF9D" text-anchor="middle">MANNING N: 0.030 - 0.045</text>
+      <rect x="595" y="0" width="175" height="26" rx="6" fill="#0F2B1F" stroke="#00FF9D" stroke-width="1"/>
+      <text x="682" y="17" class="metric-badge" fill="#19C6FF" text-anchor="middle">INFERENCE: 45 ms</text>
+    </g>
+
+    <!-- Flow Architecture Stack -->
+    <!-- 1. Input Node -->
+    <g transform="translate(35, 120)">
+      <rect width="770" height="65" rx="8" fill="#050811" stroke="#00FF9D" stroke-opacity="0.5" stroke-width="1.2"/>
+      <text x="20" y="24" class="block-title">3-CHANNEL COUPLED MULTIMODAL INPUT</text>
+      <text x="20" y="42" class="block-desc">Channel 1: U-Net++ Flood Probability  |  Channel 2: Copernicus GLO-30 DEM Topography (30m)</text>
+      <text x="20" y="56" class="block-desc">Channel 3: ECMWF ERA5 24h Cumulative Precipitation Inflow R(t)</text>
+      <rect x="620" y="18" width="130" height="26" rx="5" fill="#0D253A"/>
+      <text x="685" y="35" class="tensor-shape" fill="#00FF9D" text-anchor="middle">[Batch, 3, 512, 512]</text>
+    </g>
+
+    <!-- Down Arrow -->
+    <line x1="420" y1="185" x2="420" y2="205" stroke="#00FF9D" stroke-width="2" marker-end="url(#arrow-green-down)"/>
+
+    <!-- 2. PINN Residual Encoder Blocks -->
+    <g transform="translate(35, 205)">
+      <rect width="770" height="135" rx="8" fill="#070C18" stroke="#00FF9D" stroke-opacity="0.7" stroke-width="1.5"/>
+      <text x="20" y="24" class="block-title">PHYSICS EMBEDDED CONVOLUTIONAL ENCODER</text>
+      
+      <!-- 3 Residual Blocks -->
+      <g transform="translate(20, 36)">
+        <rect x="0" y="0" width="230" height="85" rx="6" fill="#050811" stroke="#00FF9D" stroke-opacity="0.3" stroke-width="1"/>
+        <text x="12" y="22" class="tensor-shape" fill="#00FF9D">RES BLOCK 1 (48 CH)</text>
+        <text x="12" y="38" class="block-desc">Conv 3x3 + LeakyReLU(0.1)</text>
+        <text x="12" y="52" class="block-desc">Residual Skip Connection</text>
+        <rect x="12" y="60" width="206" height="18" rx="4" fill="#0E253F"/>
+        <text x="115" y="73" class="tensor-shape" fill="#E6EDF7" text-anchor="middle">[48, 256, 256]</text>
+
+        <rect x="250" y="0" width="230" height="85" rx="6" fill="#050811" stroke="#00FF9D" stroke-opacity="0.3" stroke-width="1"/>
+        <text x="12" y="22" class="tensor-shape" fill="#00FF9D">RES BLOCK 2 (96 CH)</text>
+        <text x="12" y="38" class="block-desc">Conv 3x3 + LeakyReLU(0.1)</text>
+        <text x="12" y="52" class="block-desc">Topographic Slope Encoding</text>
+        <rect x="12" y="60" width="206" height="18" rx="4" fill="#0E253F"/>
+        <text x="115" y="73" class="tensor-shape" fill="#E6EDF7" text-anchor="middle">[96, 128, 128]</text>
+
+        <rect x="500" y="0" width="230" height="85" rx="6" fill="#050811" stroke="#00FF9D" stroke-opacity="0.3" stroke-width="1"/>
+        <text x="12" y="22" class="tensor-shape" fill="#00FF9D">RES BLOCK 3 (192 CH)</text>
+        <text x="12" y="38" class="block-desc">Conv 3x3 + LeakyReLU(0.1)</text>
+        <text x="12" y="52" class="block-desc">Hydrodynamic Inflow Context</text>
+        <rect x="12" y="60" width="206" height="18" rx="4" fill="#0E253F"/>
+        <text x="115" y="73" class="tensor-shape" fill="#E6EDF7" text-anchor="middle">[192, 64, 64]</text>
+      </g>
+    </g>
+
+    <!-- Down Arrow -->
+    <line x1="420" y1="340" x2="420" y2="360" stroke="#00FF9D" stroke-width="2" marker-end="url(#arrow-green-down)"/>
+
+    <!-- 3. PINN Decoder Stack -->
+    <g transform="translate(35, 360)">
+      <rect width="770" height="100" rx="8" fill="#070C18" stroke="#00FF9D" stroke-opacity="0.7" stroke-width="1.5"/>
+      <text x="20" y="24" class="block-title">PHYSICS RECONSTRUCTION DECODER</text>
+      
+      <g transform="translate(20, 36)">
+        <rect x="0" y="0" width="350" height="52" rx="6" fill="#050811" stroke="#00FF9D" stroke-opacity="0.3" stroke-width="1"/>
+        <text x="12" y="20" class="tensor-shape" fill="#00FF9D">UPSAMPLE BLOCK 1: ConvTranspose2d(192 → 96)</text>
+        <text x="12" y="38" class="block-desc">Batch Normalization + LeakyReLU · Resolution: [96, 128, 128]</text>
+
+        <rect x="380" y="0" width="350" height="52" rx="6" fill="#050811" stroke="#00FF9D" stroke-opacity="0.3" stroke-width="1"/>
+        <text x="12" y="20" class="tensor-shape" fill="#00FF9D">UPSAMPLE BLOCK 2: ConvTranspose2d(96 → 48)</text>
+        <text x="12" y="38" class="block-desc">Batch Normalization + LeakyReLU · Resolution: [48, 256, 256]</text>
+      </g>
+    </g>
+
+    <!-- Down Arrow -->
+    <line x1="420" y1="460" x2="420" y2="480" stroke="#00FF9D" stroke-width="2" marker-end="url(#arrow-green-down)"/>
+
+    <!-- 4. Hydrodynamic PDE Loss Formulation -->
+    <g transform="translate(35, 480)">
+      <rect width="770" height="165" rx="8" fill="#050811" stroke="#FFB020" stroke-width="1.5"/>
+      <text x="20" y="24" class="block-title" fill="#FFB020">PHYSICS LOSS FORMULATION &amp; GOVERNING EQUATIONS</text>
+      
+      <text x="20" y="48" class="mono" fill="#E6EDF7">1. Continuity Residual: || ∇ · (h · v) - R(t) ||^2   where S = |∇η| / Δz, v = (1/n) * h^(2/3) * S^(1/2)</text>
+      <text x="20" y="68" class="mono" fill="#E6EDF7">2. Total PINN Objective Function:</text>
+      <text x="40" y="88" class="mono" fill="#00FF9D">L_total = 3.0 * L_consistency + 1.0 * L_smoothness + 0.5 * L_continuity + 2.0 * L_nonneg + 0.3 * L_weak_supervision</text>
+      
+      <text x="20" y="112" class="mono" fill="#8892A6">• Consistency: Enforces h = 0 in dry zones (P &lt; 0.5) and h &gt; 0 in inundated zones (P &gt;= 0.5)</text>
+      <text x="20" y="128" class="mono" fill="#8892A6">• Smoothness: First-order Total Variation penalty ||∇h|| on continuous water surface elevations</text>
+      <text x="20" y="144" class="mono" fill="#8892A6">• Non-negativity: L_nonneg = ||min(h, 0)||^2 strictly preventing unphysical negative depth values</text>
+    </g>
+
+    <!-- Down Arrow -->
+    <line x1="420" y1="645" x2="420" y2="665" stroke="#00FF9D" stroke-width="2" marker-end="url(#arrow-green-down)"/>
+
+    <!-- 5. Depth Head -->
+    <g transform="translate(35, 665)">
+      <rect width="770" height="70" rx="8" fill="#050811" stroke="#00FF9D" stroke-width="2"/>
+      <text x="20" y="26" class="block-title" fill="#00FF9D">CALIBRATED WATER DEPTH HEAD (1x1 CONV + SOFTPLUS x SCALE)</text>
+      <text x="20" y="44" class="block-desc">Output: h(x,y) continuous water depth in meters [0.0 m to 8.5 m] across full terrain bathymetry</text>
+      <text x="20" y="58" class="mono" fill="#E6EDF7">Feeds: 3D Bathymetry Terrain Mesh, Dynamic Cross-Section Profiler, &amp; Risk Classifier</text>
+      <rect x="620" y="22" width="130" height="26" rx="5" fill="#0F2B1F"/>
+      <text x="685" y="39" class="tensor-shape" fill="#00FF9D" text-anchor="middle">[Batch, 1, 512, 512]</text>
+    </g>
+  </g>
+</svg>

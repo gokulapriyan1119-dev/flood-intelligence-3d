@@ -1,0 +1,417 @@
+%PDF-1.3
+%ºß¬à
+3 0 obj
+<</Type /Page
+/Parent 1 0 R
+/Resources 2 0 R
+/MediaBox [0 0 595.2799999999999727 841.8899999999999864]
+/Contents 4 0 R
+>>
+endobj
+4 0 obj
+<<
+/Length 5605
+>>
+stream
+0.5670000000000001 w
+0 G
+0.04 0.12 0.24 rg
+0. 841.8899999999999864 595.2755905511811534 -102.0472440944882067 re
+f
+BT
+/F2 18 Tf
+20.6999999999999993 TL
+1. g
+42.5196850393700814 796.5356692913385359 Td
+(FLOOD INTELLIGENCE 3D) Tj
+ET
+BT
+/F2 10 Tf
+11.5 TL
+0.024 0.714 0.831 rg
+42.5196850393700814 773.8585039370078675 Td
+(Technical Design & Architecture Document | Version 2.0.0-PROD) Tj
+ET
+BT
+/F1 8 Tf
+9.1999999999999993 TL
+0.796 0.835 0.882 rg
+42.5196850393700814 756.8506299212598378 Td
+(Live Deployment: https://flood-intelligence-3d-cy4j.vercel.app | Open-Source MIT License) Tj
+ET
+BT
+/F2 12 Tf
+13.7999999999999989 TL
+0.082 0.259 0.451 rg
+42.5196850393700814 705.8270078740157487 Td
+(1. Executive Summary & Problem Formulation) Tj
+ET
+BT
+/F1 9 Tf
+10.3499999999999996 TL
+0.118 0.161 0.231 rg
+42.5196850393700814 688.819133858267719 Td
+(Urban and river basin inundation presents a critical spatiotemporal challenge where traditional optical satellites fail due to dense) Tj
+T* (cloud cover, heavy rainfall, and nighttime limitations.) Tj
+ET
+BT
+/F1 9 Tf
+10.3499999999999996 TL
+0.118 0.161 0.231 rg
+42.5196850393700814 657.6380314960629221 Td
+(This platform couples active Synthetic Aperture Radar \(SAR\) with hydrodynamic physical constraints to achieve) Tj
+T* (cloud-penetrating flood segmentation, continuous flood depth modeling \(h\), and real-time interactive 3D WebGL bathymetry.) Tj
+ET
+BT
+/F2 12 Tf
+13.7999999999999989 TL
+0.082 0.259 0.451 rg
+42.5196850393700814 615.1183464566928478 Td
+(2. System Architecture & Ingestion Pipeline) Tj
+ET
+BT
+/F1 9 Tf
+10.3499999999999996 TL
+0.118 0.161 0.231 rg
+42.5196850393700814 598.1104724409448181 Td
+(• Earth Observation Layer: Sentinel-1 C-SAR IW GRDH \(VV + VH Dual-Pol radar backscatter\), Copernicus DEM GLO-30 \(30m) Tj
+T* (elevation\), and ECMWF ERA5 precipitation reanalysis.) Tj
+ET
+BT
+/F1 9 Tf
+10.3499999999999996 TL
+0.118 0.161 0.231 rg
+42.5196850393700814 566.9293700787401349 Td
+(• Radar Calibration: Radiometric sigma0 calibration and Refined Lee 7x7 speckle reduction to eliminate noise and urban corner) Tj
+T* (reflections.) Tj
+ET
+BT
+/F1 9 Tf
+10.3499999999999996 TL
+0.118 0.161 0.231 rg
+42.5196850393700814 535.748267716535338 Td
+(• Dual-Stage Machine Learning: U-Net++ with ResNet-34 backbone for flood extent segmentation coupled with a) Tj
+T* (Physics-Informed Neural Network \(PINN\).) Tj
+ET
+BT
+/F1 9 Tf
+10.3499999999999996 TL
+0.118 0.161 0.231 rg
+42.5196850393700814 504.5671653543306547 Td
+(• Hydrodynamic Formulation: Solves 2D Shallow Water Navier-Stokes and Manning's roughness equations: dh/dt + div\(uh\) =) Tj
+T* (R\(t\), with physical residual loss <= 4.18e-5.) Tj
+ET
+BT
+/F2 12 Tf
+13.7999999999999989 TL
+0.082 0.259 0.451 rg
+42.5196850393700814 462.0474803149605805 Td
+(3. 3D WebGL Visualization & Bathymetry Engine) Tj
+ET
+BT
+/F1 9 Tf
+10.3499999999999996 TL
+0.118 0.161 0.231 rg
+42.5196850393700814 445.0396062992125508 Td
+(• NASA Blue Marble Global View: Interactive 3D globe rendered with Three.js and React Three Fiber \(R3F\) featuring dynamic) Tj
+T* (event markers.) Tj
+ET
+BT
+/F1 9 Tf
+10.3499999999999996 TL
+0.118 0.161 0.231 rg
+42.5196850393700814 413.8585039370078107 Td
+(• 3D Bathymetry Viewer: Terrain mesh procedurally displaced by Copernicus DEM elevation vertices with real-time wave) Tj
+T* (simulation and layer toggles.) Tj
+ET
+BT
+/F1 9 Tf
+10.3499999999999996 TL
+0.118 0.161 0.231 rg
+42.5196850393700814 382.6774015748030706 Td
+(• Dynamic Cross-Section Profiler: Interactive 2D elevation cut-through tool displaying precise water depth above terrain bedrock) Tj
+T* (for safe emergency navigation.) Tj
+ET
+BT
+/F2 12 Tf
+13.7999999999999989 TL
+0.082 0.259 0.451 rg
+42.5196850393700814 340.1577165354329964 Td
+(4. Enterprise Security & Authentication) Tj
+ET
+BT
+/F1 9 Tf
+10.3499999999999996 TL
+0.118 0.161 0.231 rg
+42.5196850393700814 323.1498425196849666 Td
+(• Real-Time 2FA OTP: New account registrations dispatch dynamic 6-digit codes via official Google SMTP \(smtp.gmail.com:465\)) Tj
+T* (with 10-minute expiry.) Tj
+ET
+BT
+/F1 9 Tf
+10.3499999999999996 TL
+0.118 0.161 0.231 rg
+42.5196850393700814 291.9687401574802834 Td
+(• Direct Password Login: Returning sessions verify SHA-256 salted credentials directly without repeating OTP prompts.) Tj
+ET
+BT
+/F1 9 Tf
+10.3499999999999996 TL
+0.118 0.161 0.231 rg
+42.5196850393700814 273.5435433070865656 Td
+(• Brute-Force Countermeasures: Security locks triggered after 5 failed attempts with automated attempt resetting.) Tj
+ET
+BT
+/F2 12 Tf
+13.7999999999999989 TL
+0.082 0.259 0.451 rg
+42.5196850393700814 243.7797637795274568 Td
+(5. Automated Reporting & Spec-Compliant Export) Tj
+ET
+BT
+/F1 9 Tf
+10.3499999999999996 TL
+0.118 0.161 0.231 rg
+42.5196850393700814 226.7718897637794271 Td
+(• 10-Page Emergency Assessment Dossiers: Generates military/UN-grade PDF reports with hydrograph curves, risk matrices,) Tj
+T* (and evacuation routes via jsPDF.) Tj
+ET
+BT
+/F1 9 Tf
+10.3499999999999996 TL
+0.118 0.161 0.231 rg
+42.5196850393700814 195.5907874015747439 Td
+(• Spec-Compliant TIFF 6.0 RGB Export: Downloads full-resolution GeoTIFF rasters natively viewable in Windows Photo Viewer) Tj
+T* (and GIS suites \(QGIS/ArcGIS\).) Tj
+ET
+BT
+/F2 12 Tf
+13.7999999999999989 TL
+0.082 0.259 0.451 rg
+42.5196850393700814 153.0711023622046696 Td
+(6. Verification & Automated Test Coverage) Tj
+ET
+BT
+/F1 9 Tf
+10.3499999999999996 TL
+0.118 0.161 0.231 rg
+42.5196850393700814 136.0632283464566399 Td
+(• Automated test suite \(npm test\) verifies SHA-256 hashing determinism, 6-digit cryptographic entropy, expiration enforcement,) Tj
+T* (and brute-force lockout with 100% pass rate \(4/4 tests passed\).) Tj
+ET
+endstream
+endobj
+1 0 obj
+<</Type /Pages
+/Kids [3 0 R ]
+/Count 1
+>>
+endobj
+5 0 obj
+<<
+/Type /Font
+/BaseFont /Helvetica
+/Subtype /Type1
+/Encoding /WinAnsiEncoding
+/FirstChar 32
+/LastChar 255
+>>
+endobj
+6 0 obj
+<<
+/Type /Font
+/BaseFont /Helvetica-Bold
+/Subtype /Type1
+/Encoding /WinAnsiEncoding
+/FirstChar 32
+/LastChar 255
+>>
+endobj
+7 0 obj
+<<
+/Type /Font
+/BaseFont /Helvetica-Oblique
+/Subtype /Type1
+/Encoding /WinAnsiEncoding
+/FirstChar 32
+/LastChar 255
+>>
+endobj
+8 0 obj
+<<
+/Type /Font
+/BaseFont /Helvetica-BoldOblique
+/Subtype /Type1
+/Encoding /WinAnsiEncoding
+/FirstChar 32
+/LastChar 255
+>>
+endobj
+9 0 obj
+<<
+/Type /Font
+/BaseFont /Courier
+/Subtype /Type1
+/Encoding /WinAnsiEncoding
+/FirstChar 32
+/LastChar 255
+>>
+endobj
+10 0 obj
+<<
+/Type /Font
+/BaseFont /Courier-Bold
+/Subtype /Type1
+/Encoding /WinAnsiEncoding
+/FirstChar 32
+/LastChar 255
+>>
+endobj
+11 0 obj
+<<
+/Type /Font
+/BaseFont /Courier-Oblique
+/Subtype /Type1
+/Encoding /WinAnsiEncoding
+/FirstChar 32
+/LastChar 255
+>>
+endobj
+12 0 obj
+<<
+/Type /Font
+/BaseFont /Courier-BoldOblique
+/Subtype /Type1
+/Encoding /WinAnsiEncoding
+/FirstChar 32
+/LastChar 255
+>>
+endobj
+13 0 obj
+<<
+/Type /Font
+/BaseFont /Times-Roman
+/Subtype /Type1
+/Encoding /WinAnsiEncoding
+/FirstChar 32
+/LastChar 255
+>>
+endobj
+14 0 obj
+<<
+/Type /Font
+/BaseFont /Times-Bold
+/Subtype /Type1
+/Encoding /WinAnsiEncoding
+/FirstChar 32
+/LastChar 255
+>>
+endobj
+15 0 obj
+<<
+/Type /Font
+/BaseFont /Times-Italic
+/Subtype /Type1
+/Encoding /WinAnsiEncoding
+/FirstChar 32
+/LastChar 255
+>>
+endobj
+16 0 obj
+<<
+/Type /Font
+/BaseFont /Times-BoldItalic
+/Subtype /Type1
+/Encoding /WinAnsiEncoding
+/FirstChar 32
+/LastChar 255
+>>
+endobj
+17 0 obj
+<<
+/Type /Font
+/BaseFont /ZapfDingbats
+/Subtype /Type1
+/FirstChar 32
+/LastChar 255
+>>
+endobj
+18 0 obj
+<<
+/Type /Font
+/BaseFont /Symbol
+/Subtype /Type1
+/FirstChar 32
+/LastChar 255
+>>
+endobj
+2 0 obj
+<<
+/ProcSet [/PDF /Text /ImageB /ImageC /ImageI]
+/Font <<
+/F1 5 0 R
+/F2 6 0 R
+/F3 7 0 R
+/F4 8 0 R
+/F5 9 0 R
+/F6 10 0 R
+/F7 11 0 R
+/F8 12 0 R
+/F9 13 0 R
+/F10 14 0 R
+/F11 15 0 R
+/F12 16 0 R
+/F13 17 0 R
+/F14 18 0 R
+>>
+/XObject <<
+>>
+>>
+endobj
+19 0 obj
+<<
+/Producer (jsPDF 4.2.1)
+/CreationDate (D:20261011150725+05'30')
+>>
+endobj
+20 0 obj
+<<
+/Type /Catalog
+/Pages 1 0 R
+/OpenAction [3 0 R /FitH null]
+/PageLayout /OneColumn
+>>
+endobj
+xref
+0 21
+0000000000 65535 f 
+0000005809 00000 n 
+0000007626 00000 n 
+0000000015 00000 n 
+0000000152 00000 n 
+0000005866 00000 n 
+0000005991 00000 n 
+0000006121 00000 n 
+0000006254 00000 n 
+0000006391 00000 n 
+0000006514 00000 n 
+0000006643 00000 n 
+0000006775 00000 n 
+0000006911 00000 n 
+0000007039 00000 n 
+0000007166 00000 n 
+0000007295 00000 n 
+0000007428 00000 n 
+0000007530 00000 n 
+0000007874 00000 n 
+0000007960 00000 n 
+trailer
+<<
+/Size 21
+/Root 20 0 R
+/Info 19 0 R
+/ID [ <7EBB0F0BDF0034871FF2E691C32C12A6> <7EBB0F0BDF0034871FF2E691C32C12A6> ]
+>>
+startxref
+8064
+%%EOF

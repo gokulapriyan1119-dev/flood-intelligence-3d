@@ -1,0 +1,262 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080" width="1920" height="1080">
+  <defs>
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&amp;family=Inter:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400;600&amp;display=swap');
+      .title { font-family: 'Space Grotesk', sans-serif; font-weight: 700; fill: #E6EDF7; }
+      .subtitle { font-family: 'Inter', sans-serif; font-weight: 500; fill: #8892A6; }
+      .layer-title { font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 20px; }
+      .layer-sub { font-family: 'Inter', sans-serif; font-weight: 500; font-size: 13px; fill: #8892A6; }
+      .card-title { font-family: 'Inter', sans-serif; font-weight: 600; font-size: 15px; fill: #E6EDF7; }
+      .card-sub { font-family: 'Inter', sans-serif; font-weight: 400; font-size: 12px; fill: #8892A6; }
+      .mono { font-family: 'JetBrains Mono', monospace; font-size: 11px; }
+      .arrow-text { font-family: 'JetBrains Mono', monospace; font-size: 12px; font-weight: 600; fill: #19C6FF; }
+    </style>
+    <linearGradient id="bg-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#05070D"/>
+      <stop offset="100%" stop-color="#020306"/>
+    </linearGradient>
+    <filter id="glow-cyan" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="6" result="blur"/>
+      <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+    </filter>
+    <filter id="glow-blue" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="6" result="blur"/>
+      <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+    </filter>
+    <filter id="glow-green" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="6" result="blur"/>
+      <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+    </filter>
+    <filter id="glow-amber" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="6" result="blur"/>
+      <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+    </filter>
+    <marker id="arrow" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#19C6FF"/>
+    </marker>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1920" height="1080" fill="url(#bg-grad)"/>
+
+  <!-- Subtle Blueprint Grid Pattern -->
+  <g opacity="0.04" stroke="#19C6FF" stroke-width="1">
+    <line x1="0" y1="120" x2="1920" y2="120"/><line x1="0" y1="240" x2="1920" y2="240"/>
+    <line x1="0" y1="360" x2="1920" y2="360"/><line x1="0" y1="480" x2="1920" y2="480"/>
+    <line x1="0" y1="600" x2="1920" y2="600"/><line x1="0" y1="720" x2="1920" y2="720"/>
+    <line x1="0" y1="840" x2="1920" y2="840"/><line x1="0" y1="960" x2="1920" y2="960"/>
+    <line x1="240" y1="0" x2="240" y2="1080"/><line x1="480" y1="0" x2="480" y2="1080"/>
+    <line x1="720" y1="0" x2="720" y2="1080"/><line x1="960" y1="0" x2="960" y2="1080"/>
+    <line x1="1200" y1="0" x2="1200" y2="1080"/><line x1="1440" y1="0" x2="1440" y2="1080"/>
+    <line x1="1680" y1="0" x2="1680" y2="1080"/>
+  </g>
+
+  <!-- Header Section -->
+  <g transform="translate(100, 45)">
+    <rect x="0" y="0" width="180" height="28" rx="14" fill="#0E223D" stroke="#19C6FF" stroke-width="1"/>
+    <text x="90" y="18" fill="#19C6FF" font-family="'JetBrains Mono', monospace" font-size="11" font-weight="600" text-anchor="middle" letter-spacing="1.5">BHARAT WIN · ARCHITECTURE</text>
+    <text x="0" y="62" class="title" font-size="34" letter-spacing="-0.5">FLOOD INTELLIGENCE 3D — SYSTEM ARCHITECTURE</text>
+    <text x="0" y="86" class="subtitle" font-size="14">Physics-Informed Deep Remote Sensing Inundation Pipeline · Next.js 14 · FastAPI · PyTorch 2.5.1</text>
+  </g>
+
+  <!-- ==================== LAYER 1: PRESENTATION ==================== -->
+  <g transform="translate(100, 160)">
+    <rect width="1720" height="150" rx="14" fill="#0B0F1A" stroke="#19C6FF" stroke-width="2" filter="url(#glow-cyan)"/>
+    <!-- Layer Title -->
+    <text x="35" y="36" class="layer-title" fill="#19C6FF">LAYER 1: PRESENTATION &amp; WORKSTATION LAYER</text>
+    <text x="475" y="36" class="layer-sub">Client UI · Three.js WebGL · React Three Fiber · TailwindCSS · Next.js 14 App Router</text>
+    
+    <!-- Component Cards -->
+    <g transform="translate(35, 55)">
+      <!-- Card 1 -->
+      <rect x="0" y="0" width="310" height="72" rx="10" fill="#050811" stroke="#19C6FF" stroke-opacity="0.4" stroke-width="1"/>
+      <circle cx="28" cy="36" r="14" fill="#0D253A"/>
+      <path d="M 22 36 A 6 6 0 1 1 34 36 A 6 6 0 1 1 22 36" stroke="#19C6FF" stroke-width="1.8" fill="none"/>
+      <text x="52" y="30" class="card-title">3D Global Monitor</text>
+      <text x="52" y="48" class="card-sub">Three.js NASA Blue Marble Sphere</text>
+      <text x="52" y="62" class="mono" fill="#19C6FF">8 Global Disaster Observatories</text>
+
+      <!-- Card 2 -->
+      <rect x="335" y="0" width="310" height="72" rx="10" fill="#050811" stroke="#19C6FF" stroke-opacity="0.4" stroke-width="1"/>
+      <circle cx="363" cy="36" r="14" fill="#0D253A"/>
+      <path d="M 356 42 L 363 28 L 370 42 Z" stroke="#19C6FF" stroke-width="1.8" fill="none"/>
+      <text x="387" y="30" class="card-title">3D Terrain Bathymetry</text>
+      <text x="387" y="48" class="card-sub">R3F DEM Procedural Displacement</text>
+      <text x="387" y="62" class="mono" fill="#19C6FF">Wave Shaders &amp; Cross-Section Slice</text>
+
+      <!-- Card 3 -->
+      <rect x="670" y="0" width="310" height="72" rx="10" fill="#050811" stroke="#19C6FF" stroke-opacity="0.4" stroke-width="1"/>
+      <circle cx="698" cy="36" r="14" fill="#0D253A"/>
+      <path d="M 698 28 L 698 42 M 692 34 L 698 28 L 704 34" stroke="#19C6FF" stroke-width="1.8" fill="none"/>
+      <text x="722" y="30" class="card-title">SAR Ingestion Pipeline</text>
+      <text x="722" y="48" class="card-sub">Drag-and-Drop GeoTIFF Reader</text>
+      <text x="722" y="62" class="mono" fill="#19C6FF">Dual-Pol VV/VH GeoTIFF Ingestion</text>
+
+      <!-- Card 4 -->
+      <rect x="1005" y="0" width="310" height="72" rx="10" fill="#050811" stroke="#19C6FF" stroke-opacity="0.4" stroke-width="1"/>
+      <circle cx="1033" cy="36" r="14" fill="#0D253A"/>
+      <path d="M 1026 42 L 1030 35 L 1035 38 L 1040 28" stroke="#19C6FF" stroke-width="1.8" fill="none"/>
+      <text x="1057" y="30" class="card-title">Hydrological Analytics</text>
+      <text x="1057" y="48" class="card-sub">Recharts Hydrographs &amp; Histograms</text>
+      <text x="1057" y="62" class="mono" fill="#19C6FF">Critical Infrastructure Risk Matrix</text>
+
+      <!-- Card 5 -->
+      <rect x="1340" y="0" width="310" height="72" rx="10" fill="#050811" stroke="#19C6FF" stroke-opacity="0.4" stroke-width="1"/>
+      <circle cx="1368" cy="36" r="14" fill="#0D253A"/>
+      <path d="M 1362 28 H 1374 V 44 H 1362 Z M 1365 33 H 1371 M 1365 38 H 1371" stroke="#19C6FF" stroke-width="1.6" fill="none"/>
+      <text x="1392" y="30" class="card-title">10-Page PDF Dossier &amp; TIFF</text>
+      <text x="1392" y="48" class="card-sub">jsPDF Emergency Brief Generator</text>
+      <text x="1392" y="62" class="mono" fill="#19C6FF">Spec-Compliant TIFF 6.0 RGB Export</text>
+    </g>
+  </g>
+
+  <!-- Connectors Layer 1 -> Layer 2 -->
+  <g transform="translate(960, 310)">
+    <line x1="0" y1="0" x2="0" y2="40" stroke="#19C6FF" stroke-width="2" stroke-dasharray="4,4" marker-end="url(#arrow)"/>
+    <rect x="-140" y="10" width="280" height="22" rx="5" fill="#05070D" stroke="#19C6FF" stroke-width="1"/>
+    <text x="0" y="25" class="arrow-text" text-anchor="middle">HTTPS · Multipart/FormData · JSON</text>
+  </g>
+
+  <!-- ==================== LAYER 2: APPLICATION ==================== -->
+  <g transform="translate(100, 370)">
+    <rect width="1720" height="150" rx="14" fill="#0B0F1A" stroke="#1E88E5" stroke-width="2" filter="url(#glow-blue)"/>
+    <!-- Layer Title -->
+    <text x="35" y="36" class="layer-title" fill="#1E88E5">LAYER 2: APPLICATION &amp; GATEWAY LAYER</text>
+    <text x="455" y="36" class="layer-sub">Next.js 14 Server Runtime · Edge Middleware · Route Handlers · Zustand State · Nodemailer SMTP</text>
+    
+    <!-- Component Cards -->
+    <g transform="translate(35, 55)">
+      <!-- Card 1 -->
+      <rect x="0" y="0" width="390" height="72" rx="10" fill="#050811" stroke="#1E88E5" stroke-opacity="0.4" stroke-width="1"/>
+      <circle cx="28" cy="36" r="14" fill="#102540"/>
+      <path d="M 28 27 L 34 30 V 37 C 34 41 28 44 28 44 C 28 44 22 41 22 37 V 30 Z" stroke="#1E88E5" stroke-width="1.8" fill="none"/>
+      <text x="52" y="30" class="card-title">Protected Route Guard</text>
+      <text x="52" y="48" class="card-sub">Session Gatekeeper &amp; Route Protection</text>
+      <text x="52" y="62" class="mono" fill="#1E88E5">Automatic Unauthenticated Redirect to /auth</text>
+
+      <!-- Card 2 -->
+      <rect x="420" y="0" width="410" height="72" rx="10" fill="#050811" stroke="#1E88E5" stroke-opacity="0.4" stroke-width="1"/>
+      <circle cx="448" cy="36" r="14" fill="#102540"/>
+      <path d="M 442 32 H 454 M 448 26 L 454 32 L 448 38 M 454 40 H 442" stroke="#1E88E5" stroke-width="1.8" fill="none"/>
+      <text x="472" y="30" class="card-title">Inference Proxy &amp; Fallback</text>
+      <text x="472" y="48" class="card-sub">FastAPI Proxy + Node Local In-Memory Inference</text>
+      <text x="472" y="62" class="mono" fill="#1E88E5">AbortController Timeout (3.5s) Graceful Failover</text>
+
+      <!-- Card 3 -->
+      <rect x="860" y="0" width="410" height="72" rx="10" fill="#050811" stroke="#1E88E5" stroke-opacity="0.4" stroke-width="1"/>
+      <circle cx="888" cy="36" r="14" fill="#102540"/>
+      <path d="M 882 30 H 894 V 42 H 882 Z M 882 30 L 888 36 L 894 30" stroke="#1E88E5" stroke-width="1.8" fill="none"/>
+      <text x="912" y="30" class="card-title">Enterprise 2FA OTP Gateway</text>
+      <text x="912" y="48" class="card-sub">Nodemailer + Google SMTP (smtp.gmail.com:465)</text>
+      <text x="912" y="62" class="mono" fill="#1E88E5">6-Digit Crypto OTP · 10m TTL · Max 5 Attempts</text>
+
+      <!-- Card 4 -->
+      <rect x="1300" y="0" width="385" height="72" rx="10" fill="#050811" stroke="#1E88E5" stroke-opacity="0.4" stroke-width="1"/>
+      <circle cx="1328" cy="36" r="14" fill="#102540"/>
+      <circle cx="1328" cy="36" r="6" stroke="#1E88E5" stroke-width="1.8" fill="none"/>
+      <text x="1352" y="30" class="card-title">Zustand Global State Store</text>
+      <text x="1352" y="48" class="card-sub">Thread-Safe Memory Store + LocalStorage Sync</text>
+      <text x="1352" y="62" class="mono" fill="#1E88E5">useAuthStore · useFloodStore State Bus</text>
+    </g>
+  </g>
+
+  <!-- Connectors Layer 2 -> Layer 3 -->
+  <g transform="translate(960, 520)">
+    <line x1="0" y1="0" x2="0" y2="40" stroke="#00FF9D" stroke-width="2" stroke-dasharray="4,4" marker-end="url(#arrow)"/>
+    <rect x="-160" y="10" width="320" height="22" rx="5" fill="#05070D" stroke="#00FF9D" stroke-width="1"/>
+    <text x="0" y="25" class="arrow-text" fill="#00FF9D" text-anchor="middle">REST HTTP API · JSON Payload · GeoTIFF Tensor</text>
+  </g>
+
+  <!-- ==================== LAYER 3: AI INFERENCE ==================== -->
+  <g transform="translate(100, 580)">
+    <rect width="1720" height="150" rx="14" fill="#0B0F1A" stroke="#00FF9D" stroke-width="2" filter="url(#glow-green)"/>
+    <!-- Layer Title -->
+    <text x="35" y="36" class="layer-title" fill="#00FF9D">LAYER 3: AI INFERENCE &amp; HYDRODYNAMIC PINN LAYER</text>
+    <text x="560" y="36" class="layer-sub">FastAPI Microservice · PyTorch 2.5.1 · CUDA 12.1 Accelerated · Model Weights Preloaded</text>
+    
+    <!-- Component Cards -->
+    <g transform="translate(35, 55)">
+      <!-- Card 1 -->
+      <rect x="0" y="0" width="510" height="72" rx="10" fill="#050811" stroke="#00FF9D" stroke-opacity="0.4" stroke-width="1"/>
+      <circle cx="28" cy="36" r="14" fill="#0F3022"/>
+      <path d="M 22 28 H 34 V 44 H 22 Z M 25 34 H 31 M 25 38 H 31" stroke="#00FF9D" stroke-width="1.8" fill="none"/>
+      <text x="52" y="30" class="card-title">Tensor Preprocessing &amp; Normalization</text>
+      <text x="52" y="48" class="card-sub">Rasterio Extraction · Radiometric Calibration · Lee Speckle</text>
+      <text x="52" y="62" class="mono" fill="#00FF9D">NaN Imputation · Per-Band (VV, VH) Min-Max Scaling (50 ms)</text>
+
+      <!-- Card 2 -->
+      <rect x="540" y="0" width="550" height="72" rx="10" fill="#050811" stroke="#00FF9D" stroke-opacity="0.4" stroke-width="1"/>
+      <circle cx="568" cy="36" r="14" fill="#0F3022"/>
+      <path d="M 560 42 L 568 28 L 576 42 Z M 564 36 H 572" stroke="#00FF9D" stroke-width="1.8" fill="none"/>
+      <text x="592" y="30" class="card-title">Stage 1: U-Net++ Extent Segmentation (ResNet-34)</text>
+      <text x="592" y="48" class="card-sub">Nested Dense Skip Pathways · Focal (0.5) + Dice (1.0) Loss</text>
+      <text x="592" y="62" class="mono" fill="#00FF9D">Input [2, 512, 512] → Flood Probability [1, 512, 512] · IoU: 0.621 (120 ms)</text>
+
+      <!-- Card 3 -->
+      <rect x="1120" y="0" width="565" height="72" rx="10" fill="#050811" stroke="#00FF9D" stroke-opacity="0.4" stroke-width="1"/>
+      <circle cx="1148" cy="36" r="14" fill="#0F3022"/>
+      <path d="M 1140 36 C 1144 30 1148 42 1152 36 C 1156 30 1160 42 1164 36" stroke="#00FF9D" stroke-width="1.8" fill="none"/>
+      <text x="1172" y="30" class="card-title">Stage 2: Physics-Informed Neural Network (PINN)</text>
+      <text x="1172" y="48" class="card-sub">2D Shallow Water Equations + Manning Surface Friction Constraint</text>
+      <text x="1172" y="62" class="mono" fill="#00FF9D">Inputs (Prob, DEM, ERA5 Rain) → Depth h(x,y) · Residual &lt;= 4.18e-5 (45 ms)</text>
+    </g>
+  </g>
+
+  <!-- Connectors Layer 3 -> Layer 4 -->
+  <g transform="translate(960, 730)">
+    <line x1="0" y1="0" x2="0" y2="40" stroke="#FFB020" stroke-width="2" stroke-dasharray="4,4" marker-end="url(#arrow)"/>
+    <rect x="-150" y="10" width="300" height="22" rx="5" fill="#05070D" stroke="#FFB020" stroke-width="1"/>
+    <text x="0" y="25" class="arrow-text" fill="#FFB020" text-anchor="middle">GeoTIFF Rasters · NetCDF · Model Checkpoints</text>
+  </g>
+
+  <!-- ==================== LAYER 4: DATA ==================== -->
+  <g transform="translate(100, 790)">
+    <rect width="1720" height="150" rx="14" fill="#0B0F1A" stroke="#FFB020" stroke-width="2" filter="url(#glow-amber)"/>
+    <!-- Layer Title -->
+    <text x="35" y="36" class="layer-title" fill="#FFB020">LAYER 4: EARTH OBSERVATION DATA &amp; BENCHMARKS</text>
+    <text x="530" y="36" class="layer-sub">Copernicus Sentinel-1 SAR · Copernicus DEM GLO-30 · ECMWF ERA5 · Sen1Floods11 Benchmark</text>
+    
+    <!-- Component Cards -->
+    <g transform="translate(35, 55)">
+      <!-- Card 1 -->
+      <rect x="0" y="0" width="390" height="72" rx="10" fill="#050811" stroke="#FFB020" stroke-opacity="0.4" stroke-width="1"/>
+      <circle cx="28" cy="36" r="14" fill="#2E2008"/>
+      <circle cx="28" cy="36" r="6" stroke="#FFB020" stroke-width="1.8" fill="none"/>
+      <text x="52" y="30" class="card-title">Copernicus Sentinel-1 C-SAR</text>
+      <text x="52" y="48" class="card-sub">All-Weather Active Radar (5.405 GHz)</text>
+      <text x="52" y="62" class="mono" fill="#FFB020">VV + VH Dual-Pol Backscatter (10m GSD)</text>
+
+      <!-- Card 2 -->
+      <rect x="420" y="0" width="410" height="72" rx="10" fill="#050811" stroke="#FFB020" stroke-opacity="0.4" stroke-width="1"/>
+      <circle cx="448" cy="36" r="14" fill="#2E2008"/>
+      <path d="M 440 42 L 448 30 L 456 42 Z" stroke="#FFB020" stroke-width="1.8" fill="none"/>
+      <text x="472" y="30" class="card-title">Copernicus DEM GLO-30</text>
+      <text x="472" y="48" class="card-sub">Global Digital Elevation Model</text>
+      <text x="472" y="62" class="mono" fill="#FFB020">30m Topographic Surface Elevations &amp; Slopes</text>
+
+      <!-- Card 3 -->
+      <rect x="860" y="0" width="410" height="72" rx="10" fill="#050811" stroke="#FFB020" stroke-opacity="0.4" stroke-width="1"/>
+      <circle cx="888" cy="36" r="14" fill="#2E2008"/>
+      <path d="M 882 36 Q 888 28 894 36 M 885 41 L 884 43 M 891 41 L 890 43" stroke="#FFB020" stroke-width="1.8" fill="none"/>
+      <text x="912" y="30" class="card-title">ECMWF ERA5 Atmospheric Forcing</text>
+      <text x="912" y="48" class="card-sub">Precipitation Reanalysis</text>
+      <text x="912" y="62" class="mono" fill="#FFB020">24h Cumulative Rainfall Inflow R(t)</text>
+
+      <!-- Card 4 -->
+      <rect x="1300" y="0" width="385" height="72" rx="10" fill="#050811" stroke="#FFB020" stroke-opacity="0.4" stroke-width="1"/>
+      <circle cx="1328" cy="36" r="14" fill="#2E2008"/>
+      <path d="M 1322 36 H 1334 M 1328 30 V 42" stroke="#FFB020" stroke-width="1.8" fill="none"/>
+      <text x="1352" y="30" class="card-title">Sen1Floods11 Dataset Benchmark</text>
+      <text x="1352" y="48" class="card-sub">4,831 Image Chips Across 11 Disasters</text>
+      <text x="1352" y="62" class="mono" fill="#FFB020">Curated Ground Truth Training/Test Split</text>
+    </g>
+  </g>
+
+  <!-- ==================== FOOTER ==================== -->
+  <g transform="translate(100, 975)">
+    <rect width="1720" height="55" rx="10" fill="#0B0F1A" stroke="#19C6FF" stroke-opacity="0.3" stroke-width="1"/>
+    <text x="25" y="33" class="mono" fill="#19C6FF">LATENCY BREAKDOWN:</text>
+    <text x="175" y="33" class="mono" fill="#E6EDF7">Preprocessing: 50 ms  |  U-Net++ Inundation: 120 ms  |  PINN Depth Engine: 45 ms  |  Post-Processing: 30 ms  |  End-to-End: ~2.5 s (NVIDIA T4 GPU)</text>
+    <text x="1695" y="33" class="mono" fill="#00FF9D" text-anchor="end">LIVE AT: flood-intelligence-3d-cy4j.vercel.app</text>
+  </g>
+</svg>
