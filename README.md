@@ -11,10 +11,16 @@ A production-grade, open-source 3D earth observation platform that integrates **
 
 ---
 
-## 🌐 Live Prototype & Repository
-* **24/7 Production Live Web App:** [https://flood-intelligence-3d-cy4j.vercel.app](https://flood-intelligence-3d-cy4j.vercel.app/)
-* **Official Code Repository:** [https://github.com/gokulapriyan1119-dev/flood-intelligence-3d](https://github.com/gokulapriyan1119-dev/flood-intelligence-3d)
-* **Technical Design Document:** [TECHNICAL_DESIGN.md](./TECHNICAL_DESIGN.md)
+## 🏆 Bharat WIN (Jal Shakti Hackathon) — Submission Package
+
+| Deliverable | Repository Asset & Link | Status |
+| :--- | :--- | :---: |
+| **🌐 24/7 Live Web App** | [flood-intelligence-3d-cy4j.vercel.app](https://flood-intelligence-3d-cy4j.vercel.app/) | ✅ Deployed & Active |
+| **📑 Technical Design Document (PDF)** | [Bharat_WIN_Technical_Design_Document.pdf](./Bharat_WIN_Technical_Design_Document.pdf) | ✅ 23-Page Specification |
+| **📐 Architectural Diagrams (SVG)** | [`system_architecture.svg`](./public/system_architecture.svg) · [`data_flow.svg`](./public/data_flow.svg) · [`model_architecture.svg`](./public/model_architecture.svg) | ✅ Vector 1080p |
+| **⚙️ Setup & Environment Variables** | [Setup Guide & `.env.local.example`](#%EF%B8%8F-quickstart--setup-guide) | ✅ Complete |
+| **🧪 Sample Data & Test Cases** | [`sample_data/`](./sample_data/) · [`tests/auth.test.js`](./tests/auth.test.js) (`npm test`) | ✅ 100% Pass (4/4) |
+| **📜 Open-Source License** | [MIT License](./LICENSE) | ✅ MIT Licensed |
 
 ---
 
